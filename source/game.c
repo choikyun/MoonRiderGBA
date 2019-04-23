@@ -44,7 +44,6 @@ init_sprite_setting();
 static void
 init_stage();
 
-
 //debug
 void vbaPrint(char *s);
 
@@ -128,7 +127,8 @@ init_sprite_setting()
     set_sprite_tile(SPRITE_SHIP, TILE_SHIP1);
 
     //// スター 64*64 dot
-    for (int i = 0; i < MAX_STARS; i++) {
+    for (int i = 0; i < MAX_STARS; i++)
+    {
         set_sprite_form(SPRITE_STAR + i, OBJ_SIZE(3), OBJ_SQUARE, OBJ_256_COLOR);
         set_sprite_tile(SPRITE_STAR + i, TILE_STAR);
         set_affine_setting(SPRITE_STAR + i, i, 0);
@@ -150,14 +150,13 @@ restart()
 static void
 init_stage()
 {
+
+    // テスト
     // スター作成
     stars.list[0].vec.x = 0;
     stars.list[0].vec.y = 0;
-    stars.list[0].vec.z = MAX_Z;
+    stars.list[0].vec.z = MIN_Z << FIX;
     stars.num = 1;
-
-    set_scale(stars.list[0].aff, 50, 50);
-
 }
 
 /**********************************************/ /**
@@ -166,14 +165,16 @@ init_stage()
 static void
 init_ship()
 {
-    // 加速度
+    // 加速度　自機はZ未使用
     ship.acc.x = ship.acc.y = 0;
 
     // スプライト
     ship.chr = SPRITE_SHIP;
     ship.vec.x = SHIP_X << FIX;
     ship.vec.y = SHIP_Y << FIX;
-    ship.vec.z = SHIP_Z << FIX;
+    ship.vec.z = SHIP_Z;
+    ship.center.x = SHIP_W / 2 - 1;
+    ship.center.y = SHIP_H / 2 - 1;
 }
 
 /**********************************************/ /**
@@ -182,18 +183,37 @@ init_ship()
 static void
 init_stars()
 {
-    for (int i = 0; i < MAX_STARS;i++) {
+    for (int i = 0; i < MAX_STARS; i++)
+    {
         // 加速度
-        stars.list[i].acc.x = stars.list[i].acc.y = 0;
+        stars.list[i].acc.x = stars.list[i].acc.y = stars.list[i].acc.z = 0;
 
         // スプライト
         stars.list[i].chr = SPRITE_STAR + i;
         stars.list[i].vec.x = 0;
         stars.list[i].vec.y = 0;
-        stars.list[i].vec.z = MAX_Z;
+        stars.list[i].vec.z = MIN_Z << FIX;
     }
 
     stars.num = 0;
+}
+
+/**********************************************/ /**
+ * @brief 3D座標からデバイス座標に変換 右手座標系
+ * 
+ * @param *v 3D座標 (-119)-(119), (-79)-(79), (1)-(100) 補正済みのこと
+ * @param cx X中心のオフセット
+ * @param cy Y中心のオフセット
+ ***********************************************/
+static void
+trans_device_coord(VectorType *v, int cx, int cy)
+{
+    // スプライトのスケールを決定 1-100%
+    v->scale = (v->z * 100) / MAX_Z;
+
+    // XY座標の変換
+    v->x = ((v->x * v->z) / MAX_Z) + FIX_STAGE_X - ((cx * v->z) / MAX_Z);
+    v->y = ((v->y * v->z) / MAX_Z) + FIX_STAGE_Y - ((cy * v->z) / MAX_Z);
 }
 
 /**********************************************/ /**
@@ -224,7 +244,6 @@ move_ship()
         // タイル切り替え
         set_sprite_tile(SPRITE_SHIP, TILE_SHIP2);
     }
-
 }
 
 /**********************************************/ /**
@@ -233,7 +252,14 @@ move_ship()
 static void
 disp_ship()
 {
-    move_sprite(ship.chr, ship.vec.x >> FIX, ship.vec.y >> FIX);
+    VectorType v = ship.vec;
+    v.x >>= FIX; // i8:f8
+    v.y >>= FIX; // i8:f8
+
+    // 座標変換
+    trans_device_coord(&v, ship.center.x, ship.center.y);
+
+    move_sprite(ship.chr, v.x, v.y);
 }
 
 /**********************************************/ /**
@@ -242,8 +268,19 @@ disp_ship()
 static void
 disp_stars()
 {
-    for (int i = 0; i < stars.num; i++) {
-        move_sprite(stars.list[i].chr, stars.list[i].vec.x >> FIX, stars.list[i].vec.y >> FIX);
+    VectorType v;
+
+    for (int i = 0; i < stars.num; i++)
+    {
+        v = stars.list[i].vec;
+        v.z >>= FIX; // i8:f8
+
+        // 座標変換
+        trans_device_coord(&v, stars.list[i].center.x, stars.list[i].center.y);
+        // スケールを設定
+        set_scale(stars.list[i].aff, v.scale, v.scale);
+
+        move_sprite(stars.list[i].chr, v.x, v.y);
     }
 }
 

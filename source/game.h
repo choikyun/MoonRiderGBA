@@ -38,23 +38,6 @@
 #define FIX (16)
 
 /**
- * ステージ幅　最小
- */
-#define STAGE_W_MIN (0)
-/**
- * ステージ幅　最大
- */
-#define STAGE_W_MAX (SCREEN_WIDTH - 16)
-/**
- * ステージ高さ　最小
- */
-#define STAGE_H_MIN (8)
-/**
- * ステージ高さ　最大
- */
-#define STAGE_H_MAX (SCREEN_HEIGHT - 32 - 16)
-
-/**
  * 数字　幅
  */
 #define NUM_W (8)
@@ -119,10 +102,23 @@
  * Z座標 最大値
  */
 #define MAX_Z (100)
+
 /**
  * Z座標 最小値
  */
 #define MIN_Z (1)
+
+/**
+ * 座標補正X
+ * ステージの論理座標からデバイス座標へ変換
+ */
+#define FIX_STAGE_X (120)
+
+/**
+ * 座標補正Y
+ * ステージの論理座標からデバイス座標へ変換
+ */
+#define FIX_STAGE_Y (80)
 
 /***************************************************
  * 自機 スプライト
@@ -138,19 +134,19 @@
 #define SHIP_H (32)
 
 /**
- * 自機 X座標
+ * 自機 X座標 中心
  */
-#define SHIP_X (SCREEN_WIDTH / 2 - SHIP_W / 2)
+#define SHIP_X (0)
+
+/**
+ * 自機 Y座標 中心
+ */
+#define SHIP_Y (0)
 
 /**
  * 自機 Y座標
  */
-#define SHIP_Y ((SCREEN_HEIGHT - SHIP_H) / 2 - SHIP_H / 2) + 32
-
-/**
- * 自機 Y座標
- */
-#define SHIP_Z MAX_Z
+#define SHIP_Z MIN_Z
 
 /**
  * 自機 速度
@@ -229,7 +225,7 @@
  */
 #define MAX_STAGE_BGM (3)
 
-///////////////////////////////////////////////////////////////////// クラス
+///////////////////////////////////////////////////////////////////// 構造体
 
 /**
  * 座標 2d
@@ -241,6 +237,17 @@ typedef struct
 } ALIGN(4) PointType;
 
 /**
+ * 矩形
+ */
+typedef struct
+{
+    int x;
+    int y;
+    int w;
+    int h;
+} ALIGN(4) RectangleType;
+
+/**
  * 座標 3d
  */
 typedef struct
@@ -248,6 +255,8 @@ typedef struct
     int x;
     int y;
     int z;
+    // スケール 1-100%
+    int scale;
 } ALIGN(4) VectorType;
 
 /**
@@ -313,17 +322,22 @@ typedef struct
  */
 typedef struct
 {
-    int chr;     /**< キャラクタ番号 */
-    int tile;    /**< タイル番号 */
-    VectorType vec; /**< 座標 */
-    VectorType acc; /**< 加速度 */
-    int cx;         /**< 中心X のオフセット */
-    int cy;         /**< 中心Y のオフセット */
-    int w;          /**< 高さ */
-    int h;          /**< 幅 */
-    bool scaling;   /**< 拡縮するか */
-    int aff;     /**< アフィンパラメータ番号 0-31 */
-    bool show;      /**< 表示フラグ */
+    // キャラクタ番号 0-127
+    int chr;
+    // タイル番号 512-1024
+    int tile;
+    // 3d座標
+    VectorType vec;
+    // 加速度
+    VectorType acc;
+    // 中心のオフセット
+    PointType center;
+    // 当たり判定用矩形
+    RectangleType hit;
+    // アフィンパラメータ番号 0-31
+    int aff;           
+    // 表示フラグ
+    bool show;
 } ALIGN(4) SpriteCharType;
 
 /**
@@ -331,8 +345,10 @@ typedef struct
  */
 typedef struct
 {
-    int num;                        /**< 現在のスター数 */
-    SpriteCharType list[MAX_STARS]; /**< スターのリスト */
+    // 現在のスター数
+    int num;
+    // スターのリスト
+    SpriteCharType list[MAX_STARS];
 } ALIGN(4) StarType;
 
 /**

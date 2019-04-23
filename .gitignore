@@ -1,11 +1,5 @@
-/bitmap/
 /build/
 /sound/
 /command.sav
-.vscode/c_cpp_properties.json
-.vscode/ipch/94cb29ca37559bbd/mmap_address.bin
-.vscode/ipch/f57e575cf9e2325f/mmap_address.bin
-.vscode/ipch/f57e605cf9e241aa/mmap_address.bin
-.vscode/ipch/94cb29ca37559bbd/starter.ipch
-.vscode/ipch/f57e605cf9e241aa/graph.ipch
-.vscode/c_cpp_properties.json
+.vscode/
+

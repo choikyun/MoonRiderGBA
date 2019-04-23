@@ -127,11 +127,11 @@
 /**
  * 自機 幅
  */
-#define SHIP_W (32)
+#define SHIP_W (31)
 /**
  * 自機 高さ
  */
-#define SHIP_H (32)
+#define SHIP_H (31)
 
 /**
  * 自機 X座標 中心
@@ -146,7 +146,7 @@
 /**
  * 自機 Y座標
  */
-#define SHIP_Z MIN_Z
+#define SHIP_Z MAX_Z
 
 /**
  * 自機 速度

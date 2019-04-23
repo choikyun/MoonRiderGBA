@@ -153,9 +153,11 @@ init_stage()
 
     // テスト
     // スター作成
-    stars.list[0].vec.x = 0;
-    stars.list[0].vec.y = 0;
-    stars.list[0].vec.z = MIN_Z << FIX;
+    stars.list[0].vec.x = -60;
+    stars.list[0].vec.y = 10;
+    stars.list[0].vec.z = 50 << FIX;
+    stars.list[0].center.x = STAR_W / 2 - 1;
+    stars.list[0].center.y = STAR_H / 2 - 1;
     stars.num = 1;
 }
 
@@ -173,8 +175,8 @@ init_ship()
     ship.vec.x = SHIP_X << FIX;
     ship.vec.y = SHIP_Y << FIX;
     ship.vec.z = SHIP_Z;
-    ship.center.x = SHIP_W / 2 - 1;
-    ship.center.y = SHIP_H / 2 - 1;
+    ship.center.x = SHIP_W / 2;
+    ship.center.y = SHIP_H / 2;
 }
 
 /**********************************************/ /**
@@ -212,8 +214,8 @@ trans_device_coord(VectorType *v, int cx, int cy)
     v->scale = (v->z * 100) / MAX_Z;
 
     // XY座標の変換
-    v->x = ((v->x * v->z) / MAX_Z) + FIX_STAGE_X - ((cx * v->z) / MAX_Z);
-    v->y = ((v->y * v->z) / MAX_Z) + FIX_STAGE_Y - ((cy * v->z) / MAX_Z);
+    v->x = ((v->x * v->z) / MAX_Z) + FIX_STAGE_X - cx;
+    v->y = ((v->y * v->z) / MAX_Z) + FIX_STAGE_Y - cy;
 }
 
 /**********************************************/ /**

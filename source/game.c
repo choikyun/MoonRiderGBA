@@ -130,7 +130,7 @@ init_sprite_setting()
     for (int i = 0; i < MAX_STARS; i++)
     {
         set_sprite_form(SPRITE_STAR + i, OBJ_SIZE(3), OBJ_SQUARE, OBJ_256_COLOR);
-        set_sprite_tile(SPRITE_STAR + i, TILE_STAR);
+        set_sprite_tile(SPRITE_STAR + i, TILE_STAR2);
         set_affine_setting(SPRITE_STAR + i, i, 0);
         set_scale(i, 100, 100);
     }

@@ -25,6 +25,7 @@
 #include "sprite_ship2.h"
 #include "sprite_ship3.h"
 #include "sprite_star1.h"
+#include "sprite_star2.h"
 
 /***************************************************
  スプライト初期化
@@ -113,7 +114,7 @@ s16 read_sprite_y(u16 num)
  ***********************************************/
 void set_affine_setting(u16 num, u16 a_num, u16 d_flg)
 {
-    OBJATTR* sp = (OBJATTR*)OAM + num;
+    OBJATTR *sp = (OBJATTR *)OAM + num;
 
     sp->attr0 |= OBJ_ROT_SCALE_ON;
 
@@ -131,7 +132,7 @@ void set_affine_setting(u16 num, u16 a_num, u16 d_flg)
  ***********************************************/
 void set_scale(u16 num, u16 x_sc, u16 y_sc)
 {
-    OBJAFFINE* rot = (OBJAFFINE*)OAM + num;
+    OBJAFFINE *rot = (OBJAFFINE *)OAM + num;
 
     rot->pa = 256 * 100 / x_sc;
     rot->pb = 0;
@@ -155,11 +156,11 @@ void init_sprite_chr(void)
 
     // キャラクタデータ転送
     //ship
-    CpuSet(sprite_ship1Tiles, oam, (COPY32 | sprite_ship1TilesLen / 4));
-    CpuSet(sprite_ship2Tiles, oam + 512, (COPY32 | sprite_ship2TilesLen / 4));
-    CpuSet(sprite_ship3Tiles, oam + 512 * 2, (COPY32 | sprite_ship3TilesLen / 4));
-    
-    // スター
-    CpuSet(sprite_star1Tiles, oam + 512 * 3, (COPY32 | sprite_star1TilesLen / 4));
+    CpuSet(sprite_ship1Tiles, oam, (COPY32 | sprite_ship1TilesLen / 4));           // 32dot
+    CpuSet(sprite_ship2Tiles, oam + 512, (COPY32 | sprite_ship2TilesLen / 4));     // 32dot
+    CpuSet(sprite_ship3Tiles, oam + 512 * 2, (COPY32 | sprite_ship3TilesLen / 4)); // 32dot
 
+    // スター
+    CpuSet(sprite_star1Tiles, oam + 512 * 3, (COPY32 | sprite_star1TilesLen / 4)); // 64dot
+    CpuSet(sprite_star2Tiles, oam + 512 * 7, (COPY32 | sprite_star2TilesLen / 4)); // 64dot
 }

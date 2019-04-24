@@ -86,6 +86,20 @@
  ***************************************************/
 
 /***************************************************
+ * ゲームバランス
+ ***************************************************/
+
+/**
+ * 星の出現間隔
+ */
+#define STAR_INTERVAL (60)
+
+/**
+ * 星の同時出現数
+ */
+#define APPER_STARS (2)
+
+/***************************************************
  * モード
  ***************************************************/
 
@@ -297,12 +311,14 @@ typedef struct
  */
 typedef struct
 {
+    // レベル
     int lv;
+    // 次のスターが出現するまでの間隔
+    int star_interval;
+    // モード
     int mode;
-    int cities;
+    // デモモード
     bool demo;
-
-    FlashType flash;
 } ALIGN(4) StageType;
 
 /**
@@ -335,7 +351,7 @@ typedef struct
     // 当たり判定用矩形
     RectangleType hit;
     // アフィンパラメータ番号 0-31
-    int aff;           
+    int aff;
     // 表示フラグ
     bool show;
 } ALIGN(4) SpriteCharType;
@@ -410,12 +426,13 @@ enum
 #define TILE_SIZE_16 (8)
 
 // 自機
-#define TILE_SHIP1 (512)
-#define TILE_SHIP2 (544)
-#define TILE_SHIP3 (576)
+#define TILE_SHIP1 (512) // 32
+#define TILE_SHIP2 (544) // 32
+#define TILE_SHIP3 (576) // 32
 
 // スター
-#define TILE_STAR (608)
+#define TILE_STAR1 (608) // 128
+#define TILE_STAR2 (736) // 128
 
 ///////////////////////////////////////////////////////////////////// SRAM
 

@@ -12,18 +12,26 @@
  * Choe Gyun (choikyun)
  *****************************************************/
 
+#include <gba.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <gba.h>
 
-#include "sprite.h"
 #include "bg.h"
+#include "sprite.h"
 
 //// スプライト
 // 自機
 #include "sprite_ship1.h"
 #include "sprite_ship2.h"
 #include "sprite_ship3.h"
+#include "sprite_ship4.h"
+#include "sprite_ship5.h"
+
+// 炎
+#include "sprite_fire1.h"
+#include "sprite_fire2.h"
+
+// スター
 #include "sprite_star1.h"
 #include "sprite_star2.h"
 
@@ -35,8 +43,7 @@ void init_sprite(void)
     int i;
 
     //すべて画面外へ
-    for (i = 0; i < MAX_SPRITE; i++)
-    {
+    for (i = 0; i < MAX_SPRITE; i++) {
         move_sprite(i, SCREEN_WIDTH, SCREEN_HEIGHT);
     }
 }
@@ -54,7 +61,7 @@ void erase_sprite(u16 num)
  ***************************************************/
 void move_sprite(u16 num, s16 x, s16 y)
 {
-    OBJATTR *sp = (OBJATTR *)OAM + num;
+    OBJATTR* sp = (OBJATTR*)OAM + num;
 
     sp->attr1 &= 0xfe00;
     sp->attr0 &= 0xff00;
@@ -67,7 +74,7 @@ void move_sprite(u16 num, s16 x, s16 y)
  ***************************************************/
 void set_sprite_form(u16 num, u16 size, u16 form, u16 col)
 {
-    OBJATTR *sp = (OBJATTR *)OAM + num;
+    OBJATTR* sp = (OBJATTR*)OAM + num;
 
     sp->attr0 &= 0x1fff;
     sp->attr1 &= 0x3fff;
@@ -80,7 +87,7 @@ void set_sprite_form(u16 num, u16 size, u16 form, u16 col)
  **************************************************/
 void set_sprite_tile(u16 num, u16 tile)
 {
-    OBJATTR *sp = (OBJATTR *)OAM + num;
+    OBJATTR* sp = (OBJATTR*)OAM + num;
 
     sp->attr2 &= 0xfc00;
     sp->attr2 |= tile;
@@ -91,7 +98,7 @@ void set_sprite_tile(u16 num, u16 tile)
  ***************************************************/
 s16 read_sprite_x(u16 num)
 {
-    OBJATTR *sp = (OBJATTR *)OAM + num;
+    OBJATTR* sp = (OBJATTR*)OAM + num;
 
     return sp->attr1 & ~0xfe00;
 }
@@ -101,7 +108,7 @@ s16 read_sprite_x(u16 num)
  ***************************************************/
 s16 read_sprite_y(u16 num)
 {
-    OBJATTR *sp = (OBJATTR *)OAM + num;
+    OBJATTR* sp = (OBJATTR*)OAM + num;
 
     return sp->attr0 & ~0xff00;
 }
@@ -114,7 +121,7 @@ s16 read_sprite_y(u16 num)
  ***********************************************/
 void set_affine_setting(u16 num, u16 a_num, u16 d_flg)
 {
-    OBJATTR *sp = (OBJATTR *)OAM + num;
+    OBJATTR* sp = (OBJATTR*)OAM + num;
 
     sp->attr0 |= OBJ_ROT_SCALE_ON;
 
@@ -132,7 +139,7 @@ void set_affine_setting(u16 num, u16 a_num, u16 d_flg)
  ***********************************************/
 void set_scale(u16 num, u16 x_sc, u16 y_sc)
 {
-    OBJAFFINE *rot = (OBJAFFINE *)OAM + num;
+    OBJAFFINE* rot = (OBJAFFINE*)OAM + num;
 
     rot->pa = 256 * 100 / x_sc;
     rot->pb = 0;
@@ -146,21 +153,27 @@ void set_scale(u16 num, u16 x_sc, u16 y_sc)
 void init_sprite_chr(void)
 {
     // スプライトデータ
-    u16 *oam = DEF_MODE < MODE_3 ? OBJ_BASE_ADR : BITMAP_OBJ_BASE_ADR;
+    u16* oam = DEF_MODE < MODE_3 ? OBJ_BASE_ADR : BITMAP_OBJ_BASE_ADR;
 
     // スプライトパレット
-    u16 *pal = OBJ_COLORS;
+    u16* pal = OBJ_COLORS;
 
     // 共通パレット転送
     CpuSet(sprite_ship1Pal, pal, (COPY32 | sprite_ship1PalLen / 4));
 
     // キャラクタデータ転送
     //ship
-    CpuSet(sprite_ship1Tiles, oam, (COPY32 | sprite_ship1TilesLen / 4));           // 32dot
-    CpuSet(sprite_ship2Tiles, oam + 512, (COPY32 | sprite_ship2TilesLen / 4));     // 32dot
+    CpuSet(sprite_ship1Tiles, oam, (COPY32 | sprite_ship1TilesLen / 4)); // 32dot
+    CpuSet(sprite_ship2Tiles, oam + 512, (COPY32 | sprite_ship2TilesLen / 4)); // 32dot
     CpuSet(sprite_ship3Tiles, oam + 512 * 2, (COPY32 | sprite_ship3TilesLen / 4)); // 32dot
+    CpuSet(sprite_ship4Tiles, oam + 512 * 3, (COPY32 | sprite_ship4TilesLen / 4)); // 32dot
+    CpuSet(sprite_ship5Tiles, oam + 512 * 4, (COPY32 | sprite_ship5TilesLen / 4)); // 32dot
+
+    // 炎
+    CpuSet(sprite_fire1Tiles, oam + 512 * 5, (COPY32 | sprite_fire1TilesLen / 4)); // 16dot
+    CpuSet(sprite_fire2Tiles, oam + 512 * 5 + 128, (COPY32 | sprite_fire2TilesLen / 4)); // 16dot
 
     // スター
-    CpuSet(sprite_star1Tiles, oam + 512 * 3, (COPY32 | sprite_star1TilesLen / 4)); // 64dot
-    CpuSet(sprite_star2Tiles, oam + 512 * 7, (COPY32 | sprite_star2TilesLen / 4)); // 64dot
+    CpuSet(sprite_star1Tiles, oam + 512 * 5 + 128 * 2, (COPY32 | sprite_star1TilesLen / 4)); // 64dot
+    CpuSet(sprite_star2Tiles, oam + 512 * 5 + 128 * 2 + 2048, (COPY32 | sprite_star2TilesLen / 4)); // 64dot
 }

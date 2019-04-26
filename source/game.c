@@ -38,6 +38,8 @@ disp_ship();
 static void
 disp_stars();
 static void
+disp_fire();
+static void
 draw_bg();
 static void
 init_sprite_setting();
@@ -45,6 +47,8 @@ static void
 init_stage();
 static void
 move_stars();
+static void
+check_stage_boundary();
 
 //debug
 void vbaPrint(char* s);
@@ -75,6 +79,7 @@ void game()
         move_stars();
 
         disp_ship();
+        disp_fire();
         disp_stars();
         break;
 
@@ -128,6 +133,10 @@ init_sprite_setting()
     set_sprite_form(SPRITE_SHIP, OBJ_SIZE(2), OBJ_SQUARE, OBJ_256_COLOR);
     set_sprite_tile(SPRITE_SHIP, TILE_SHIP1);
 
+    //// 炎 16*16 dot
+    set_sprite_form(SPRITE_FIRE, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
+    set_sprite_tile(SPRITE_FIRE, TILE_FIRE1);
+
     //// スター 64*64 dot
     for (int i = 0; i < MAX_STARS; i++) {
         set_sprite_form(SPRITE_STAR + i, OBJ_SIZE(3), OBJ_SQUARE, OBJ_256_COLOR);
@@ -156,10 +165,14 @@ init_stage()
     // スター作成
     stars.list[0].vec.x = -60;
     stars.list[0].vec.y = 10;
-    stars.list[0].vec.z = 50 << FIX;
+    stars.list[0].vec.z = 100 << FIX;
     stars.list[0].center.x = STAR_W / 2 - 1;
     stars.list[0].center.y = STAR_H / 2 - 1;
     stars.num = 1;
+
+    // ステージの座標
+    stage.center.x = 0;
+    stage.center.y = 0;
 }
 
 /**********************************************/ /**
@@ -171,13 +184,27 @@ init_ship()
     // 加速度　自機はZ未使用
     ship.acc.x = ship.acc.y = 0;
 
-    // スプライト
+    // 自機スプライト
     ship.chr = SPRITE_SHIP;
     ship.vec.x = SHIP_X << FIX;
     ship.vec.y = SHIP_Y << FIX;
     ship.vec.z = SHIP_Z << FIX;
     ship.center.x = SHIP_W / 2;
     ship.center.y = SHIP_H / 2;
+
+    // 炎 スプライト
+    fire.sprite.chr = SPRITE_FIRE;
+    fire.sprite.vec.x = FIRE_X << FIX;
+    fire.sprite.vec.y = FIRE_Y << FIX;
+    fire.sprite.vec.z = FIRE_Z << FIX;
+    fire.sprite.center.x = FIRE_W / 2;
+    fire.sprite.center.y = FIRE_H / 2;
+
+    // 炎 アニメーション
+    fire.anime.frame = 0;
+    fire.anime.max_frame = 2;
+    fire.anime.interval = fire.anime.interval_rel = FIRE_INTERVAL;
+    fire.anime.is_start = true;
 }
 
 /**********************************************/ /**
@@ -231,77 +258,84 @@ move_ship()
 
     // 4方向移動
     if (key & KEY_UP) {
-        // マイナス方向に加速
-        if (ship.acc.y > -MAX_SHIP_ACC) {
-            ship.acc.y -= SHIP_SPEED;
+        ship.acc.y -= SHIP_SPEED;
+        if (ship.acc.y < -MAX_SHIP_ACC) {
+            ship.acc.y = -MAX_SHIP_ACC;
         }
+        set_sprite_tile(SPRITE_SHIP, TILE_SHIP4);
     } else if (key & KEY_DOWN) {
-        // プラス方向に加速
-        if (ship.acc.y < MAX_SHIP_ACC) {
-            ship.acc.y += SHIP_SPEED;
+        ship.acc.y += SHIP_SPEED;
+        if (ship.acc.y > MAX_SHIP_ACC) {
+            ship.acc.y = MAX_SHIP_ACC;
         }
-    } else {
-        // Y方向 自然減
-        if (ship.acc.y > 0) {
-            ship.acc.y -= SHIP_DEC_SPEED;
-        } else {
-            ship.acc.y += SHIP_DEC_SPEED;
-        }
+        set_sprite_tile(SPRITE_SHIP, TILE_SHIP5);
     }
 
     if (key & KEY_LEFT) {
-        // マイナス方向に加速
-        if (ship.acc.x > -MAX_SHIP_ACC) {
-            ship.acc.x -= SHIP_SPEED;
+        ship.acc.x -= SHIP_SPEED;
+        if (ship.acc.x < -MAX_SHIP_ACC) {
+            ship.acc.x = -MAX_SHIP_ACC;
         }
-        // タイル切り替え
         set_sprite_tile(SPRITE_SHIP, TILE_SHIP3);
     } else if (key & KEY_RIGHT) {
-        // プラス方向に加速
-        if (ship.acc.x < MAX_SHIP_ACC) {
-            ship.acc.x += SHIP_SPEED;
+        ship.acc.x += SHIP_SPEED;
+        if (ship.acc.x > MAX_SHIP_ACC) {
+            ship.acc.x = MAX_SHIP_ACC;
         }
-        // タイル切り替え
         set_sprite_tile(SPRITE_SHIP, TILE_SHIP2);
-    } else {
-        // X方向 自然減
-        if (ship.acc.x > 0) {
-            ship.acc.x -= SHIP_DEC_SPEED;
-        } else {
-            ship.acc.x += SHIP_DEC_SPEED;
-        }
     }
 
-    // 移動
-    int sx = ship.vec.x >> FIX;
-    int sy = ship.vec.y >> FIX;
-    if (sx >= SHIP_MOVE_MIN_X && sx <= SHIP_MOVE_MAX_X) {
-        ship.vec.x += ship.acc.x;
+    // 自然減速
+    if (!(key & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT))) {
+        ship.acc.x += -ship.acc.x * SHIP_FRIC;
+        ship.acc.y += -ship.acc.y * SHIP_FRIC;
     }
-    if (sy >= SHIP_MOVE_MIN_Y && sy <= SHIP_MOVE_MAX_Y) {
-        ship.vec.x += ship.acc.x;
+
+    // 自機は中央固定なのでステージ座標が変化する
+    // 自機とは逆方向に加速
+    stage.center.x -= ship.acc.x;
+    stage.center.y -= ship.acc.y;
+    
+    // 境界判定
+    check_stage_boundary();
+}
+
+/**********************************************/ /**
+ * @brief ステージ境界チェック
+ * 
+ * @param *tx ターゲットX座標
+ * @param *ty ターゲットY座標
+ ***********************************************/
+static void
+check_stage_boundary()
+{
+    int x = stage.center.x >> FIX;
+    int y = stage.center.y >> FIX;
+
+    if (x < SHIP_MOVE_MIN_X) {
+        stage.center.x = SHIP_MOVE_MIN_X << FIX;
+        ship.acc.x /= -2;// 加速度反転
+    } else if (x > SHIP_MOVE_MAX_X) {
+        stage.center.x = SHIP_MOVE_MAX_X << FIX;
+        ship.acc.x /= -2;
+    }
+
+    if (y < SHIP_MOVE_MIN_Y) {
+        stage.center.y = SHIP_MOVE_MIN_Y << FIX;
+        ship.acc.y /= -2;
+    } else if (y > SHIP_MOVE_MAX_Y) {
+        stage.center.y = SHIP_MOVE_MAX_Y << FIX;
+        ship.acc.y /= -2;
     }
 }
 
 /**********************************************/ /**
- * @brief 自機移動
+ * @brief スター移動
  ***********************************************/
 static void
 move_stars()
 {
-    int sx = ship.vec.x >> FIX;
-    int sy = ship.vec.y >> FIX;
-
     for (int i = 0; i < stars.num; i++) {
-        // 自機の移動の影響を受ける
-        // 自機と逆方向に移動
-        if (sx >= SHIP_MOVE_MIN_X && sx <= SHIP_MOVE_MAX_X) {
-            stars.list[i].vec.x += -ship.acc.x;
-        }
-        if (sy >= SHIP_MOVE_MIN_Y && sy <= SHIP_MOVE_MAX_Y) {
-            stars.list[i].vec.y += -ship.acc.y;
-        }
-
         // Z方向の移動
     }
 }
@@ -313,13 +347,39 @@ static void
 disp_ship()
 {
     VectorType v = ship.vec;
-    v.z >>= FIX; // i8:f8
+    v.x >>= FIX;
+    v.y >>= FIX;
+    v.z >>= FIX;
 
     // 座標変換
     // 自機は中央固定
-    trans_device_coord(&v, 0, 0);
+    trans_device_coord(&v, ship.center.x, ship.center.y);
 
     move_sprite(ship.chr, v.x, v.y);
+}
+
+/**********************************************/ /**
+ * @brief 炎表示
+ ***********************************************/
+static void
+disp_fire()
+{
+    // アニメ
+    if (fire.anime.is_start && --fire.anime.interval < 0) {
+        fire.anime.interval = fire.anime.interval_rel;
+        fire.anime.frame = (fire.anime.frame + 1) % fire.anime.max_frame;
+        // タイル切り替え
+        set_sprite_tile(SPRITE_FIRE, TILE_FIRE1 + (fire.anime.frame * TILE_SIZE_16));
+    }
+
+    VectorType v = fire.sprite.vec;
+    v.x >>= FIX; v.y >>= FIX; v.z >>= FIX;
+
+    // 座標変換
+    // 炎は中央固定
+    trans_device_coord(&v, fire.sprite.center.x, fire.sprite.center.y);
+
+    move_sprite(fire.sprite.chr, v.x, v.y);
 }
 
 /**********************************************/ /**
@@ -341,7 +401,11 @@ disp_stars()
         // スケールを設定
         set_scale(stars.list[i].aff, v.scale, v.scale);
 
-        move_sprite(stars.list[i].chr, v.x, v.y);
+        // ステージ座標の補正
+        move_sprite(
+            stars.list[i].chr,
+            v.x + (stage.center.x >> FIX),
+            v.y + (stage.center.y >> FIX));
     }
 }
 

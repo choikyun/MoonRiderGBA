@@ -15,8 +15,8 @@
 #ifndef _game_h_
 #define _game_h_
 
-#include <gba.h>
 #include "bg.h"
+#include <gba.h>
 
 #ifdef GLOBAL_VALUE_DEFINE
 #define GLOBAL
@@ -86,7 +86,7 @@
  ***************************************************/
 
 /***************************************************
- * ゲームバランス
+ * ゲームバランスに関連するパラメータ
  ***************************************************/
 
 /**
@@ -166,42 +166,76 @@
  * @brief 自機 移動X座標最小値
  * 
  */
-#define SHIP_MOVE_MIN_X (-104)
+#define SHIP_MOVE_MIN_X (-105)
 
 /**
  * @brief 自機 移動X座標最大値
  * 
  */
-#define SHIP_MOVE_MAX_X (104)
+#define SHIP_MOVE_MAX_X (103)
 
 /**
  * @brief 自機 移動Y座標最小値
  * 
  */
-#define SHIP_MOVE_MIN_Y (-64)
+#define SHIP_MOVE_MIN_Y (-65)
 
 /**
  * @brief 自機 移動Y座標最大値
  * 
  */
-#define SHIP_MOVE_MAX_Y (64)
+#define SHIP_MOVE_MAX_Y (63)
 
 /**
  * 自機 速度
  */
-#define SHIP_SPEED (1)
+#define SHIP_SPEED (4096 * 2)
 
 /**
  * @brief 自機自然減速
  * 
  */
-#define SHIP_DEC_SPEED (1)
+#define SHIP_FRIC (0.01)
 
 /**
  * @brief 自機最大加速度
  * 
  */
-#define MAX_SHIP_ACC (16)
+#define MAX_SHIP_ACC (3 << FIX)
+
+/***************************************************
+ * 炎 スプライト
+ ***************************************************/
+
+/**
+ * 炎 幅
+ */
+#define FIRE_W (15)
+
+/**
+ * 炎 高さ
+ */
+#define FIRE_H (15)
+
+/**
+ * 炎 X座標 中心
+ */
+#define FIRE_X (0)
+
+/**
+ * 炎 Y座標 中心
+ */
+#define FIRE_Y (10)
+
+/**
+ * 炎 Y座標
+ */
+#define FIRE_Z MAX_Z
+
+/**
+ * 炎 点滅間隔
+ */
+#define FIRE_INTERVAL (4)
 
 /***************************************************
  * スター スプライト
@@ -349,6 +383,8 @@ typedef struct
 {
     // レベル
     int lv;
+    // ステージの中心座標
+    VectorType center;
     // 次のスターが出現するまでの間隔
     int star_interval;
     // モード
@@ -362,10 +398,10 @@ typedef struct
  */
 typedef struct
 {
-    bool is_start;    // 開始
-    int frame;        // 現在のフレーム
-    int max_frame;    // フレーム最大値
-    int interval;     // インターバル
+    bool is_start; // 開始
+    int frame; // 現在のフレーム
+    int max_frame; // フレーム最大値
+    int interval; // インターバル
     int interval_rel; // インターバル既定値
 } ALIGN(4) AnimeType;
 
@@ -391,6 +427,16 @@ typedef struct
     // 表示フラグ
     bool show;
 } ALIGN(4) SpriteCharType;
+
+/**
+ * 炎
+ */
+typedef struct {
+    // アニメーション用
+    AnimeType anime;
+    // スプライト
+    SpriteCharType sprite;
+} ALIGN(4) FireType;
 
 /**
  * スター管理
@@ -430,8 +476,7 @@ typedef struct
 /**
  * シーン
  */
-enum
-{
+enum {
     GAME_MAIN = 0,
     GAME_TITLE = 1,
     GAME_PAUSE = 2,
@@ -446,29 +491,40 @@ enum
 /**
  * スプライトキャラクタ
  */
-enum
-{
+enum {
     // 自機
     SPRITE_SHIP = 0,
 
+    // 炎
+    SPRITE_FIRE = 4,
+
     // スター
-    SPRITE_STAR = 4 // -19 まで
+    SPRITE_STAR = 5 // -20 まで
 
 } SpriteEnum;
 
 ///////////////////////////////////////////////////////////////////// タイル番号
 
+// タイルサイズ
 #define TILE_SIZE_8 (2)
 #define TILE_SIZE_16 (8)
+#define TILE_SIZE_32 (32)
+#define TILE_SIZE_64 (128)
 
 // 自機
-#define TILE_SHIP1 (512) // 32
+#define TILE_SHIP1 (512) // 32tile
 #define TILE_SHIP2 (544) // 32
 #define TILE_SHIP3 (576) // 32
+#define TILE_SHIP4 (608) // 32
+#define TILE_SHIP5 (640) // 32
+
+// 炎
+#define TILE_FIRE1 (672) // 8tile
+#define TILE_FIRE2 (680) // 8
 
 // スター
-#define TILE_STAR1 (608) // 128
-#define TILE_STAR2 (736) // 128
+#define TILE_STAR1 (688) // 128tile
+#define TILE_STAR2 (816) // 128
 
 ///////////////////////////////////////////////////////////////////// SRAM
 
@@ -541,6 +597,11 @@ GLOBAL StageType stage;
  * 自機
  */
 GLOBAL SpriteCharType ship;
+
+/**
+ * 炎
+ */
+GLOBAL FireType fire;
 
 /**
  * スター

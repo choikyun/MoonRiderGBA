@@ -14,17 +14,17 @@
 
 #define GLOBAL_VALUE_DEFINE
 
+#include <gba.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <gba.h>
 
-#include "game.h"
 #include "bg.h"
-#include "sprite.h"
-#include "score.h"
-#include "music.h"
+#include "game.h"
 #include "graph.h"
+#include "music.h"
+#include "score.h"
+#include "sprite.h"
 
 void init_game();
 static void
@@ -43,9 +43,11 @@ static void
 init_sprite_setting();
 static void
 init_stage();
+static void
+move_stars();
 
 //debug
-void vbaPrint(char *s);
+void vbaPrint(char* s);
 
 /**********************************************/ /**
  * @brief メインループ
@@ -57,8 +59,7 @@ void game()
 
     seed++;
 
-    switch (game_state.scene)
-    {
+    switch (game_state.scene) {
     case GAME_TITLE:
         //disp_title();
         //select_mode();
@@ -71,6 +72,7 @@ void game()
         draw_bg();
 
         move_ship();
+        move_stars();
 
         disp_ship();
         disp_stars();
@@ -127,8 +129,7 @@ init_sprite_setting()
     set_sprite_tile(SPRITE_SHIP, TILE_SHIP1);
 
     //// スター 64*64 dot
-    for (int i = 0; i < MAX_STARS; i++)
-    {
+    for (int i = 0; i < MAX_STARS; i++) {
         set_sprite_form(SPRITE_STAR + i, OBJ_SIZE(3), OBJ_SQUARE, OBJ_256_COLOR);
         set_sprite_tile(SPRITE_STAR + i, TILE_STAR2);
         set_affine_setting(SPRITE_STAR + i, i, 0);
@@ -174,7 +175,7 @@ init_ship()
     ship.chr = SPRITE_SHIP;
     ship.vec.x = SHIP_X << FIX;
     ship.vec.y = SHIP_Y << FIX;
-    ship.vec.z = SHIP_Z;
+    ship.vec.z = SHIP_Z << FIX;
     ship.center.x = SHIP_W / 2;
     ship.center.y = SHIP_H / 2;
 }
@@ -185,8 +186,7 @@ init_ship()
 static void
 init_stars()
 {
-    for (int i = 0; i < MAX_STARS; i++)
-    {
+    for (int i = 0; i < MAX_STARS; i++) {
         // 加速度
         stars.list[i].acc.x = stars.list[i].acc.y = stars.list[i].acc.z = 0;
 
@@ -208,7 +208,7 @@ init_stars()
  * @param cy Y中心のオフセット
  ***********************************************/
 static void
-trans_device_coord(VectorType *v, int cx, int cy)
+trans_device_coord(VectorType* v, int cx, int cy)
 {
     // スプライトのスケールを決定 1-100%
     v->scale = (v->z * 100) / MAX_Z;
@@ -229,22 +229,80 @@ move_ship()
     // デフォルトタイル
     set_sprite_tile(SPRITE_SHIP, TILE_SHIP1);
 
-    // 4方向
-    if (key & KEY_UP)
-    {
+    // 4方向移動
+    if (key & KEY_UP) {
+        // マイナス方向に加速
+        if (ship.acc.y > -MAX_SHIP_ACC) {
+            ship.acc.y -= SHIP_SPEED;
+        }
+    } else if (key & KEY_DOWN) {
+        // プラス方向に加速
+        if (ship.acc.y < MAX_SHIP_ACC) {
+            ship.acc.y += SHIP_SPEED;
+        }
+    } else {
+        // Y方向 自然減
+        if (ship.acc.y > 0) {
+            ship.acc.y -= SHIP_DEC_SPEED;
+        } else {
+            ship.acc.y += SHIP_DEC_SPEED;
+        }
     }
-    if (key & KEY_DOWN)
-    {
-    }
-    if (key & KEY_LEFT)
-    {
+
+    if (key & KEY_LEFT) {
+        // マイナス方向に加速
+        if (ship.acc.x > -MAX_SHIP_ACC) {
+            ship.acc.x -= SHIP_SPEED;
+        }
         // タイル切り替え
         set_sprite_tile(SPRITE_SHIP, TILE_SHIP3);
-    }
-    if (key & KEY_RIGHT)
-    {
+    } else if (key & KEY_RIGHT) {
+        // プラス方向に加速
+        if (ship.acc.x < MAX_SHIP_ACC) {
+            ship.acc.x += SHIP_SPEED;
+        }
         // タイル切り替え
         set_sprite_tile(SPRITE_SHIP, TILE_SHIP2);
+    } else {
+        // X方向 自然減
+        if (ship.acc.x > 0) {
+            ship.acc.x -= SHIP_DEC_SPEED;
+        } else {
+            ship.acc.x += SHIP_DEC_SPEED;
+        }
+    }
+
+    // 移動
+    int sx = ship.vec.x >> FIX;
+    int sy = ship.vec.y >> FIX;
+    if (sx >= SHIP_MOVE_MIN_X && sx <= SHIP_MOVE_MAX_X) {
+        ship.vec.x += ship.acc.x;
+    }
+    if (sy >= SHIP_MOVE_MIN_Y && sy <= SHIP_MOVE_MAX_Y) {
+        ship.vec.x += ship.acc.x;
+    }
+}
+
+/**********************************************/ /**
+ * @brief 自機移動
+ ***********************************************/
+static void
+move_stars()
+{
+    int sx = ship.vec.x >> FIX;
+    int sy = ship.vec.y >> FIX;
+
+    for (int i = 0; i < stars.num; i++) {
+        // 自機の移動の影響を受ける
+        // 自機と逆方向に移動
+        if (sx >= SHIP_MOVE_MIN_X && sx <= SHIP_MOVE_MAX_X) {
+            stars.list[i].vec.x += -ship.acc.x;
+        }
+        if (sy >= SHIP_MOVE_MIN_Y && sy <= SHIP_MOVE_MAX_Y) {
+            stars.list[i].vec.y += -ship.acc.y;
+        }
+
+        // Z方向の移動
     }
 }
 
@@ -255,11 +313,11 @@ static void
 disp_ship()
 {
     VectorType v = ship.vec;
-    v.x >>= FIX; // i8:f8
-    v.y >>= FIX; // i8:f8
+    v.z >>= FIX; // i8:f8
 
     // 座標変換
-    trans_device_coord(&v, ship.center.x, ship.center.y);
+    // 自機は中央固定
+    trans_device_coord(&v, 0, 0);
 
     move_sprite(ship.chr, v.x, v.y);
 }
@@ -272,9 +330,10 @@ disp_stars()
 {
     VectorType v;
 
-    for (int i = 0; i < stars.num; i++)
-    {
+    for (int i = 0; i < stars.num; i++) {
         v = stars.list[i].vec;
+        v.x >>= FIX; // i8:f8
+        v.y >>= FIX; // i8:f8
         v.z >>= FIX; // i8:f8
 
         // 座標変換
@@ -381,7 +440,7 @@ disp_pause()
  * @param *m メッセージパラメータポインタ
  ***********************************************/
 static void
-reset_message(BlinkMessageType *m)
+reset_message(BlinkMessageType* m)
 {
 }
 
@@ -390,7 +449,7 @@ reset_message(BlinkMessageType *m)
  * @param *m メッセージパラメータポインタ
  ***********************************************/
 static void
-reset_message_fast(BlinkMessageType *m)
+reset_message_fast(BlinkMessageType* m)
 {
 }
 
@@ -414,7 +473,7 @@ void load_title()
 
 //// デバグ用
 //THUMB code
-void vbaPrint(char *s)
+void vbaPrint(char* s)
 {
     /*
     asm volatile("mov r0, %0;"

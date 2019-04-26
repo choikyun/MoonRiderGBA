@@ -163,9 +163,45 @@
 #define SHIP_Z MAX_Z
 
 /**
+ * @brief 自機 移動X座標最小値
+ * 
+ */
+#define SHIP_MOVE_MIN_X (-104)
+
+/**
+ * @brief 自機 移動X座標最大値
+ * 
+ */
+#define SHIP_MOVE_MAX_X (104)
+
+/**
+ * @brief 自機 移動Y座標最小値
+ * 
+ */
+#define SHIP_MOVE_MIN_Y (-64)
+
+/**
+ * @brief 自機 移動Y座標最大値
+ * 
+ */
+#define SHIP_MOVE_MAX_Y (64)
+
+/**
  * 自機 速度
  */
 #define SHIP_SPEED (1)
+
+/**
+ * @brief 自機自然減速
+ * 
+ */
+#define SHIP_DEC_SPEED (1)
+
+/**
+ * @brief 自機最大加速度
+ * 
+ */
+#define MAX_SHIP_ACC (16)
 
 /***************************************************
  * スター スプライト

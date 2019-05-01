@@ -35,6 +35,9 @@
 #include "sprite_star1.h"
 #include "sprite_star2.h"
 
+// 柱
+#include "sprite_pole1.h"
+
 /***************************************************
  スプライト初期化
  ***************************************************/
@@ -92,6 +95,18 @@ void set_sprite_tile(u16 num, u16 tile)
     sp->attr2 &= 0xfc00;
     sp->attr2 |= tile;
 }
+
+/***************************************************
+ スプライト 表示優先度
+ **************************************************/
+void set_sprite_priority(u16 num, u16 priority)
+{
+    OBJATTR* sp = (OBJATTR*)OAM + num;
+
+    sp->attr2 &= 0xf3ff;
+    sp->attr2 |= OBJ_PRIORITY(priority);
+}
+
 
 /***************************************************
  スプライトX座標読み取り
@@ -174,6 +189,7 @@ void init_sprite_chr(void)
     CpuSet(sprite_fire2Tiles, oam + 512 * 5 + 128, (COPY32 | sprite_fire2TilesLen / 4)); // 16dot
 
     // スター
-    CpuSet(sprite_star1Tiles, oam + 512 * 5 + 128 * 2, (COPY32 | sprite_star1TilesLen / 4)); // 64dot
-    CpuSet(sprite_star2Tiles, oam + 512 * 5 + 128 * 2 + 2048, (COPY32 | sprite_star2TilesLen / 4)); // 64dot
+    //CpuSet(sprite_star1Tiles, oam + 512 * 5 + 128 * 2, (COPY32 | sprite_star1TilesLen / 4)); // 64dot
+    //CpuSet(sprite_star2Tiles, oam + 512 * 5 + 128 * 2 + 2048, (COPY32 | sprite_star2TilesLen / 4)); // 64dot
+    CpuSet(sprite_pole1Tiles, oam + 512 * 5 + 128 * 2, (COPY32 | sprite_pole1TilesLen / 4)); // 64dot *32
 }

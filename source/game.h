@@ -92,12 +92,12 @@
 /**
  * 星の出現間隔
  */
-#define STAR_INTERVAL (60)
+#define STAR_INTERVAL (40)
 
 /**
  * 星の同時出現数
  */
-#define APPER_STARS (2)
+#define APPER_MAX_STARS (1)
 
 /***************************************************
  * モード
@@ -115,12 +115,12 @@
 /**
  * Z座標 最大値
  */
-#define MAX_Z (100)
+#define MAX_Z (240)
 
 /**
  * Z座標 最小値
  */
-#define MIN_Z (1)
+#define MIN_Z (20)
 
 /**
  * 座標補正X
@@ -132,7 +132,7 @@
  * 座標補正Y
  * ステージの論理座標からデバイス座標へ変換
  */
-#define FIX_STAGE_Y (80)
+#define FIX_STAGE_Y (12)
 
 /***************************************************
  * 自機 スプライト
@@ -155,47 +155,47 @@
 /**
  * 自機 Y座標 中心
  */
-#define SHIP_Y (0)
+#define SHIP_Y (120)
 
 /**
  * 自機 Y座標
  */
-#define SHIP_Z MAX_Z
+#define SHIP_Z MIN_Z
 
 /**
  * @brief 自機 移動X座標最小値
  * 
  */
-#define SHIP_MOVE_MIN_X (-105)
+#define SHIP_MOVE_MIN_X (-120)
 
 /**
  * @brief 自機 移動X座標最大値
  * 
  */
-#define SHIP_MOVE_MAX_X (103)
+#define SHIP_MOVE_MAX_X (119)
 
 /**
  * @brief 自機 移動Y座標最小値
  * 
  */
-#define SHIP_MOVE_MIN_Y (-65)
+#define SHIP_MOVE_MIN_Y (-80)
 
 /**
  * @brief 自機 移動Y座標最大値
  * 
  */
-#define SHIP_MOVE_MAX_Y (63)
+#define SHIP_MOVE_MAX_Y (79)
 
 /**
  * 自機 速度
  */
-#define SHIP_SPEED (4096 * 2)
+#define SHIP_SPEED (4096 * 1)
 
 /**
  * @brief 自機自然減速
  * 
  */
-#define SHIP_FRIC (0.01)
+#define SHIP_FRIC (0.05)
 
 /**
  * @brief 自機最大加速度
@@ -225,17 +225,40 @@
 /**
  * 炎 Y座標 中心
  */
-#define FIRE_Y (10)
+#define FIRE_Y (SHIP_Y + 6)
+
+/**
+ * 炎 Y座標 中心 自機が上移動のとき
+ */
+#define FIRE_Y_UP (10)
+
+/**
+ * 炎 Y座標 中心 自機が下移動のとき
+ */
+#define FIRE_Y_DOWN (4)
+
+/**
+ * 炎 Y座標 中心 自機が上移動のとき
+ */
+#define FIRE_X_LEFT (4)
+
+/**
+ * 炎 Y座標 中心 自機が下移動のとき
+ */
+#define FIRE_X_RIGHT (-4)
+
+
 
 /**
  * 炎 Y座標
  */
-#define FIRE_Z MAX_Z
+#define FIRE_Z MIN_Z
+
 
 /**
  * 炎 点滅間隔
  */
-#define FIRE_INTERVAL (4)
+#define FIRE_INTERVAL (3)
 
 /***************************************************
  * スター スプライト
@@ -244,7 +267,7 @@
 /**
  * スター 幅
  */
-#define STAR_W (64)
+#define STAR_W (32)
 /**
  * スター 高さ
  */
@@ -254,6 +277,22 @@
  * スター最大数
  */
 #define MAX_STARS (16)
+
+/**
+ * スター 速度
+ */
+#define STAR_SPEED (-4096 * 16)
+
+/**
+ * 目標のY座標
+ */
+#define STAR_TARGET_Y (140 - STAR_H / 2)
+
+/**
+ * Z加速度最大値
+ */
+#define STAR_MAX_ACC (8 << FIX)
+
 
 /***************************************************
  * フラッシュ
@@ -414,16 +453,16 @@ typedef struct
     int chr;
     // タイル番号 512-1024
     int tile;
-    // 3d座標
+    // 現在の3d座標
     VectorType vec;
     // 加速度
     VectorType acc;
+    // 目標のXY座標
+    PointType target;
     // 中心のオフセット
     PointType center;
     // 当たり判定用矩形
     RectangleType hit;
-    // アフィンパラメータ番号 0-31
-    int aff;
     // 表示フラグ
     bool show;
 } ALIGN(4) SpriteCharType;
@@ -443,6 +482,10 @@ typedef struct {
  */
 typedef struct
 {
+    // 出現間隔
+    int interval;
+    // 出現間隔リロード
+    int interval_rel;
     // 現在のスター数
     int num;
     // スターのリスト
@@ -492,15 +535,14 @@ enum {
  * スプライトキャラクタ
  */
 enum {
-    // 自機
-    SPRITE_SHIP = 0,
-
     // 炎
-    SPRITE_FIRE = 4,
+    SPRITE_FIRE = 0,
+
+    // 自機
+    SPRITE_SHIP = 1,
 
     // スター
-    SPRITE_STAR = 5 // -20 まで
-
+    SPRITE_STAR = 2, // -17 まで
 } SpriteEnum;
 
 ///////////////////////////////////////////////////////////////////// タイル番号
@@ -523,8 +565,8 @@ enum {
 #define TILE_FIRE2 (680) // 8
 
 // スター
-#define TILE_STAR1 (688) // 128tile
-#define TILE_STAR2 (816) // 128
+#define TILE_STAR1 (688) // 64tile
+
 
 ///////////////////////////////////////////////////////////////////// SRAM
 

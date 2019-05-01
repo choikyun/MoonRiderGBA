@@ -43,5 +43,6 @@ s16 read_sprite_x(u16);
 s16 read_sprite_y(u16);
 void set_scale(u16, u16, u16);
 void set_affine_setting(u16, u16, u16);
+void set_sprite_priority(u16, u16);
 
 #endif /* _sprite_h_ */

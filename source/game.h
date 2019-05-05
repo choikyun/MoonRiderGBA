@@ -92,12 +92,17 @@
 /**
  * 星の出現間隔
  */
-#define STAR_INTERVAL (40)
+#define STAR_INTERVAL (30)
 
 /**
  * 星の同時出現数
  */
 #define APPER_MAX_STARS (1)
+
+/**
+ * スター 速度
+ */
+#define STAR_SPEED (-4096 * 32)
 
 /***************************************************
  * モード
@@ -115,7 +120,7 @@
 /**
  * Z座標 最大値
  */
-#define MAX_Z (240)
+#define MAX_Z (300)
 
 /**
  * Z座標 最小値
@@ -126,13 +131,13 @@
  * 座標補正X
  * ステージの論理座標からデバイス座標へ変換
  */
-#define FIX_STAGE_X (120)
+#define FIX_STAGE_X (110)
 
 /**
  * 座標補正Y
  * ステージの論理座標からデバイス座標へ変換
  */
-#define FIX_STAGE_Y (12)
+#define FIX_STAGE_Y (70)
 
 /***************************************************
  * 自機 スプライト
@@ -155,7 +160,7 @@
 /**
  * 自機 Y座標 中心
  */
-#define SHIP_Y (120)
+#define SHIP_Y (0)
 
 /**
  * 自機 Y座標
@@ -195,7 +200,7 @@
  * @brief 自機自然減速
  * 
  */
-#define SHIP_FRIC (0.05)
+#define SHIP_FRIC (0.02)
 
 /**
  * @brief 自機最大加速度
@@ -267,7 +272,7 @@
 /**
  * スター 幅
  */
-#define STAR_W (32)
+#define STAR_W (64)
 /**
  * スター 高さ
  */
@@ -276,12 +281,7 @@
 /**
  * スター最大数
  */
-#define MAX_STARS (16)
-
-/**
- * スター 速度
- */
-#define STAR_SPEED (-4096 * 16)
+#define MAX_STARS (8)
 
 /**
  * 目標のY座標
@@ -293,6 +293,10 @@
  */
 #define STAR_MAX_ACC (8 << FIX)
 
+/**
+ * スター出現間隔 X方向
+ */
+#define STAR_X_STEP (64)
 
 /***************************************************
  * フラッシュ
@@ -554,18 +558,18 @@ enum {
 #define TILE_SIZE_64 (128)
 
 // 自機
-#define TILE_SHIP1 (512) // 32tile
+#define TILE_SHIP1 (512) // 32tiles
 #define TILE_SHIP2 (544) // 32
 #define TILE_SHIP3 (576) // 32
 #define TILE_SHIP4 (608) // 32
 #define TILE_SHIP5 (640) // 32
 
 // 炎
-#define TILE_FIRE1 (672) // 8tile
+#define TILE_FIRE1 (672) // 8tiles
 #define TILE_FIRE2 (680) // 8
 
 // スター
-#define TILE_STAR1 (688) // 64tile
+#define TILE_STAR1 (688) // 64tiles
 
 
 ///////////////////////////////////////////////////////////////////// SRAM

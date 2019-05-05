@@ -38,6 +38,9 @@
 // 柱
 #include "sprite_pole1.h"
 
+// ブロック
+#include "sprite_block1.h"
+
 /***************************************************
  スプライト初期化
  ***************************************************/
@@ -65,6 +68,9 @@ void erase_sprite(u16 num)
 void move_sprite(u16 num, s16 x, s16 y)
 {
     OBJATTR* sp = (OBJATTR*)OAM + num;
+
+    //if(x < 0) x += 512;
+    //if(y < 0) y += 256;
 
     sp->attr1 &= 0xfe00;
     sp->attr0 &= 0xff00;
@@ -189,7 +195,7 @@ void init_sprite_chr(void)
     CpuSet(sprite_fire2Tiles, oam + 512 * 5 + 128, (COPY32 | sprite_fire2TilesLen / 4)); // 16dot
 
     // スター
-    //CpuSet(sprite_star1Tiles, oam + 512 * 5 + 128 * 2, (COPY32 | sprite_star1TilesLen / 4)); // 64dot
+    CpuSet(sprite_block1Tiles, oam + 512 * 5 + 128 * 2, (COPY32 | sprite_block1TilesLen / 4)); // 64dot
     //CpuSet(sprite_star2Tiles, oam + 512 * 5 + 128 * 2 + 2048, (COPY32 | sprite_star2TilesLen / 4)); // 64dot
-    CpuSet(sprite_pole1Tiles, oam + 512 * 5 + 128 * 2, (COPY32 | sprite_pole1TilesLen / 4)); // 64dot *32
+    //CpuSet(sprite_pole1Tiles, oam + 512 * 5 + 128 * 2, (COPY32 | sprite_pole1TilesLen / 4)); // 64dot *32
 }

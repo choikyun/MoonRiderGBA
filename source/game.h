@@ -81,6 +81,12 @@
  */
 #define OBJ_H (32)
 
+/**
+ * @brief 画面の中心
+ * 
+ */
+#define SCREEN_CENTER (SCREEN_WIDTH / 2)
+
 /***************************************************
  * ゲーム個別
  ***************************************************/
@@ -128,16 +134,35 @@
 #define MIN_Z (20)
 
 /**
+ * @brief ステータス表示域の高さ
+ * 
+ */
+#define STATUS_HEIGHT (32)
+
+/**
+ * @brief ステージY方向の余白
+ * 
+ */
+#define STAGE_Y_BLANK (80)
+
+
+/**
  * 座標補正X
  * ステージの論理座標からデバイス座標へ変換
  */
-#define FIX_STAGE_X (110)
+#define FIX_STAGE_X (SCREEN_WIDTH / 2 - MIN_Z / 2)
 
 /**
  * 座標補正Y
  * ステージの論理座標からデバイス座標へ変換
  */
-#define FIX_STAGE_Y (70)
+#define FIX_STAGE_Y (STATUS_HEIGHT - MIN_Z / 2)
+
+/**
+ * @brief ブロック着地点の余白
+ * 
+ */
+#define STAGE_Y_TARGET_BLANK (SCREEN_HEIGHT - STAR_H * 2 - FIX_STAGE_Y)
 
 /***************************************************
  * 自機 スプライト
@@ -160,7 +185,7 @@
 /**
  * 自機 Y座標 中心
  */
-#define SHIP_Y (0)
+#define SHIP_Y (100)
 
 /**
  * 自機 Y座標
@@ -183,13 +208,13 @@
  * @brief 自機 移動Y座標最小値
  * 
  */
-#define SHIP_MOVE_MIN_Y (-80)
+#define SHIP_MOVE_MIN_Y (58 + SHIP_H / 2)
 
 /**
  * @brief 自機 移動Y座標最大値
  * 
  */
-#define SHIP_MOVE_MAX_Y (79)
+#define SHIP_MOVE_MAX_Y (120)
 
 /**
  * 自機 速度
@@ -206,7 +231,7 @@
  * @brief 自機最大加速度
  * 
  */
-#define MAX_SHIP_ACC (3 << FIX)
+#define MAX_SHIP_ACC (2 << FIX)
 
 /***************************************************
  * 炎 スプライト
@@ -230,7 +255,7 @@
 /**
  * 炎 Y座標 中心
  */
-#define FIRE_Y (SHIP_Y + 6)
+#define FIRE_Y (6)
 
 /**
  * 炎 Y座標 中心 自機が上移動のとき
@@ -252,13 +277,10 @@
  */
 #define FIRE_X_RIGHT (-4)
 
-
-
 /**
  * 炎 Y座標
  */
 #define FIRE_Z MIN_Z
-
 
 /**
  * 炎 点滅間隔
@@ -272,11 +294,24 @@
 /**
  * スター 幅
  */
-#define STAR_W (64)
+#define STAR_W (40)
+
 /**
  * スター 高さ
  */
-#define STAR_H (64)
+#define STAR_H (40)
+
+/**
+ * @brief スプライト幅
+ * 
+ */
+#define STAR_SP_W (64)
+
+/**
+ * @brief スプライト高さ
+ * 
+ */
+#define STAR_SP_H (64)
 
 /**
  * スター最大数
@@ -284,19 +319,32 @@
 #define MAX_STARS (8)
 
 /**
- * 目標のY座標
- */
-#define STAR_TARGET_Y (140 - STAR_H / 2)
-
-/**
  * Z加速度最大値
  */
-#define STAR_MAX_ACC (8 << FIX)
+#define STAR_MAX_ACC (4) << FIX)
 
 /**
  * スター出現間隔 X方向
  */
-#define STAR_X_STEP (64)
+#define STAR_X_STEP (40)
+
+/**
+ * @brief スター出現 Y方向
+ * 
+ */
+#define STAR_Y_STEP (40)
+
+/**
+ * @brief X方向の出現数
+ * 
+ */
+#define STAR_X_STEP_NUM (SCREEN_WIDTH / STAR_X_STEP - 1)
+
+/**
+ * @brief Y方向の出現数
+ * 
+ */
+#define STAR_Y_STEP_NUM ((SCREEN_HEIGHT - STAGE_Y_BLANK) / STAR_Y_STEP - 1)
 
 /***************************************************
  * フラッシュ
@@ -570,7 +618,6 @@ enum {
 
 // スター
 #define TILE_STAR1 (688) // 64tiles
-
 
 ///////////////////////////////////////////////////////////////////// SRAM
 

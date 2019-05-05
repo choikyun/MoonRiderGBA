@@ -6,10 +6,10 @@
  */
 
 /***************************************************
- * Starbow
+ * Meteorite
  * ver 1.0.0
  * 2019.04.19
- * Choe Gyun (choikyun)
+ * Choi Gyun
  *****************************************************/
 
 #define GLOBAL_VALUE_DEFINE
@@ -148,13 +148,13 @@ create_new_stars()
                 init_star(
                     MAX_STARS - stars.num,
                     // 自機をねらう
-                    ((ship.vec.x >> FIX) / STAR_X_STEP) * STAR_X_STEP,
-                    ((ship.vec.y >> FIX) / STAR_X_STEP) * STAR_X_STEP);
+                    ((ship.vec.x >> FIX) / STAR_X_STEP) * STAR_X_STEP + STAR_W / 2 - SCREEN_CENTER,
+                    ((ship.vec.y >> FIX) / STAR_Y_STEP) * STAR_X_STEP + STAR_H / 2);
             } else {
                 init_star(
                     MAX_STARS - stars.num,
-                    RND(0, SCREEN_WIDTH / STAR_X_STEP) * STAR_X_STEP - SCREEN_WIDTH / 2,
-                    RND(0, SCREEN_HEIGHT / STAR_X_STEP) * STAR_X_STEP - SCREEN_HEIGHT / 2);
+                    RND(0, STAR_X_STEP_NUM) * STAR_X_STEP + STAR_W / 2 - SCREEN_CENTER,
+                    RND(0, STAR_Y_STEP_NUM) * STAR_Y_STEP + STAR_H / 2 + STAGE_Y_TARGET_BLANK);
             }
         }
 
@@ -180,20 +180,21 @@ move_stars()
     cur = end = MAX_STARS - stars.num;
     int max = stars.num;
     for (int i = 0; i < max; i++, cur++) {
-
         stars.list[cur].vec.z += stars.list[cur].acc.z;
 
         if ((stars.list[cur].vec.z >> FIX) < MIN_Z) {
-            // 消去 データとスプライト
+            // 消去
+            // データ
             CpuSet(
                 &stars.list[end],
                 &stars.list[cur],
                 (COPY32 | (sizeof(SpriteCharType) / 4)));
+            // スプライト属性
             CpuSet(sp + end, sp + cur, (COPY32 | sizeof(OBJATTR) / 4));
-            
+            // アフィンパラメータ
             copy_affine(end, cur);
             set_affine_setting(SPRITE_STAR + cur, cur, 0);
-
+            // スプライト
             erase_sprite(SPRITE_STAR + end);
 
             stars.num--;
@@ -316,8 +317,8 @@ init_stars()
     for (int i = 0; i < MAX_STARS; i++) {
         // スプライトの割当
         stars.list[i].chr = SPRITE_STAR;
-        stars.list[i].center.x = STAR_W / 2;
-        stars.list[i].center.y = STAR_H / 2;
+        stars.list[i].center.x = STAR_SP_W / 2;
+        stars.list[i].center.y = STAR_SP_H / 2;
     }
 
     stars.interval = 1;

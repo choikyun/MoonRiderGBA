@@ -41,6 +41,9 @@
 // ブロック
 #include "sprite_block1.h"
 
+// リング
+#include "sprite_ring1.h"
+
 /***************************************************
  スプライト初期化
  ***************************************************/
@@ -196,6 +199,7 @@ void init_sprite_chr(void)
 
     // スター
     CpuSet(sprite_block1Tiles, oam + 512 * 5 + 128 * 2, (COPY32 | sprite_block1TilesLen / 4)); // 64dot
-    //CpuSet(sprite_star2Tiles, oam + 512 * 5 + 128 * 2 + 2048, (COPY32 | sprite_star2TilesLen / 4)); // 64dot
-    //CpuSet(sprite_pole1Tiles, oam + 512 * 5 + 128 * 2, (COPY32 | sprite_pole1TilesLen / 4)); // 64dot *32
+    
+    // リング
+    CpuSet(sprite_ring1Tiles, oam + 512 * 5 + 128 * 2 + 2048, (COPY32 | sprite_ring1TilesLen / 4)); // 64dot
 }

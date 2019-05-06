@@ -98,7 +98,7 @@
 /**
  * 星の出現間隔
  */
-#define STAR_INTERVAL (30)
+#define STAR_INTERVAL (50)
 
 /**
  * 星の同時出現数
@@ -108,7 +108,7 @@
 /**
  * スター 速度
  */
-#define STAR_SPEED (-4096 * 28)
+#define STAR_SPEED (-4096 * 20)
 
 /***************************************************
  * モード
@@ -143,7 +143,7 @@
  * @brief ステージY方向の余白
  * 
  */
-#define STAGE_Y_BLANK (80)
+#define STAGE_Y_BLANK (80+40)
 
 
 /**
@@ -179,7 +179,7 @@
 /**
  * 自機 Y座標 中心
  */
-#define SHIP_Y (100)
+#define SHIP_Y (128)
 
 /**
  * 自機 Y座標
@@ -213,13 +213,13 @@
 /**
  * 自機 速度
  */
-#define SHIP_SPEED (4096 * 1)
+#define SHIP_SPEED (4096 * 4)
 
 /**
  * @brief 自機自然減速
  * 
  */
-#define SHIP_FRIC (0.02)
+#define SHIP_FRIC (0.05)
 
 /**
  * @brief 自機最大加速度
@@ -332,19 +332,25 @@
  * @brief X方向の出現数
  * 
  */
-#define STAR_X_STEP_NUM (SCREEN_WIDTH / STAR_X_STEP - 1)
+#define STAR_X_STEP_NUM 5
 
 /**
  * @brief Y方向の出現数
  * 
  */
-#define STAR_Y_STEP_NUM ((SCREEN_HEIGHT - STAGE_Y_BLANK) / STAR_Y_STEP - 1)
+#define STAR_Y_STEP_NUM 0
 
 /**
  * @brief ブロック着地点の余白
  * 
  */
 #define STAR_Y_TARGET_BLANK (SCREEN_HEIGHT - STAR_H * 2 - FIX_STAGE_Y)
+
+/**
+ * @brief ブロック着地点 Y座標
+ * 
+ */
+#define STAR_Y_TARGET (SHIP_Y-32)
 
 /***************************************************
  * 地平線
@@ -439,6 +445,45 @@
  * ステージBGM数
  */
 #define MAX_STAGE_BGM (3)
+
+///////////////////////////////////////////////////////////////////// ENUM
+
+/**
+ * シーン
+ */
+enum {
+    GAME_MAIN = 0,
+    GAME_TITLE = 1,
+    GAME_PAUSE = 2,
+    GAME_OVER = 4,
+    GAME_READY = 8,
+    GAME_OVER_PRE = 16,
+    GAME_CRASH = 32,
+    GAME_CLEAR = 64,
+    GAME_DEMO = 128,
+};
+
+/**
+ * スプライトキャラクタ
+ */
+enum {
+    // 炎
+    SPRITE_FIRE = 0,
+    // 自機
+    SPRITE_SHIP = 1,
+    // スター
+    SPRITE_STAR = 2, // -17 まで
+};
+
+/**
+ * ブロックの種類
+ */
+typedef enum {
+    // 炎
+    NORMAL = 0,
+    // 自機
+    RING,
+} BlockTypeEnum;
 
 ///////////////////////////////////////////////////////////////////// 構造体
 
@@ -545,6 +590,7 @@ typedef struct
     int chr;
     // タイル番号 512-1024
     int tile;
+    BlockTypeEnum type;
     // 現在の3d座標
     VectorType vec;
     // 加速度
@@ -620,36 +666,8 @@ typedef struct
     int wait;
 } ALIGN(4) WaitType;
 
-///////////////////////////////////////////////////////////////////// ENUM
 
-/**
- * シーン
- */
-enum {
-    GAME_MAIN = 0,
-    GAME_TITLE = 1,
-    GAME_PAUSE = 2,
-    GAME_OVER = 4,
-    GAME_READY = 8,
-    GAME_OVER_PRE = 16,
-    GAME_CRASH = 32,
-    GAME_CLEAR = 64,
-    GAME_DEMO = 128,
-};
 
-/**
- * スプライトキャラクタ
- */
-enum {
-    // 炎
-    SPRITE_FIRE = 0,
-
-    // 自機
-    SPRITE_SHIP = 1,
-
-    // スター
-    SPRITE_STAR = 2, // -17 まで
-} SpriteEnum;
 
 ///////////////////////////////////////////////////////////////////// タイル番号
 
@@ -671,7 +689,10 @@ enum {
 #define TILE_FIRE2 (680) // 8
 
 // スター
-#define TILE_STAR1 (688) // 64tiles
+#define TILE_STAR1 (688) // 128tiles
+
+// リング
+#define TILE_RING1 (816) // 128
 
 ///////////////////////////////////////////////////////////////////// SRAM
 

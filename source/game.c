@@ -165,23 +165,16 @@ create_new_stars()
 {
     // 一定間隔で出現
     if (--stars.interval <= 0) {
-        if (stars.num < MAX_STARS) {
-            stars.num++;
-            
-            if (!RND(0, 3)) {
-                init_star(
-                    MAX_STARS - stars.num,
-                    // 自機をねらう
-                    RND(0, STAR_X_STEP_NUM) * STAR_X_STEP + STAR_W / 2 - SCREEN_CENTER,
-                    RND(0, STAR_Y_STEP_NUM) * STAR_Y_STEP + STAR_H / 2 + STAR_Y_TARGET_BLANK);
-
-                    //((ship.vec.x >> FIX) / STAR_X_STEP) * STAR_X_STEP + STAR_W / 2 - SCREEN_CENTER,
-                    //((ship.vec.y >> FIX) / STAR_Y_STEP) * STAR_X_STEP + STAR_H / 2);
-            } else {
+        
+        for (int i = 0; i < APPER_MAX_STARS; i++) {
+            if (stars.num < MAX_STARS) {
+                stars.num++;
+                
                 init_star(
                     MAX_STARS - stars.num,
                     RND(0, STAR_X_STEP_NUM) * STAR_X_STEP + STAR_W / 2 - SCREEN_CENTER,
-                    RND(0, STAR_Y_STEP_NUM) * STAR_Y_STEP + STAR_H / 2 + STAR_Y_TARGET_BLANK);
+                    STAR_Y_TARGET
+                    /*RND(0, STAR_Y_STEP_NUM) * STAR_Y_STEP + STAR_H / 2 + STAR_Y_TARGET_BLANK*/);
             }
         }
 
@@ -384,6 +377,12 @@ init_star(int num, int x, int y)
     stars.list[num].vec.z = MAX_Z << FIX;
 
     set_affine_setting(SPRITE_STAR + num, num, 0);
+
+    // ブロック or リング
+    stars.list[num].type = NORMAL;
+    if (!RND(0,2)) {
+        stars.list[num].type = RING;
+    }
 }
 
 /**********************************************/ /**
@@ -527,7 +526,7 @@ move_ship()
     fire.sprite.vec.y = FIRE_Y << FIX;
 
     // 移動
-    if (key & KEY_UP) {
+    /*if (key & KEY_UP) {
         ship.acc.y -= SHIP_SPEED;
         if (ship.acc.y < -MAX_SHIP_ACC) {
             ship.acc.y = -MAX_SHIP_ACC;
@@ -542,6 +541,7 @@ move_ship()
         set_sprite_tile(SPRITE_SHIP, TILE_SHIP5);
         fire.sprite.vec.y = FIRE_Y_DOWN << FIX;
     }
+    */
 
     if (key & KEY_LEFT) {
         ship.acc.x -= SHIP_SPEED;
@@ -565,8 +565,12 @@ move_ship()
         ship.acc.y += -ship.acc.y * SHIP_FRIC;
     }
 
-    ship.vec.x += ship.acc.x;
-    ship.vec.y += ship.acc.y;
+    //ship.vec.x += ship.acc.x;
+    //ship.vec.y += ship.acc.y;
+
+    // ステージを移動
+    // 自機とは逆方向
+    stage.center.x -= ship.acc.x;
 
     fire.sprite.vec.x = ship.vec.x;
     fire.sprite.vec.y += ship.vec.y; 
@@ -577,13 +581,11 @@ move_ship()
 
 /**********************************************/ /**
  * @brief ステージ境界チェック
- * 
- * @param *tx ターゲットX座標
- * @param *ty ターゲットY座標
  ***********************************************/
 static void
 check_stage_boundary()
 {
+    /*
     int x = ship.vec.x >> FIX;
     int y = ship.vec.y >> FIX;
 
@@ -602,6 +604,19 @@ check_stage_boundary()
         ship.vec.x = SHIP_MOVE_MAX_X << FIX;
         ship.acc.x /= -2;
     }
+    */
+
+    int x = stage.center.x >> FIX;
+    int y = stage.center.y >> FIX;
+
+    if (x < SHIP_MOVE_MIN_X) {
+        stage.center.x = SHIP_MOVE_MIN_X << FIX;
+        ship.acc.x /= -2;
+    } else if (x > SHIP_MOVE_MAX_X) {
+        stage.center.x = SHIP_MOVE_MAX_X << FIX;
+        ship.acc.x /= -2;
+    }
+
 }
 
 /**********************************************/ /**
@@ -662,7 +677,7 @@ static void
 disp_stars()
 {
     VectorType v;
-    PointType t, c;
+    PointType t;
 
     int cur = MAX_STARS - stars.num;
     for (int i = 0; i < stars.num; i++, cur++) {
@@ -671,19 +686,28 @@ disp_stars()
         v.y >>= FIX;
         v.z >>= FIX;
 
+        // ステージ側が移動するのでターゲット座標の補正
+        t = stars.list[cur].target;
+        //t.x += stage.center.x >> FIX;
+
         // 座標変換
-        trans_device_coord(&v, &stars.list[cur].target, &stars.list[cur].center, STAR_W);
+        trans_device_coord(&v, &t, &stars.list[cur].center, STAR_W);
 
         // アフィンパラメータ設定
         //set_affine_setting(SPRITE_STAR + cur, cur, 0);
         // スケールを設定
         set_scale(cur, v.scale, v.scale);
 
-        // ステージ座標の補正
-        move_sprite(
-            stars.list[cur].chr + cur,
-            v.x + (stage.center.x >> FIX),
-            v.y + (stage.center.y >> FIX));
+        // ブロック or リング
+        if (stars.list[cur].type == NORMAL) {
+            set_sprite_tile(SPRITE_STAR + cur, TILE_STAR1);
+        } else {
+            set_sprite_tile(SPRITE_STAR + cur, TILE_RING1);
+        }
+
+        move_sprite(stars.list[cur].chr + cur,
+         v.x + (stage.center.x >> FIX),
+         v.y);
     }
 }
 

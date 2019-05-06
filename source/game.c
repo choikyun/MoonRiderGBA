@@ -71,6 +71,8 @@ static void
 draw_line(int);
 static void
 trans_device_coord(VectorType*, PointType*, PointType*, int);
+static int
+sort_z(int, SpriteCharType*);
 
 
 
@@ -210,9 +212,9 @@ move_stars()
                 &stars.list[cur],
                 (COPY32 | (sizeof(SpriteCharType) / 4)));
             // スプライト属性
-            copy_sp_attr(sp + end, sp + cur);
+            //copy_sp_attr(end, cur);
             // アフィンパラメータ
-            copy_affine(end, cur);
+            //copy_affine(end, cur);
             set_affine_setting(SPRITE_STAR + cur, cur, 0);
             // スプライト消去
             erase_sprite(SPRITE_STAR + end);
@@ -679,6 +681,9 @@ disp_stars()
     VectorType v;
     PointType t;
 
+    // Z軸でソート
+    //sort_z();
+
     int cur = MAX_STARS - stars.num;
     for (int i = 0; i < stars.num; i++, cur++) {
         v = stars.list[cur].vec;
@@ -856,12 +861,17 @@ disp_title()
 }
 
 /**********************************************/ /**
- * @brief Z値 DESCソート 
+ * @brief Z値 DESCソート
  ***********************************************/
-int sort_sprite(int len, SpriteCharType* sp)
+static int
+sort_z(int len, SpriteCharType* sp)
 {
     int mini, count = 0;
-    SpriteCharType tmp;
+    OBJATTR* o = OAM + SPRITE_STAR;
+
+    SpriteCharType tmp_sp;
+    OBJATTR tmp_attr;
+    OBJAFFINE tmp_aff;
 
     for (int i = 0; i < len; i++) {
         mini = i;
@@ -873,9 +883,14 @@ int sort_sprite(int len, SpriteCharType* sp)
         }
 
         if (mini != i) {
-            tmp = sp[i];
+            // スプライト
+            tmp_sp = sp[i];
             sp[i] = sp[mini];
-            sp[mini] = tmp;
+            sp[mini] = tmp_sp;
+            // スプライト属性
+
+            // アフィンパラメータ
+
             count++;
         }
     }

@@ -44,6 +44,9 @@
 // リング
 #include "sprite_ring1.h"
 
+// ガイド
+#include "sprite_guide1.h"
+
 /***************************************************
  スプライト初期化
  ***************************************************/
@@ -202,4 +205,8 @@ void init_sprite_chr(void)
     
     // リング
     CpuSet(sprite_ring1Tiles, oam + 512 * 5 + 128 * 2 + 2048, (COPY32 | sprite_ring1TilesLen / 4)); // 64dot
+
+    // ガイド
+    CpuSet(sprite_ring1Tiles, oam + 512 * 5 + 128 * 2 + 2048, (COPY32 | sprite_ring1TilesLen / 4)); // 64dot
+
 }

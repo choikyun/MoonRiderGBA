@@ -108,7 +108,7 @@
 /**
  * スター 速度
  */
-#define STAR_SPEED (-4096 * 32)
+#define STAR_SPEED (-4096 * 28)
 
 /***************************************************
  * モード
@@ -150,19 +150,13 @@
  * 座標補正X
  * ステージの論理座標からデバイス座標へ変換
  */
-#define FIX_STAGE_X (SCREEN_WIDTH / 2 - MIN_Z / 2)
+#define FIX_STAGE_X (SCREEN_WIDTH / 2)
 
 /**
  * 座標補正Y
  * ステージの論理座標からデバイス座標へ変換
  */
-#define FIX_STAGE_Y (STATUS_HEIGHT - MIN_Z / 2)
-
-/**
- * @brief ブロック着地点の余白
- * 
- */
-#define STAGE_Y_TARGET_BLANK (SCREEN_HEIGHT - STAR_H * 2 - FIX_STAGE_Y)
+#define FIX_STAGE_Y (16)
 
 /***************************************************
  * 自機 スプライト
@@ -208,13 +202,13 @@
  * @brief 自機 移動Y座標最小値
  * 
  */
-#define SHIP_MOVE_MIN_Y (58 + SHIP_H / 2)
+#define SHIP_MOVE_MIN_Y (STAGE_Y_BLANK)
 
 /**
  * @brief 自機 移動Y座標最大値
  * 
  */
-#define SHIP_MOVE_MAX_Y (120)
+#define SHIP_MOVE_MAX_Y (SCREEN_HEIGHT - SHIP_H / 2)
 
 /**
  * 自機 速度
@@ -231,7 +225,7 @@
  * @brief 自機最大加速度
  * 
  */
-#define MAX_SHIP_ACC (2 << FIX)
+#define MAX_SHIP_ACC (3 << FIX)
 
 /***************************************************
  * 炎 スプライト
@@ -316,7 +310,7 @@
 /**
  * スター最大数
  */
-#define MAX_STARS (8)
+#define MAX_STARS (12)
 
 /**
  * Z加速度最大値
@@ -345,6 +339,52 @@
  * 
  */
 #define STAR_Y_STEP_NUM ((SCREEN_HEIGHT - STAGE_Y_BLANK) / STAR_Y_STEP - 1)
+
+/**
+ * @brief ブロック着地点の余白
+ * 
+ */
+#define STAR_Y_TARGET_BLANK (SCREEN_HEIGHT - STAR_H * 2 - FIX_STAGE_Y)
+
+/***************************************************
+ * 地平線
+ ***************************************************/
+
+/**
+ * @brief 地平線の最大数
+ * 
+ */
+#define MAX_LINES (10)
+
+/**
+ * @brief 地平線出現間隔 Z座標
+ */
+#define LINE_INTERVAL (MAX_Z / MAX_LINES)
+
+/**
+ * @brief 地平線 Z座標 デフォルト
+ */
+#define LINE_Z MAX_Z
+
+/**
+ * @brief 地平線幅
+ */
+#define LINE_W (SCREEN_WIDTH)
+
+/**
+ * @brief X座標
+ */
+#define LINE_X (-120)
+
+/**
+ * @brief 地平線の目標Y座標
+ */
+#define LINE_Y_TARGET (SCREEN_HEIGHT - FIX_STAGE_Y)
+
+/**
+ * @brief 地平線の色 2dot分
+ */
+#define LINE_COLOR ((38 << 8) + 38)
 
 /***************************************************
  * フラッシュ
@@ -538,11 +578,25 @@ typedef struct
     int interval;
     // 出現間隔リロード
     int interval_rel;
-    // 現在のスター数
+    // 現在の数
     int num;
     // スターのリスト
     SpriteCharType list[MAX_STARS];
 } ALIGN(4) StarType;
+
+/**
+ * 地平線管理
+ */
+typedef struct
+{
+    // 現在の数
+    int num;
+    // 進んだ距離 Z軸
+    int z;
+    // 地平線のリスト
+    VectorType list[MAX_LINES];
+} ALIGN(4) LineType;
+
 
 /**
  * 点滅メッセージ
@@ -700,6 +754,11 @@ GLOBAL FireType fire;
  * スター
  */
 GLOBAL StarType stars;
+
+/**
+ * 地平線
+ */
+GLOBAL LineType lines;
 
 /**
  * スコア

@@ -57,6 +57,23 @@ static void
 create_new_stars();
 static void
 copy_affine(int, int);
+static void
+copy_sp_attr(int, int);
+static void
+init_lines();
+static void
+create_new_line();
+static void
+move_lines();
+static void
+draw_lines();
+static void
+draw_line(int);
+static void
+trans_device_coord(VectorType*, PointType*, PointType*, int);
+
+
+
 
 //debug
 void vbaPrint(char* s);
@@ -84,9 +101,13 @@ void game()
         draw_bg();
 
         create_new_stars();
+        create_new_line();
 
         move_ship();
         move_stars();
+        move_lines();
+
+        draw_lines();
 
         disp_ship();
         disp_fire();
@@ -129,6 +150,9 @@ void init_game()
     // スター初期化
     init_stars();
 
+    // 地平線
+    init_lines();
+
     // ステージ初期化
     init_stage();
 }
@@ -148,13 +172,16 @@ create_new_stars()
                 init_star(
                     MAX_STARS - stars.num,
                     // 自機をねらう
-                    ((ship.vec.x >> FIX) / STAR_X_STEP) * STAR_X_STEP + STAR_W / 2 - SCREEN_CENTER,
-                    ((ship.vec.y >> FIX) / STAR_Y_STEP) * STAR_X_STEP + STAR_H / 2);
+                    RND(0, STAR_X_STEP_NUM) * STAR_X_STEP + STAR_W / 2 - SCREEN_CENTER,
+                    RND(0, STAR_Y_STEP_NUM) * STAR_Y_STEP + STAR_H / 2 + STAR_Y_TARGET_BLANK);
+
+                    //((ship.vec.x >> FIX) / STAR_X_STEP) * STAR_X_STEP + STAR_W / 2 - SCREEN_CENTER,
+                    //((ship.vec.y >> FIX) / STAR_Y_STEP) * STAR_X_STEP + STAR_H / 2);
             } else {
                 init_star(
                     MAX_STARS - stars.num,
                     RND(0, STAR_X_STEP_NUM) * STAR_X_STEP + STAR_W / 2 - SCREEN_CENTER,
-                    RND(0, STAR_Y_STEP_NUM) * STAR_Y_STEP + STAR_H / 2 + STAGE_Y_TARGET_BLANK);
+                    RND(0, STAR_Y_STEP_NUM) * STAR_Y_STEP + STAR_H / 2 + STAR_Y_TARGET_BLANK);
             }
         }
 
@@ -183,24 +210,41 @@ move_stars()
         stars.list[cur].vec.z += stars.list[cur].acc.z;
 
         if ((stars.list[cur].vec.z >> FIX) < MIN_Z) {
-            // 消去
+            // スプライトを消去する
             // データ
             CpuSet(
                 &stars.list[end],
                 &stars.list[cur],
                 (COPY32 | (sizeof(SpriteCharType) / 4)));
             // スプライト属性
-            CpuSet(sp + end, sp + cur, (COPY32 | sizeof(OBJATTR) / 4));
+            copy_sp_attr(sp + end, sp + cur);
             // アフィンパラメータ
             copy_affine(end, cur);
             set_affine_setting(SPRITE_STAR + cur, cur, 0);
-            // スプライト
+            // スプライト消去
             erase_sprite(SPRITE_STAR + end);
 
             stars.num--;
             end++;
         }
     }
+}
+
+/**********************************************/ /**
+ * @brief スプライト属性のコピー
+ *
+ *  @param sorc 元
+ * @param dest 先
+ ***********************************************/
+static void
+copy_sp_attr(int sorc, int dest)
+{
+    OBJATTR * s = OAM + sorc;
+    OBJATTR* d = OAM + dest;
+
+    d->attr0 = s->attr0;
+    d->attr1 = s->attr1;
+    d->attr2 = s->attr2;
 }
 
 /**********************************************/ /**
@@ -343,6 +387,106 @@ init_star(int num, int x, int y)
 }
 
 /**********************************************/ /**
+ * @brief 地平線初期化
+ ***********************************************/
+static void
+init_lines()
+{
+    lines.num = 0;
+    lines.z = LINE_Z << FIX;
+}
+
+/**********************************************/ /**
+ * @brief 新規ライン作成
+ ***********************************************/
+static void
+create_new_line()
+{
+    // ブロックと同じ加速度ですすむ
+    lines.z += STAR_SPEED;
+    if ((lines.z >> FIX) % LINE_INTERVAL != 0) {
+        return;
+    }
+    lines.z = LINE_Z << FIX;
+
+    if (lines.num < MAX_LINES) {
+        lines.list[lines.num].x = 0;// 未使用
+        lines.list[lines.num].y = 0;
+        lines.list[lines.num].z = MAX_Z << FIX;
+
+        lines.num++;
+    }
+}
+
+/**********************************************/ /**
+ * @brief ライン移動
+ ***********************************************/
+static void
+move_lines()
+{
+    if (!lines.num) {
+        return;
+    }
+
+    int cur, end;
+
+    cur = end = lines.num - 1;
+    int max = lines.num;
+    
+    for (int i = 0; i < max; i++, cur--) {
+        lines.list[cur].z += STAR_SPEED;
+
+        if ((lines.list[cur].z >> FIX) < MIN_Z) {
+            // 消去
+            CpuSet(
+                &lines.list[end],
+                &lines.list[cur],
+                (COPY32 | (sizeof(VectorType) / 4)));
+            lines.num--;
+            end--;
+        }
+    }
+}
+
+/**********************************************/ /**
+ * @brief ライン描画
+ ***********************************************/
+static void
+draw_lines()
+{
+    VectorType v;
+    PointType t, c;
+
+    t.x = 0;
+    t.y = LINE_Y_TARGET;
+    c.x = c.y = 0;
+
+    for (int i = 0; i < lines.num; i++) {
+        v = lines.list[i];
+        v.x >>= FIX;
+        v.y >>= FIX;
+        v.z >>= FIX;
+        trans_device_coord(&v, &t, &c, 0);
+        draw_line(v.y);
+    }
+}
+
+/**********************************************/ /**
+ * @brief ライン描画
+ ***********************************************/
+static void
+draw_line(int y)
+{
+    int x = 0;
+    u16 *dst = current_frame + (y * SCREEN_WIDTH) / 2;
+
+    for (int i = 0; i < LINE_W / 2; i++) {
+        *(dst + i) = LINE_COLOR;
+    }
+}
+
+
+/**********************************************/ /**
  * @brief 3D座標からデバイス座標に変換
  * 
  * @param *v 3D座標
@@ -355,11 +499,11 @@ trans_device_coord(VectorType* v, PointType* t, PointType* c, int w)
     // XY座標の変換
 
     // sc1 - sc0 でスケールを求める
-    float sc0 = (((float)t->x / v->z) + 0.5f) * MIN_Z;
-    float sc1 = ((((float)t->x + w) / v->z) + 0.5f) * MIN_Z;
+    float sc0 = ((float)t->x / v->z) * MIN_Z + 0.5f;
+    float sc1 = (((float)t->x + w) / v->z) * MIN_Z + 0.5f;
 
     v->x = sc0 + FIX_STAGE_X - c->x;
-    v->y = (((float)t->y / v->z) + 0.5f) * MIN_Z + FIX_STAGE_Y - c->y;
+    v->y = ((float)t->y / v->z) * MIN_Z + FIX_STAGE_Y - c->y + 0.5f;
 
     v->scale = ((sc1 - sc0) / w) * 100 + 0.5f;
     if (v->scale <= 0) {

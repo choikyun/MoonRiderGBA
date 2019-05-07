@@ -213,7 +213,7 @@
 /**
  * 自機 速度
  */
-#define SHIP_SPEED (4096 * 4)
+#define SHIP_SPEED (4096 * 2)
 
 /**
  * @brief 自機自然減速

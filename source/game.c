@@ -145,6 +145,9 @@ void init_game()
     // 自機初期化
     init_ship();
 
+    // 炎初期化
+    init_fire();
+
     // スター初期化
     init_stars();
 
@@ -224,7 +227,7 @@ move_stars()
 /**********************************************/ /**
  * @brief スプライト属性のコピー
  *
- *  @param sorc 元
+ * @param sorc 元
  * @param dest 先
  ***********************************************/
 static void
@@ -247,8 +250,8 @@ copy_sp_attr(int sorc, int dest)
 static void
 copy_affine(int sorc, int dest)
 {
-    OBJAFFINE* s = OAM + sorc;
-    OBJAFFINE* d = OAM + dest;
+    OBJAFFINE* s = (OBJAFFINE *)OAM + sorc;
+    OBJAFFINE* d = (OBJAFFINE *)OAM + dest;
 
     d->pa = s->pa;
     d->pb = s->pb;
@@ -374,7 +377,7 @@ init_stars()
         stars.list[i].fix.y = 0;
     }
 
-    stars.interval = 5 * 60;
+    stars.interval = 3 * 60;
     stars.num = 0;
 }
 
@@ -631,10 +634,10 @@ check_stage_boundary()
 
     if (x < SHIP_MOVE_MIN_X) {
         stage.center.x = SHIP_MOVE_MIN_X << FIX;
-        ship.acc.x /= -8;
+        ship.acc.x /= -2;
     } else if (x > SHIP_MOVE_MAX_X) {
         stage.center.x = SHIP_MOVE_MAX_X << FIX;
-        ship.acc.x /= -8;
+        ship.acc.x /= -2;
     }
 }
 
@@ -688,7 +691,7 @@ disp_stars()
     int cur = MAX_STARS - stars.num;
     for (int i = 0; i < stars.num; i++, cur++) {
         // ステージ側が移動するのでターゲット座標の補正
-        stars.list[cur].fix.x = stage.center.x >> FIX;
+        //stars.list[cur].fix.x = stage.center.x >> FIX; // VLを移動しない
 
         // 座標変換
         v = trans_device_coord(&stars.list[cur]);
@@ -705,8 +708,9 @@ disp_stars()
             set_sprite_tile(SPRITE_STAR + cur, TILE_RING1);
         }
 
-        move_sprite(stars.list[cur].chr + cur,
-            v.x,
+        move_sprite(
+            stars.list[cur].chr + cur,
+            v.x + (stage.center.x >> FIX), // VLを移動する
             v.y);
     }
 }

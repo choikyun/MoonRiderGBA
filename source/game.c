@@ -32,6 +32,8 @@ disp_title();
 static void
 init_ship();
 static void
+init_fire();
+static void
 init_stars();
 static void
 init_star(int, int, int);
@@ -69,13 +71,8 @@ static void
 draw_lines();
 static void
 draw_line(int);
-static void
-trans_device_coord(VectorType*, PointType*, PointType*, int);
-static int
-sort_z(int, SpriteCharType*);
-
-
-
+static VectorType
+trans_device_coord(SpriteCharType*);
 
 //debug
 void vbaPrint(char* s);
@@ -100,7 +97,9 @@ void game()
         break;
 
     case GAME_MAIN:
-        draw_bg();
+        disp_ship();
+        disp_fire();
+        disp_stars();
 
         create_new_stars();
         create_new_line();
@@ -109,11 +108,8 @@ void game()
         move_stars();
         move_lines();
 
+        draw_bg();
         draw_lines();
-
-        disp_ship();
-        disp_fire();
-        disp_stars();
         break;
 
     case GAME_READY:
@@ -160,18 +156,18 @@ void init_game()
 }
 
 /**********************************************/ /**
- * @brief スター作成
+ * @brief ブロック作成
  ***********************************************/
 static void
 create_new_stars()
 {
     // 一定間隔で出現
     if (--stars.interval <= 0) {
-        
+
         for (int i = 0; i < APPER_MAX_STARS; i++) {
             if (stars.num < MAX_STARS) {
                 stars.num++;
-                
+
                 init_star(
                     MAX_STARS - stars.num,
                     RND(0, STAR_X_STEP_NUM) * STAR_X_STEP + STAR_W / 2 - SCREEN_CENTER,
@@ -234,7 +230,7 @@ move_stars()
 static void
 copy_sp_attr(int sorc, int dest)
 {
-    OBJATTR * s = OAM + sorc;
+    OBJATTR* s = OAM + sorc;
     OBJATTR* d = OAM + dest;
 
     d->attr0 = s->attr0;
@@ -317,7 +313,7 @@ init_stage()
 static void
 init_ship()
 {
-    // 加速度　自機はZ未使用
+    // 加速度
     ship.acc.x = ship.acc.y = 0;
 
     // 自機スプライト
@@ -329,8 +325,18 @@ init_ship()
     ship.center.y = SHIP_H / 2;
     ship.target.x = SHIP_X;
     ship.target.y = SHIP_Y;
+    ship.rect.w = SHIP_W;
+    ship.rect.h = SHIP_H;
+    ship.fix.x = 0;
+    ship.fix.y = 0;
+}
 
-    // 炎 スプライト
+/**********************************************/ /**
+ * @brief 炎初期化
+ ***********************************************/
+static void
+init_fire()
+{
     fire.sprite.chr = SPRITE_FIRE;
     fire.sprite.vec.x = FIRE_X << FIX;
     fire.sprite.vec.y = FIRE_Y << FIX;
@@ -339,8 +345,12 @@ init_ship()
     fire.sprite.center.y = FIRE_H / 2;
     fire.sprite.target.x = FIRE_X;
     fire.sprite.target.y = FIRE_Y;
+    fire.sprite.rect.w = FIRE_W;
+    fire.sprite.rect.h = FIRE_H;
+    fire.sprite.fix.x = 0;
+    fire.sprite.fix.y = 0;
 
-    // 炎 アニメーション
+    // アニメーション
     fire.anime.frame = 0;
     fire.anime.max_frame = 2;
     fire.anime.interval = fire.anime.interval_rel = FIRE_INTERVAL;
@@ -358,9 +368,13 @@ init_stars()
         stars.list[i].chr = SPRITE_STAR;
         stars.list[i].center.x = STAR_SP_W / 2;
         stars.list[i].center.y = STAR_SP_H / 2;
+        stars.list[i].rect.w = STAR_W;
+        stars.list[i].rect.h = STAR_H;
+        stars.list[i].fix.x = 0;
+        stars.list[i].fix.y = 0;
     }
 
-    stars.interval = 1;
+    stars.interval = 5 * 60;
     stars.num = 0;
 }
 
@@ -382,7 +396,7 @@ init_star(int num, int x, int y)
 
     // ブロック or リング
     stars.list[num].type = NORMAL;
-    if (!RND(0,2)) {
+    if (!RND(0, 2)) {
         stars.list[num].type = RING;
     }
 }
@@ -395,6 +409,19 @@ init_lines()
 {
     lines.num = 0;
     lines.z = LINE_Z << FIX;
+    for (int i = 0; i < MAX_LINES; i++) {
+        lines.list[i].vec.x = 0;
+        lines.list[i].vec.y = 0;
+        lines.list[i].vec.z = MAX_Z << FIX;
+        lines.list[i].target.x = 0;
+        lines.list[i].target.y = LINE_Y_TARGET;
+        lines.list[i].center.x = 0;
+        lines.list[i].center.y = 0;
+        lines.list[i].fix.y = 0;
+        lines.list[i].fix.y = 0;
+        lines.list[i].rect.w = 0;
+        lines.list[i].rect.h = 0;
+    }
 }
 
 /**********************************************/ /**
@@ -411,10 +438,8 @@ create_new_line()
     lines.z = LINE_Z << FIX;
 
     if (lines.num < MAX_LINES) {
-        lines.list[lines.num].x = 0;// 未使用
-        lines.list[lines.num].y = 0;
-        lines.list[lines.num].z = MAX_Z << FIX;
-
+        lines.list[lines.num].vec.y = 0;
+        lines.list[lines.num].vec.z = MAX_Z << FIX;
         lines.num++;
     }
 }
@@ -433,16 +458,16 @@ move_lines()
 
     cur = end = lines.num - 1;
     int max = lines.num;
-    
-    for (int i = 0; i < max; i++, cur--) {
-        lines.list[cur].z += STAR_SPEED;
 
-        if ((lines.list[cur].z >> FIX) < MIN_Z) {
+    for (int i = 0; i < max; i++, cur--) {
+        lines.list[cur].vec.z += STAR_SPEED;
+
+        if ((lines.list[cur].vec.z >> FIX) < MIN_Z) {
             // 消去
             CpuSet(
                 &lines.list[end],
                 &lines.list[cur],
-                (COPY32 | (sizeof(VectorType) / 4)));
+                (COPY32 | (sizeof(SpriteCharType) / 4)));
             lines.num--;
             end--;
         }
@@ -456,18 +481,9 @@ static void
 draw_lines()
 {
     VectorType v;
-    PointType t, c;
-
-    t.x = 0;
-    t.y = LINE_Y_TARGET;
-    c.x = c.y = 0;
 
     for (int i = 0; i < lines.num; i++) {
-        v = lines.list[i];
-        v.x >>= FIX;
-        v.y >>= FIX;
-        v.z >>= FIX;
-        trans_device_coord(&v, &t, &c, 0);
+        v = trans_device_coord(&lines.list[i]);
         draw_line(v.y);
     }
 }
@@ -479,37 +495,40 @@ static void
 draw_line(int y)
 {
     int x = 0;
-    u16 *dst = current_frame + (y * SCREEN_WIDTH) / 2;
+    u16* dst = current_frame + (y * SCREEN_WIDTH) / 2;
 
     for (int i = 0; i < LINE_W / 2; i++) {
         *(dst + i) = LINE_COLOR;
     }
 }
 
-
 /**********************************************/ /**
  * @brief 3D座標からデバイス座標に変換
  * 
- * @param *v 3D座標
- * @param *t ターゲット座標
- * @param *c 中心のオフセット
+ * @param *sp スプライト
+ * @return 3D座標
  ***********************************************/
-static void
-trans_device_coord(VectorType* v, PointType* t, PointType* c, int w)
+static VectorType
+trans_device_coord(SpriteCharType* sp)
 {
-    // XY座標の変換
+    VectorType v;
+    int z = sp->vec.z >> FIX; // Z軸整数値のみ
+    int tx = sp->target.x + sp->fix.x; // 目標値の補正
+    int ty = sp->target.y + sp->fix.y;
 
     // sc1 - sc0 でスケールを求める
-    float sc0 = ((float)t->x / v->z) * MIN_Z + 0.5f;
-    float sc1 = (((float)t->x + w) / v->z) * MIN_Z + 0.5f;
+    float sc0 = ((float)tx / z) * MIN_Z + 0.5f;
+    float sc1 = (((float)tx + sp->rect.w) / z) * MIN_Z + 0.5f;
 
-    v->x = sc0 + FIX_STAGE_X - c->x;
-    v->y = ((float)t->y / v->z) * MIN_Z + FIX_STAGE_Y - c->y + 0.5f;
+    v.x = sc0 + FIX_STAGE_X - sp->center.x;
+    v.y = ((float)ty / z) * MIN_Z + FIX_STAGE_Y - sp->center.y + 0.5f;
 
-    v->scale = ((sc1 - sc0) / w) * 100 + 0.5f;
-    if (v->scale <= 0) {
-        v->scale = 1;
+    v.scale = ((sc1 - sc0) / sp->rect.w) * 100 + 0.5f;
+    if (v.scale <= 0) {
+        v.scale = 1;
     }
+
+    return v;
 }
 
 /**********************************************/ /**
@@ -570,12 +589,11 @@ move_ship()
     //ship.vec.x += ship.acc.x;
     //ship.vec.y += ship.acc.y;
 
-    // ステージを移動
-    // 自機とは逆方向
+    // 自機とは逆方向にステージを移動
     stage.center.x -= ship.acc.x;
 
     fire.sprite.vec.x = ship.vec.x;
-    fire.sprite.vec.y += ship.vec.y; 
+    fire.sprite.vec.y += ship.vec.y;
 
     // 境界判定
     check_stage_boundary();
@@ -613,12 +631,11 @@ check_stage_boundary()
 
     if (x < SHIP_MOVE_MIN_X) {
         stage.center.x = SHIP_MOVE_MIN_X << FIX;
-        ship.acc.x /= -2;
+        ship.acc.x /= -8;
     } else if (x > SHIP_MOVE_MAX_X) {
         stage.center.x = SHIP_MOVE_MAX_X << FIX;
-        ship.acc.x /= -2;
+        ship.acc.x /= -8;
     }
-
 }
 
 /**********************************************/ /**
@@ -627,18 +644,11 @@ check_stage_boundary()
 static void
 disp_ship()
 {
-    VectorType v = ship.vec;
-    v.x >>= FIX;
-    v.y >>= FIX;
-    v.z >>= FIX;
-    
-    PointType t;
-    t.x = v.x;
-    t.y = v.y;
-
+    ship.target.x = ship.vec.x >> FIX;
+    ship.target.y = ship.vec.y >> FIX;
 
     // 座標変換
-    trans_device_coord(&v, &t, &ship.center, SHIP_W);
+    VectorType v = trans_device_coord(&ship);
 
     move_sprite(ship.chr, v.x, v.y);
 }
@@ -657,46 +667,31 @@ disp_fire()
         set_sprite_tile(SPRITE_FIRE, TILE_FIRE1 + (fire.anime.frame * TILE_SIZE_16));
     }
 
-    VectorType v = fire.sprite.vec;
-    v.x >>= FIX;
-    v.y >>= FIX;
-    v.z >>= FIX;
-
-    PointType t;
-    t.x = v.x;
-    t.y = v.y;
+    // ターゲット座標 更新
+    fire.sprite.target.x = fire.sprite.vec.x >> FIX;
+    fire.sprite.target.y = fire.sprite.vec.y >> FIX;
 
     // 座標変換
-    trans_device_coord(&v, &t, &fire.sprite.center, FIRE_W);
+    VectorType v = trans_device_coord(&fire.sprite);
 
     move_sprite(fire.sprite.chr, v.x, v.y);
 }
 
 /**********************************************/ /**
- * @brief スター表示
+ * @brief ブロック表示
  ***********************************************/
 static void
 disp_stars()
 {
     VectorType v;
-    PointType t;
-
-    // Z軸でソート
-    //sort_z();
 
     int cur = MAX_STARS - stars.num;
     for (int i = 0; i < stars.num; i++, cur++) {
-        v = stars.list[cur].vec;
-        v.x >>= FIX;
-        v.y >>= FIX;
-        v.z >>= FIX;
-
         // ステージ側が移動するのでターゲット座標の補正
-        t = stars.list[cur].target;
-        //t.x += stage.center.x >> FIX;
+        stars.list[cur].fix.x = stage.center.x >> FIX;
 
         // 座標変換
-        trans_device_coord(&v, &t, &stars.list[cur].center, STAR_W);
+        v = trans_device_coord(&stars.list[cur]);
 
         // アフィンパラメータ設定
         //set_affine_setting(SPRITE_STAR + cur, cur, 0);
@@ -711,8 +706,8 @@ disp_stars()
         }
 
         move_sprite(stars.list[cur].chr + cur,
-         v.x + (stage.center.x >> FIX),
-         v.y);
+            v.x,
+            v.y);
     }
 }
 
@@ -858,43 +853,6 @@ disp_title()
         //  clear_hiscore ();
         //  update_hiscore ();
     }
-}
-
-/**********************************************/ /**
- * @brief Z値 DESCソート
- ***********************************************/
-static int
-sort_z(int len, SpriteCharType* sp)
-{
-    int mini, count = 0;
-    OBJATTR* o = OAM + SPRITE_STAR;
-
-    SpriteCharType tmp_sp;
-    OBJATTR tmp_attr;
-    OBJAFFINE tmp_aff;
-
-    for (int i = 0; i < len; i++) {
-        mini = i;
-
-        for (int j = i + 1; j < len; j++) {
-            if (sp[j].vec.z > sp[mini].vec.z) {
-                mini = j;
-            }
-        }
-
-        if (mini != i) {
-            // スプライト
-            tmp_sp = sp[i];
-            sp[i] = sp[mini];
-            sp[mini] = tmp_sp;
-            // スプライト属性
-
-            // アフィンパラメータ
-
-            count++;
-        }
-    }
-    return count;
 }
 
 //// デバグ用

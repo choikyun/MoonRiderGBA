@@ -98,7 +98,7 @@
 /**
  * 星の出現間隔
  */
-#define STAR_INTERVAL (50)
+#define STAR_INTERVAL (40)
 
 /**
  * 星の同時出現数
@@ -471,7 +471,7 @@ enum {
     SPRITE_FIRE = 0,
     // 自機
     SPRITE_SHIP = 1,
-    // スター
+    // ブロック
     SPRITE_STAR = 2, // -17 まで
 };
 
@@ -590,15 +590,20 @@ typedef struct
     int chr;
     // タイル番号 512-1024
     int tile;
+    // キャラクタータイプ
     BlockTypeEnum type;
-    // 現在の3d座標
+    // 現在の座標
     VectorType vec;
     // 加速度
     VectorType acc;
-    // 目標のXY座標
+    // 目標の座標
     PointType target;
+    // 座標補正用
+    PointType fix;
     // 中心のオフセット
     PointType center;
+    // 矩形
+    RectangleType rect;
     // 当たり判定用矩形
     RectangleType hit;
     // 表示フラグ
@@ -640,7 +645,7 @@ typedef struct
     // 進んだ距離 Z軸
     int z;
     // 地平線のリスト
-    VectorType list[MAX_LINES];
+    SpriteCharType list[MAX_LINES];
 } ALIGN(4) LineType;
 
 
@@ -688,7 +693,7 @@ typedef struct
 #define TILE_FIRE1 (672) // 8tiles
 #define TILE_FIRE2 (680) // 8
 
-// スター
+// ブロック
 #define TILE_STAR1 (688) // 128tiles
 
 // リング

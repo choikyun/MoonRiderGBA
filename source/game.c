@@ -431,6 +431,7 @@ init_lines()
 static void
 init_guide()
 {
+    guide.chr = SPRITE_GUIDE;
     guide.vec.x = 0;
     guide.vec.y = GUIDE_Y << FIX;
     guide.vec.z = MIN_Z << FIX;
@@ -708,14 +709,15 @@ disp_stars()
         v = trans_device_coord(&stars.list[i]);
 
         // アフィンパラメータ設定
-        set_affine_setting(SPRITE_STAR + i, i, 0);
+        set_affine_setting(SPRITE_STAR + i, i, 1);
+        
         // スケールを設定
-        set_scale(i, v.scale, v.scale);
-
         // ブロック or リング
         if (stars.list[i].type == NORMAL) {
+            set_scale(i, v.scale, v.scale);
             set_sprite_tile(SPRITE_STAR + i, TILE_STAR1);
         } else {
+            set_scale(i, v.scale, v.scale);
             set_sprite_tile(SPRITE_STAR + i, TILE_RING1);
         }
 
@@ -738,7 +740,7 @@ disp_guide()
     }
 
     guide.target.x = stars.list[0].target.x;
-    guide.target.y = guide.vec.y;
+    guide.target.y = guide.vec.y >> FIX;
 
     VectorType v = trans_device_coord(&guide);
 

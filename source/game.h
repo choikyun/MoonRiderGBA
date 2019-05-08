@@ -98,7 +98,7 @@
 /**
  * 星の出現間隔
  */
-#define STAR_INTERVAL (40)
+#define STAR_INTERVAL (20)
 
 /**
  * 星の同時出現数
@@ -108,7 +108,7 @@
 /**
  * スター 速度
  */
-#define STAR_SPEED (-4096 * 20)
+#define STAR_SPEED (-4096 * 24)
 
 /***************************************************
  * モード
@@ -189,13 +189,13 @@
  * @brief 自機 移動X座標最小値
  * 
  */
-#define SHIP_MOVE_MIN_X (-120)
+#define SHIP_MOVE_MIN_X (-200)
 
 /**
  * @brief 自機 移動X座標最大値
  * 
  */
-#define SHIP_MOVE_MAX_X (119)
+#define SHIP_MOVE_MAX_X (200)
 
 /**
  * @brief 自機 移動Y座標最小値
@@ -218,7 +218,7 @@
  * @brief 自機自然減速
  * 
  */
-#define SHIP_FRIC (0.01)
+#define SHIP_FRIC (0.02)
 
 /**
  * @brief 自機最大加速度
@@ -355,7 +355,7 @@
  * @brief ブロック着地点 Y座標
  * 
  */
-#define STAR_Y_TARGET (SHIP_Y - 32)
+#define STAR_Y_TARGET (SHIP_Y - 40)
 
 /***************************************************
  * ガイド
@@ -377,7 +377,7 @@
  * @brief ガイドY座標
  * 
  */
-#define GUIDE_Y (SCREEN_HEIGHT - GUIDE_H)
+#define GUIDE_Y (SHIP_Y + 12)
 
 /***************************************************
  * 地平線

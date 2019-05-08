@@ -143,8 +143,7 @@
  * @brief ステージY方向の余白
  * 
  */
-#define STAGE_Y_BLANK (80+40)
-
+#define STAGE_Y_BLANK (80 + 40)
 
 /**
  * 座標補正X
@@ -219,7 +218,7 @@
  * @brief 自機自然減速
  * 
  */
-#define SHIP_FRIC (0.05)
+#define SHIP_FRIC (0.01)
 
 /**
  * @brief 自機最大加速度
@@ -332,13 +331,19 @@
  * @brief X方向の出現数
  * 
  */
-#define STAR_X_STEP_NUM 5
+#define STAR_X_STEP_NUM (10 - 1)
+
+/**
+ * @brief X方向の余白 2キャラ分
+ * 
+ */
+#define STAR_X_STEP_BLANK (STAR_X_STEP *2)
 
 /**
  * @brief Y方向の出現数
  * 
  */
-#define STAR_Y_STEP_NUM 0
+#define STAR_Y_STEP_NUM (0)
 
 /**
  * @brief ブロック着地点の余白
@@ -350,7 +355,29 @@
  * @brief ブロック着地点 Y座標
  * 
  */
-#define STAR_Y_TARGET (SHIP_Y-32)
+#define STAR_Y_TARGET (SHIP_Y - 32)
+
+/***************************************************
+ * ガイド
+ ***************************************************/
+
+/**
+ * @brief ガイド幅
+ * 
+ */
+#define GUIDE_W (8)
+
+/**
+ * @brief ガイド高さ
+ * 
+ */
+#define GUIDE_H (8)
+
+/**
+ * @brief ガイドY座標
+ * 
+ */
+#define GUIDE_Y (SCREEN_HEIGHT - GUIDE_H)
 
 /***************************************************
  * 地平線
@@ -471,8 +498,10 @@ enum {
     SPRITE_FIRE = 0,
     // 自機
     SPRITE_SHIP = 1,
+    // ガイド
+    SPRITE_GUIDE = 2,
     // ブロック
-    SPRITE_STAR = 2, // -17 まで
+    SPRITE_STAR = 3, // -18 まで
 };
 
 /**
@@ -648,7 +677,6 @@ typedef struct
     SpriteCharType list[MAX_LINES];
 } ALIGN(4) LineType;
 
-
 /**
  * 点滅メッセージ
  */
@@ -670,9 +698,6 @@ typedef struct
 {
     int wait;
 } ALIGN(4) WaitType;
-
-
-
 
 ///////////////////////////////////////////////////////////////////// タイル番号
 
@@ -700,7 +725,7 @@ typedef struct
 #define TILE_RING1 (816) // 128
 
 // ガイド
-#define TILE_GUIDE (944) // 2
+#define TILE_GUIDE1 (944) // 2
 
 ///////////////////////////////////////////////////////////////////// SRAM
 
@@ -788,6 +813,12 @@ GLOBAL StarType stars;
  * 地平線
  */
 GLOBAL LineType lines;
+
+/**
+ * @brief ガイド
+ * 
+ */
+GLOBAL SpriteCharType guide;
 
 /**
  * スコア

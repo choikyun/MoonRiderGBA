@@ -38,6 +38,8 @@ init_stars();
 static void
 init_star(int, int, int);
 static void
+init_guide();
+static void
 move_ship();
 static void
 disp_ship();
@@ -45,6 +47,8 @@ static void
 disp_stars();
 static void
 disp_fire();
+static void
+disp_guide();
 static void
 draw_bg();
 static void
@@ -97,15 +101,17 @@ void game()
         break;
 
     case GAME_MAIN:
+        move_ship();
+        move_stars();
+
         disp_ship();
         disp_fire();
         disp_stars();
+        disp_guide();
 
         create_new_stars();
         create_new_line();
 
-        move_ship();
-        move_stars();
         move_lines();
 
         draw_bg();
@@ -154,6 +160,9 @@ void init_game()
     // 地平線
     init_lines();
 
+    // ガイド
+    init_guide();
+
     // ステージ初期化
     init_stage();
 }
@@ -169,13 +178,11 @@ create_new_stars()
 
         for (int i = 0; i < APPER_MAX_STARS; i++) {
             if (stars.num < MAX_STARS) {
-                stars.num++;
-
                 init_star(
-                    MAX_STARS - stars.num,
-                    RND(0, STAR_X_STEP_NUM) * STAR_X_STEP + STAR_W / 2 - SCREEN_CENTER,
-                    STAR_Y_TARGET
-                    /*RND(0, STAR_Y_STEP_NUM) * STAR_Y_STEP + STAR_H / 2 + STAR_Y_TARGET_BLANK*/);
+                    stars.num,
+                    RND(0, STAR_X_STEP_NUM) * STAR_X_STEP + STAR_W / 2 - SCREEN_CENTER - STAR_X_STEP_BLANK,
+                    STAR_Y_TARGET);
+                stars.num++;
             }
         }
 
@@ -190,37 +197,24 @@ create_new_stars()
 static void
 move_stars()
 {
-    int cur, end;
-    OBJATTR* sp = OAM + SPRITE_STAR;
-
     if (!stars.num) {
         return;
     }
 
-    // 前からバッファを操作
-    cur = end = MAX_STARS - stars.num;
-    int max = stars.num;
-    for (int i = 0; i < max; i++, cur++) {
-        stars.list[cur].vec.z += stars.list[cur].acc.z;
+    for (int i = 0; i < stars.num; i++) {
+        stars.list[i].vec.z += stars.list[i].acc.z;
+    }
 
-        if ((stars.list[cur].vec.z >> FIX) < MIN_Z) {
-            // スプライトを消去する
-            // データ
-            CpuSet(
-                &stars.list[end],
-                &stars.list[cur],
-                (COPY32 | (sizeof(SpriteCharType) / 4)));
-            // スプライト属性
-            //copy_sp_attr(end, cur);
-            // アフィンパラメータ
-            //copy_affine(end, cur);
-            set_affine_setting(SPRITE_STAR + cur, cur, 0);
-            // スプライト消去
-            erase_sprite(SPRITE_STAR + end);
+    // 先頭のスプライトデータの消去
+    if (stars.list[0].vec.z >> FIX < MIN_Z) {
+        stars.num--;
+        CpuSet(
+            &stars.list[1],
+            &stars.list[0],
+            (COPY32 | sizeof(SpriteCharType) * stars.num / 4));
 
-            stars.num--;
-            end++;
-        }
+        // スプライト消去
+        erase_sprite(SPRITE_STAR + stars.num);
     }
 }
 
@@ -273,12 +267,16 @@ init_sprite_setting()
     set_sprite_form(SPRITE_FIRE, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
     set_sprite_tile(SPRITE_FIRE, TILE_FIRE1);
 
+    //// ガイド 8*8 dot
+    set_sprite_form(SPRITE_GUIDE, OBJ_SIZE(0), OBJ_SQUARE, OBJ_256_COLOR);
+    set_sprite_tile(SPRITE_GUIDE, TILE_GUIDE1);
+
     //// スター 64*64 dot
     for (int i = 0; i < MAX_STARS; i++) {
         set_sprite_form(SPRITE_STAR + i, OBJ_SIZE(Sprite_64x64), OBJ_SQUARE, OBJ_256_COLOR);
         set_sprite_tile(SPRITE_STAR + i, TILE_STAR1);
-        set_affine_setting(SPRITE_STAR + i, i, 0);
-        set_scale(i, 1, 1);
+        //set_affine_setting(SPRITE_STAR + i, i, 0);
+        //set_scale(i, 1, 1);
     }
 }
 
@@ -428,6 +426,26 @@ init_lines()
 }
 
 /**********************************************/ /**
+ * @brief ガイド初期化
+ ***********************************************/
+static void
+init_guide()
+{
+    guide.vec.x = 0;
+    guide.vec.y = GUIDE_Y << FIX;
+    guide.vec.z = MIN_Z << FIX;
+    guide.target.x = 0;
+    guide.target.y = GUIDE_Y;
+    guide.center.x = GUIDE_W / 2;
+    guide.center.y = GUIDE_H / 2;
+    guide.fix.y = 0;
+    guide.fix.y = 0;
+    guide.rect.w = GUIDE_W;
+    guide.rect.h = GUIDE_H;
+}
+
+
+/**********************************************/ /**
  * @brief 新規ライン作成
  ***********************************************/
 static void
@@ -457,23 +475,17 @@ move_lines()
         return;
     }
 
-    int cur, end;
+    for (int i = 0; i < lines.num; i++) {
+        lines.list[i].vec.z += STAR_SPEED;
+    }
 
-    cur = end = lines.num - 1;
-    int max = lines.num;
-
-    for (int i = 0; i < max; i++, cur--) {
-        lines.list[cur].vec.z += STAR_SPEED;
-
-        if ((lines.list[cur].vec.z >> FIX) < MIN_Z) {
-            // 消去
-            CpuSet(
-                &lines.list[end],
-                &lines.list[cur],
-                (COPY32 | (sizeof(SpriteCharType) / 4)));
-            lines.num--;
-            end--;
-        }
+    // 削除
+    if (lines.list[0].vec.z >> FIX < MIN_Z) {
+        lines.num--;
+        CpuSet(
+            &lines.list[1],
+            &lines.list[0],
+            (COPY32 | (sizeof(SpriteCharType) * lines.num / 4)));
     }
 }
 
@@ -688,32 +700,54 @@ disp_stars()
 {
     VectorType v;
 
-    int cur = MAX_STARS - stars.num;
-    for (int i = 0; i < stars.num; i++, cur++) {
+    for (int i = 0; i < stars.num; i++) {
         // ステージ側が移動するのでターゲット座標の補正
-        //stars.list[cur].fix.x = stage.center.x >> FIX; // VLを移動しない
+        //stars.list[cur].fix.x = stage.center.x >> FIX; // 視点をを移動しない場合はこちら
 
         // 座標変換
-        v = trans_device_coord(&stars.list[cur]);
+        v = trans_device_coord(&stars.list[i]);
 
         // アフィンパラメータ設定
-        //set_affine_setting(SPRITE_STAR + cur, cur, 0);
+        set_affine_setting(SPRITE_STAR + i, i, 0);
         // スケールを設定
-        set_scale(cur, v.scale, v.scale);
+        set_scale(i, v.scale, v.scale);
 
         // ブロック or リング
-        if (stars.list[cur].type == NORMAL) {
-            set_sprite_tile(SPRITE_STAR + cur, TILE_STAR1);
+        if (stars.list[i].type == NORMAL) {
+            set_sprite_tile(SPRITE_STAR + i, TILE_STAR1);
         } else {
-            set_sprite_tile(SPRITE_STAR + cur, TILE_RING1);
+            set_sprite_tile(SPRITE_STAR + i, TILE_RING1);
         }
 
         move_sprite(
-            stars.list[cur].chr + cur,
-            v.x + (stage.center.x >> FIX), // VLを移動する
+            stars.list[i].chr + i,
+            // v.x,
+            v.x + (stage.center.x >> FIX), // 視点を移動する場合はこちら
             v.y);
     }
 }
+
+/**********************************************/ /**
+ * @brief ガイド表示
+ ***********************************************/
+static void
+disp_guide()
+{
+    if (!stars.num) {
+        return;
+    }
+
+    guide.target.x = stars.list[0].target.x;
+    guide.target.y = guide.vec.y;
+
+    VectorType v = trans_device_coord(&guide);
+
+    move_sprite(
+        guide.chr,
+        v.x + (stage.center.x >> FIX),
+        v.y);
+}
+
 
 /**********************************************/ /**
  * @brief ステージのBG描画

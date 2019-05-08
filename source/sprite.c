@@ -207,6 +207,6 @@ void init_sprite_chr(void)
     CpuSet(sprite_ring1Tiles, oam + 512 * 5 + 128 * 2 + 2048, (COPY32 | sprite_ring1TilesLen / 4)); // 64dot
 
     // ガイド
-    CpuSet(sprite_ring1Tiles, oam + 512 * 5 + 128 * 2 + 2048, (COPY32 | sprite_ring1TilesLen / 4)); // 64dot
+    CpuSet(sprite_ring1Tiles, oam + 512 * 5 + 128 * 2 + 2048, (COPY32 | sprite_ring1TilesLen / 4)); // 8dot
 
 }

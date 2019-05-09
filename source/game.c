@@ -77,6 +77,8 @@ static void
 draw_line(int);
 static VectorType
 trans_device_coord(SpriteCharType*);
+static void
+disp_boundary();
 
 //debug
 void vbaPrint(char* s);
@@ -108,6 +110,7 @@ void game()
         disp_fire();
         disp_stars();
         disp_guide();
+        disp_boundary();
 
         create_new_stars();
         create_new_line();
@@ -270,6 +273,13 @@ init_sprite_setting()
     //// ガイド 8*8 dot
     set_sprite_form(SPRITE_GUIDE, OBJ_SIZE(0), OBJ_SQUARE, OBJ_256_COLOR);
     set_sprite_tile(SPRITE_GUIDE, TILE_GUIDE1);
+
+    //// 境界線 8*32 dot
+    set_sprite_form(SPRITE_BOUNDARY_L, OBJ_SIZE(1), OBJ_TALL, OBJ_256_COLOR);
+    set_sprite_tile(SPRITE_BOUNDARY_L, TILE_BOUNDARY1);
+   
+    set_sprite_form(SPRITE_BOUNDARY_R, OBJ_SIZE(1), OBJ_TALL, OBJ_256_COLOR);
+    set_sprite_tile(SPRITE_BOUNDARY_R, TILE_BOUNDARY1);
 
     //// スター 64*64 dot
     for (int i = 0; i < MAX_STARS; i++) {
@@ -445,6 +455,38 @@ init_guide()
     guide.rect.h = GUIDE_H;
 }
 
+/**********************************************/ /**
+ * @brief 境界線初期化
+ ***********************************************/
+static void
+init_boundary()
+{
+    boundary_l.sprite.chr = SPRITE_BOUNDARY_L;
+    boundary_l.sprite.vec.x = 0;
+    boundary_l.sprite.vec.y = 0;
+    boundary_l.sprite.vec.z = MIN_Z << FIX;
+    boundary_l.sprite.target.x = 0;
+    boundary_l.sprite.target.y = 0;
+    boundary_l.sprite.center.x = BOUNDARY_W / 2;
+    boundary_l.sprite.center.y = BOUNDARY_H / 2;
+    boundary_l.sprite.fix.y = 0;
+    boundary_l.sprite.fix.y = 0;
+    boundary_l.sprite.rect.w = BOUNDARY_W;
+    boundary_l.sprite.rect.h = BOUNDARY_H;
+
+    boundary_r.sprite.chr = SPRITE_BOUNDARY_R;
+    boundary_r.sprite.vec.x = 0;
+    boundary_r.sprite.vec.y = 0;
+    boundary_r.sprite.vec.z = MIN_Z << FIX;
+    boundary_r.sprite.target.x = 0;
+    boundary_r.sprite.target.y = 0;
+    boundary_r.sprite.center.x = BOUNDARY_W / 2;
+    boundary_r.sprite.center.y = BOUNDARY_H / 2;
+    boundary_r.sprite.fix.y = 0;
+    boundary_r.sprite.fix.y = 0;
+    boundary_r.sprite.rect.w = BOUNDARY_W;
+    boundary_r.sprite.rect.h = BOUNDARY_H;
+}
 
 /**********************************************/ /**
  * @brief 新規ライン作成
@@ -750,6 +792,40 @@ disp_guide()
         v.y);
 }
 
+/**********************************************/ /**
+ * @brief 境界表示
+ ***********************************************/
+static void
+disp_boundary()
+{
+    if (ship.vec.x >> FIX < 0) {
+        // 左の境界
+        boundary_l.sprite.target.x = SHIP_MOVE_MIN_X;
+        boundary_l.sprite.target.y = GUIDE_Y;
+
+        VectorType v = trans_device_coord(&boundary_l);
+
+        move_sprite(
+            boundary_l.sprite.chr,
+            v.x + (stage.center.x >> FIX),
+            v.y);
+
+        erase_sprite(boundary_r.sprite.chr);
+    } else {
+        // 右の境界
+        boundary_r.sprite.target.x = SHIP_MOVE_MIN_X;
+        boundary_r.sprite.target.y = GUIDE_Y;
+
+        VectorType v = trans_device_coord(&boundary_r);
+
+        move_sprite(
+            boundary_r.sprite.chr,
+            v.x + (stage.center.x >> FIX),
+            v.y);
+
+        erase_sprite(boundary_l.sprite.chr);
+    }
+}
 
 /**********************************************/ /**
  * @brief ステージのBG描画

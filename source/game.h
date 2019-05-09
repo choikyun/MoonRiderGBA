@@ -420,6 +420,23 @@
 #define LINE_COLOR ((38 << 8) + 38)
 
 /***************************************************
+ * 境界線
+ ***************************************************/
+
+/**
+ * @brief 境界線幅
+ * 
+ */
+#define BOUNDARY_W (8)
+
+/**
+ * @brief 境界線高さ
+ * 
+ */
+#define BOUNDARY_H (32)
+
+
+/***************************************************
  * フラッシュ
  ***************************************************/
 
@@ -500,8 +517,12 @@ enum {
     SPRITE_SHIP = 1,
     // ガイド
     SPRITE_GUIDE = 2,
+    // 境界線
+    SPRITE_BOUNDARY_L = 3,
+    // 境界線
+    SPRITE_BOUNDARY_R = 4,
     // ブロック
-    SPRITE_STAR = 3, // -18 まで
+    SPRITE_STAR = 5,
 };
 
 /**
@@ -678,6 +699,16 @@ typedef struct
 } ALIGN(4) LineType;
 
 /**
+ * 境界線
+ */
+typedef struct {
+    // アニメーション用
+    AnimeType anime;
+    // スプライト
+    SpriteCharType sprite;
+} ALIGN(4) BoundaryType;
+
+/**
  * 点滅メッセージ
  */
 typedef struct
@@ -722,10 +753,12 @@ typedef struct
 #define TILE_STAR1 (688) // 128tiles
 
 // リング
-#define TILE_RING1 (816) // 128
+#define TILE_RING1 (816) // 128tiles
 
 // ガイド
-#define TILE_GUIDE1 (944) // 2
+#define TILE_GUIDE1 (944) // 2tiles
+
+#define TILE_BOUNDARY1 (946) // 8tiles
 
 ///////////////////////////////////////////////////////////////////// SRAM
 
@@ -819,6 +852,18 @@ GLOBAL LineType lines;
  * 
  */
 GLOBAL SpriteCharType guide;
+
+/**
+ * @brief 境界線
+ * 
+ */
+GLOBAL BoundaryType boundary_r;
+
+/**
+ * @brief 境界線
+ * 
+ */
+GLOBAL BoundaryType boundary_l;
 
 /**
  * スコア

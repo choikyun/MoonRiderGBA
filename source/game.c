@@ -40,6 +40,8 @@ init_star(int, int, int);
 static void
 init_guide();
 static void
+init_boundary();
+static void
 move_ship();
 static void
 disp_ship();
@@ -79,6 +81,8 @@ static VectorType
 trans_device_coord(SpriteCharType*);
 static void
 disp_boundary();
+static void
+flash();
 
 //debug
 void vbaPrint(char* s);
@@ -110,7 +114,7 @@ void game()
         disp_fire();
         disp_stars();
         disp_guide();
-        disp_boundary();
+        /*disp_boundary();*/
 
         create_new_stars();
         create_new_line();
@@ -141,6 +145,11 @@ void init_game()
     game_state.scene = GAME_TITLE;
     stage.mode = 0;
 
+    // FLASH初期化
+    for (int i = 0; i < 32; i++) {
+        stage.flash.color[i] = FLASH_COLOR;
+    }
+
     // パラメータ初期化
     score = 0;
     stage.lv = 1;
@@ -165,6 +174,9 @@ void init_game()
 
     // ガイド
     init_guide();
+
+    // 境界線
+    init_boundary();
 
     // ステージ初期化
     init_stage();
@@ -247,8 +259,8 @@ copy_sp_attr(int sorc, int dest)
 static void
 copy_affine(int sorc, int dest)
 {
-    OBJAFFINE* s = (OBJAFFINE *)OAM + sorc;
-    OBJAFFINE* d = (OBJAFFINE *)OAM + dest;
+    OBJAFFINE* s = (OBJAFFINE*)OAM + sorc;
+    OBJAFFINE* d = (OBJAFFINE*)OAM + dest;
 
     d->pa = s->pa;
     d->pb = s->pb;
@@ -277,7 +289,7 @@ init_sprite_setting()
     //// 境界線 8*32 dot
     set_sprite_form(SPRITE_BOUNDARY_L, OBJ_SIZE(1), OBJ_TALL, OBJ_256_COLOR);
     set_sprite_tile(SPRITE_BOUNDARY_L, TILE_BOUNDARY1);
-   
+
     set_sprite_form(SPRITE_BOUNDARY_R, OBJ_SIZE(1), OBJ_TALL, OBJ_256_COLOR);
     set_sprite_tile(SPRITE_BOUNDARY_R, TILE_BOUNDARY1);
 
@@ -285,8 +297,6 @@ init_sprite_setting()
     for (int i = 0; i < MAX_STARS; i++) {
         set_sprite_form(SPRITE_STAR + i, OBJ_SIZE(Sprite_64x64), OBJ_SQUARE, OBJ_256_COLOR);
         set_sprite_tile(SPRITE_STAR + i, TILE_STAR1);
-        //set_affine_setting(SPRITE_STAR + i, i, 0);
-        //set_scale(i, 1, 1);
     }
 }
 
@@ -325,21 +335,28 @@ static void
 init_ship()
 {
     // 加速度
-    ship.acc.x = ship.acc.y = 0;
+    ship.sprite.acc.x = ship.sprite.acc.y = 0;
 
     // 自機スプライト
-    ship.chr = SPRITE_SHIP;
-    ship.vec.x = SHIP_X << FIX;
-    ship.vec.y = SHIP_Y << FIX;
-    ship.vec.z = SHIP_Z << FIX;
-    ship.center.x = SHIP_W / 2;
-    ship.center.y = SHIP_H / 2;
-    ship.target.x = SHIP_X;
-    ship.target.y = SHIP_Y;
-    ship.rect.w = SHIP_W;
-    ship.rect.h = SHIP_H;
-    ship.fix.x = 0;
-    ship.fix.y = 0;
+    ship.sprite.chr = SPRITE_SHIP;
+    ship.sprite.vec.x = SHIP_X << FIX;
+    ship.sprite.vec.y = SHIP_Y << FIX;
+    ship.sprite.vec.z = SHIP_Z << FIX;
+    ship.sprite.center.x = SHIP_W / 2;
+    ship.sprite.center.y = SHIP_H / 2;
+    ship.sprite.target.x = SHIP_X;
+    ship.sprite.target.y = SHIP_Y;
+    ship.sprite.rect.w = SHIP_W;
+    ship.sprite.rect.h = SHIP_H;
+    ship.sprite.fix.x = 0;
+    ship.sprite.fix.y = 0;
+
+    // 振動
+    ship.shock.range = SHOCK_RANGE;
+    ship.shock.direc = 1;
+    ship.shock.interval = SHOCK_INTERVAL;
+    ship.shock.duration = 0;
+
 }
 
 /**********************************************/ /**
@@ -547,7 +564,7 @@ draw_lines()
 }
 
 /**********************************************/ /**
- * @brief ライン描画
+ * @brief ライン描画 サブ
  ***********************************************/
 static void
 draw_line(int y)
@@ -623,16 +640,16 @@ move_ship()
     */
 
     if (key & KEY_LEFT) {
-        ship.acc.x -= SHIP_SPEED;
-        if (ship.acc.x < -MAX_SHIP_ACC) {
-            ship.acc.x = -MAX_SHIP_ACC;
+        ship.sprite.acc.x -= SHIP_SPEED;
+        if (ship.sprite.acc.x < -MAX_SHIP_ACC) {
+            ship.sprite.acc.x = -MAX_SHIP_ACC;
         }
         set_sprite_tile(SPRITE_SHIP, TILE_SHIP3);
         fire.sprite.vec.x = FIRE_X_LEFT << FIX;
     } else if (key & KEY_RIGHT) {
-        ship.acc.x += SHIP_SPEED;
-        if (ship.acc.x > MAX_SHIP_ACC) {
-            ship.acc.x = MAX_SHIP_ACC;
+        ship.sprite.acc.x += SHIP_SPEED;
+        if (ship.sprite.acc.x > MAX_SHIP_ACC) {
+            ship.sprite.acc.x = MAX_SHIP_ACC;
         }
         set_sprite_tile(SPRITE_SHIP, TILE_SHIP2);
         fire.sprite.vec.x = FIRE_X_RIGHT << FIX;
@@ -640,18 +657,18 @@ move_ship()
 
     // 自然減速
     if (!(key & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT))) {
-        ship.acc.x += -ship.acc.x * SHIP_FRIC;
-        ship.acc.y += -ship.acc.y * SHIP_FRIC;
+        ship.sprite.acc.x += -ship.sprite.acc.x * SHIP_FRIC;
+        ship.sprite.acc.y += -ship.sprite.acc.y * SHIP_FRIC;
     }
 
     //ship.vec.x += ship.acc.x;
     //ship.vec.y += ship.acc.y;
 
     // 自機とは逆方向にステージを移動
-    stage.center.x -= ship.acc.x;
+    stage.center.x -= ship.sprite.acc.x;
 
-    fire.sprite.vec.x = ship.vec.x;
-    fire.sprite.vec.y += ship.vec.y;
+    fire.sprite.vec.x = ship.sprite.vec.x;
+    fire.sprite.vec.y += ship.sprite.vec.y;
 
     // 境界判定
     check_stage_boundary();
@@ -689,10 +706,10 @@ check_stage_boundary()
 
     if (x < SHIP_MOVE_MIN_X) {
         stage.center.x = SHIP_MOVE_MIN_X << FIX;
-        ship.acc.x /= -2;
+        ship.sprite.acc.x /= -2;
     } else if (x > SHIP_MOVE_MAX_X) {
         stage.center.x = SHIP_MOVE_MAX_X << FIX;
-        ship.acc.x /= -2;
+        ship.sprite.acc.x /= -2;
     }
 }
 
@@ -702,13 +719,13 @@ check_stage_boundary()
 static void
 disp_ship()
 {
-    ship.target.x = ship.vec.x >> FIX;
-    ship.target.y = ship.vec.y >> FIX;
+    ship.sprite.target.x = ship.sprite.vec.x >> FIX;
+    ship.sprite.target.y = ship.sprite.vec.y >> FIX;
 
     // 座標変換
-    VectorType v = trans_device_coord(&ship);
+    VectorType v = trans_device_coord(&ship.sprite);
 
-    move_sprite(ship.chr, v.x, v.y);
+    move_sprite(ship.sprite.chr, v.x, v.y);
 }
 
 /**********************************************/ /**
@@ -751,12 +768,12 @@ disp_stars()
         v = trans_device_coord(&stars.list[i]);
 
         // アフィンパラメータ設定
-        set_affine_setting(SPRITE_STAR + i, i, 1);
-        
+        set_affine_setting(SPRITE_STAR + i, i, 0 /*OBJ_DOUBLE*/);
+
         // スケールを設定
         // ブロック or リング
         if (stars.list[i].type == NORMAL) {
-            set_scale(i, v.scale, v.scale);
+            set_scale(i, v.scale, v.scale /* * 1.2f*/);
             set_sprite_tile(SPRITE_STAR + i, TILE_STAR1);
         } else {
             set_scale(i, v.scale, v.scale);
@@ -772,7 +789,7 @@ disp_stars()
 }
 
 /**********************************************/ /**
- * @brief ガイド表示
+ * @brief ガイド表示 常に中央を指す
  ***********************************************/
 static void
 disp_guide()
@@ -781,8 +798,8 @@ disp_guide()
         return;
     }
 
-    guide.target.x = stars.list[0].target.x;
-    guide.target.y = guide.vec.y >> FIX;
+    guide.target.x = 0;
+    guide.target.y = GUIDE_Y;
 
     VectorType v = trans_device_coord(&guide);
 
@@ -798,12 +815,12 @@ disp_guide()
 static void
 disp_boundary()
 {
-    if (ship.vec.x >> FIX < 0) {
+    if (stage.center.x >> FIX < 0) {
         // 左の境界
         boundary_l.sprite.target.x = SHIP_MOVE_MIN_X;
-        boundary_l.sprite.target.y = GUIDE_Y;
+        boundary_l.sprite.target.y = BOUNDARY_Y;
 
-        VectorType v = trans_device_coord(&boundary_l);
+        VectorType v = trans_device_coord(&boundary_l.sprite);
 
         move_sprite(
             boundary_l.sprite.chr,
@@ -813,10 +830,10 @@ disp_boundary()
         erase_sprite(boundary_r.sprite.chr);
     } else {
         // 右の境界
-        boundary_r.sprite.target.x = SHIP_MOVE_MIN_X;
-        boundary_r.sprite.target.y = GUIDE_Y;
+        boundary_r.sprite.target.x = SHIP_MOVE_MAX_X;
+        boundary_r.sprite.target.y = BOUNDARY_Y;
 
-        VectorType v = trans_device_coord(&boundary_r);
+        VectorType v = trans_device_coord(&boundary_r.sprite);
 
         move_sprite(
             boundary_r.sprite.chr,
@@ -828,13 +845,29 @@ disp_boundary()
 }
 
 /**********************************************/ /**
+ * @brief フラッシュ
+ ***********************************************/
+static void
+flash()
+{
+    stage.flash.interval = FLASH_INTERVAL;
+}
+
+/**********************************************/ /**
  * @brief ステージのBG描画
  ***********************************************/
 static void
 draw_bg()
 {
     flip_frame();
-    load_frame_bitmap(DEF_BG_BITMAP);
+
+    if (stage.flash.interval) {
+        stage.flash.interval--;
+        fill_frame_bitmap(stage.flash.color);
+    } else {
+        // 通常のBG
+        load_frame_bitmap(DEF_BG_BITMAP);
+    }
 }
 
 /**********************************************/ /**

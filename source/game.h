@@ -108,7 +108,7 @@
 /**
  * スター 速度
  */
-#define STAR_SPEED (-4096 * 24)
+#define STAR_SPEED (-4096 * 25)
 
 /***************************************************
  * モード
@@ -227,6 +227,27 @@
 #define MAX_SHIP_ACC (3 << FIX)
 
 /***************************************************
+ * 振動アニメ
+ ***************************************************/
+
+/**
+ * 振幅
+ */
+#define SHOCK_RANGE (1)
+
+
+/**
+ * 間隔
+ */
+#define SHOCK_INTERVAL (4)
+
+
+/**
+ * 長さ
+ */
+#define SHOCK_DURATION (SHOCK_INTERVAL * 4)
+
+/***************************************************
  * 炎 スプライト
  ***************************************************/
 
@@ -288,28 +309,32 @@
  * スター 幅
  */
 #define STAR_W (40)
+//#define STAR_W (80)
 
 /**
  * スター 高さ
  */
 #define STAR_H (40)
+//#define STAR_H (80)
 
 /**
  * @brief スプライト幅
  * 
  */
 #define STAR_SP_W (64)
+//#define STAR_SP_W (128)
 
 /**
  * @brief スプライト高さ
  * 
  */
 #define STAR_SP_H (64)
+//#define STAR_SP_H (128)
 
 /**
  * スター最大数
  */
-#define MAX_STARS (12)
+#define MAX_STARS (16)
 
 /**
  * Z加速度最大値
@@ -427,13 +452,19 @@
  * @brief 境界線幅
  * 
  */
-#define BOUNDARY_W (8)
+#define BOUNDARY_W (7)
 
 /**
  * @brief 境界線高さ
  * 
  */
 #define BOUNDARY_H (32)
+
+/**
+ * @brief 境界線Y座標
+ * 
+ */
+#define BOUNDARY_Y (SHIP_Y - BOUNDARY_H / 2)
 
 
 /***************************************************
@@ -617,6 +648,8 @@ typedef struct
     int mode;
     // デモモード
     bool demo;
+    // フラッシュ
+    FlashType flash;
 } ALIGN(4) StageType;
 
 /**
@@ -659,6 +692,15 @@ typedef struct
     // 表示フラグ
     bool show;
 } ALIGN(4) SpriteCharType;
+
+typedef struct {
+    // エネルギー
+    int energy;
+    // 振動
+    ShockType shock;
+    // スプライト
+    SpriteCharType sprite;
+} ALIGN(4) ShipType;
 
 /**
  * 炎
@@ -830,7 +872,7 @@ GLOBAL StageType stage;
 /**
  * 自機
  */
-GLOBAL SpriteCharType ship;
+GLOBAL ShipType ship;
 
 /**
  * 炎

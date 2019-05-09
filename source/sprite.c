@@ -47,6 +47,10 @@
 // ガイド
 #include "sprite_guide1.h"
 
+// 境界線
+#include "sprite_boundary1.h"
+
+
 /***************************************************
  スプライト初期化
  ***************************************************/
@@ -208,5 +212,8 @@ void init_sprite_chr(void)
 
     // ガイド
     CpuSet(sprite_guide1Tiles, oam + 512 * 5 + 128 * 2 + 2048 * 2, (COPY32 | sprite_guide1TilesLen / 4)); // 8dot
+
+    // 境界線
+    CpuSet(sprite_boundary1Tiles, oam + 512 * 5 + 128 * 2 + 2048 * 2 + 32, (COPY32 | sprite_boundary1TilesLen / 4)); // 8dot
 
 }

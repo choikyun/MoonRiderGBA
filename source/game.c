@@ -77,12 +77,16 @@ static void
 draw_lines();
 static void
 draw_line(int);
+static void
+draw_energy();
 static VectorType
 trans_device_coord(SpriteCharType*);
 static void
 disp_boundary();
 static void
 flash();
+static void
+shock();
 static bool
 hits_block();
 
@@ -125,6 +129,7 @@ void game()
 
         draw_bg();
         draw_lines();
+        draw_energy();
         break;
 
     case GAME_READY:
@@ -232,9 +237,14 @@ move_stars()
         m.w = ship.sprite.hit.w;
         e.x = stars.list[0].target.x + SHIP_MOVE_MAX_X - stars.list[0].center.x + (stage.center.x >> FIX);
         e.w = stars.list[0].hit.w;
-        if (hits_block(&m, &e) && stars.list[0].type == NORMAL) {
-            flash();
-        }
+        if (hits_block(&m, &e)) {
+            if (stars.list[0].type == NORMAL) {
+                flash();
+                shock();
+            } else {
+                shock();
+            }
+        } 
 
         stars.num--;
         CpuSet(
@@ -372,6 +382,9 @@ init_ship()
     ship.shock.direc = 1;
     ship.shock.interval = SHOCK_INTERVAL;
     ship.shock.duration = 0;
+
+    // エネルギー
+    ship.energy = MAX_ENEGRY << E_FIX;
 }
 
 /**********************************************/ /**
@@ -759,7 +772,19 @@ disp_ship()
     // 座標変換
     VectorType v = trans_device_coord(&ship.sprite);
 
-    move_sprite(ship.sprite.chr, v.x, v.y);
+    // 振動
+    if (ship.shock.duration) {
+        ship.shock.duration--;
+
+        if (! --ship.shock.interval) {
+            ship.shock.direc *= -1;
+            ship.shock.interval = SHOCK_INTERVAL;
+        }
+        int r = ship.shock.direc * ship.shock.range;
+        move_sprite (ship.sprite.chr, v.x + r, v.y);
+    } else {
+        move_sprite (ship.sprite.chr, v.x, v.y);
+    }
 }
 
 /**********************************************/ /**
@@ -828,10 +853,6 @@ disp_stars()
 static void
 disp_guide()
 {
-    if (!stars.num) {
-        return;
-    }
-
     guide.target.x = 0;
     guide.target.y = GUIDE_Y;
 
@@ -885,6 +906,45 @@ static void
 flash()
 {
     stage.flash.interval = FLASH_INTERVAL;
+}
+
+/**********************************************/ /**
+ * @brief 振動
+ ***********************************************/
+static void
+shock()
+{
+    if (!ship.shock.duration) {
+        ship.shock.duration = SHOCK_DURATION;
+        ship.shock.interval = SHOCK_INTERVAL;
+    }
+}
+
+/**********************************************/ /**
+ * @brief エネルギー更新
+ ***********************************************/
+static void
+update_energy(int e)
+{
+    ship.energy += e;
+}
+
+/**********************************************/ /**
+ * @brief エネルギー表示
+ ***********************************************/
+static void
+draw_energy()
+{
+    int max = ship.energy >> E_FIX;
+    for (int i = 0; i < max; i++) {
+        draw_bitmap_frame (ENERGY_X + (i * 2), ENERGY_Y, ENERGY_W, ENERGY_H, bmp_energy1Bitmap);
+    }
+
+    int x = ENERGY_X + max * 2;
+    max = MAX_ENEGRY - max;
+    for (int j = 0; j < max; j++) {
+        draw_bitmap_frame (x + (j * 2), ENERGY_Y, ENERGY_W, ENERGY_H, bmp_energy2Bitmap);
+    }
 }
 
 /**********************************************/ /**

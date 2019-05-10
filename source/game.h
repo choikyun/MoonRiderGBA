@@ -98,7 +98,7 @@
 /**
  * 星の出現間隔
  */
-#define STAR_INTERVAL (20)
+#define STAR_INTERVAL (19)
 
 /**
  * 星の同時出現数
@@ -212,13 +212,13 @@
 /**
  * 自機 速度
  */
-#define SHIP_SPEED (4096 * 2)
+#define SHIP_SPEED (4096 * 1)
 
 /**
  * @brief 自機自然減速
  * 
  */
-#define SHIP_FRIC (0.02)
+#define SHIP_FRIC (0.01)
 
 /**
  * @brief 自機最大加速度
@@ -227,25 +227,49 @@
 #define MAX_SHIP_ACC (3 << FIX)
 
 /***************************************************
+ * エネルギー
+ ***************************************************/
+
+/**
+ * @brief エネルギー用の小数点
+ * 
+ */
+#define E_FIX (8)
+
+/**
+ * @brief エネルギー
+ * 
+ */
+#define MAX_ENEGRY (30)
+
+#define ENERGY_X (136)
+
+#define ENERGY_Y (0)
+
+#define ENERGY_W (2)
+
+#define ENERGY_H (8)
+
+/***************************************************
  * 振動アニメ
  ***************************************************/
 
 /**
  * 振幅
  */
-#define SHOCK_RANGE (1)
+#define SHOCK_RANGE (2)
 
 
 /**
  * 間隔
  */
-#define SHOCK_INTERVAL (4)
+#define SHOCK_INTERVAL (2)
 
 
 /**
  * 長さ
  */
-#define SHOCK_DURATION (SHOCK_INTERVAL * 4)
+#define SHOCK_DURATION (SHOCK_INTERVAL * 6)
 
 /***************************************************
  * 炎 スプライト

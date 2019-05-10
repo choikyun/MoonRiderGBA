@@ -560,9 +560,9 @@ enum {
  * ブロックの種類
  */
 typedef enum {
-    // 炎
+    // 通常のブロック
     NORMAL = 0,
-    // 自機
+    // リング
     RING,
 } BlockTypeEnum;
 

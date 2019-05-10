@@ -83,6 +83,8 @@ static void
 disp_boundary();
 static void
 flash();
+static bool
+hits_block();
 
 //debug
 void vbaPrint(char* s);
@@ -212,6 +214,8 @@ create_new_stars()
 static void
 move_stars()
 {
+    RectangleType m, e;
+
     if (!stars.num) {
         return;
     }
@@ -222,6 +226,16 @@ move_stars()
 
     // 先頭のスプライトデータの消去
     if (stars.list[0].vec.z >> FIX < MIN_Z) {
+
+        // 当たり判定
+        m.x = (ship.sprite.vec.x >> FIX) + SHIP_MOVE_MAX_X - ship.sprite.center.x;
+        m.w = ship.sprite.hit.w;
+        e.x = stars.list[0].target.x + SHIP_MOVE_MAX_X - stars.list[0].center.x + (stage.center.x >> FIX);
+        e.w = stars.list[0].hit.w;
+        if (hits_block(&m, &e) && stars.list[0].type == NORMAL) {
+            flash();
+        }
+
         stars.num--;
         CpuSet(
             &stars.list[1],
@@ -348,6 +362,8 @@ init_ship()
     ship.sprite.target.y = SHIP_Y;
     ship.sprite.rect.w = SHIP_W;
     ship.sprite.rect.h = SHIP_H;
+    ship.sprite.hit.w = SHIP_W - 1;
+    ship.sprite.hit.h = SHIP_H - 1;
     ship.sprite.fix.x = 0;
     ship.sprite.fix.y = 0;
 
@@ -356,7 +372,6 @@ init_ship()
     ship.shock.direc = 1;
     ship.shock.interval = SHOCK_INTERVAL;
     ship.shock.duration = 0;
-
 }
 
 /**********************************************/ /**
@@ -398,6 +413,8 @@ init_stars()
         stars.list[i].center.y = STAR_SP_H / 2;
         stars.list[i].rect.w = STAR_W;
         stars.list[i].rect.h = STAR_H;
+        stars.list[i].hit.w = STAR_W - 1;
+        stars.list[i].hit.h = STAR_H - 1;
         stars.list[i].fix.x = 0;
         stars.list[i].fix.y = 0;
     }
@@ -503,6 +520,23 @@ init_boundary()
     boundary_r.sprite.fix.y = 0;
     boundary_r.sprite.rect.w = BOUNDARY_W;
     boundary_r.sprite.rect.h = BOUNDARY_H;
+}
+
+/**********************************************/ /**
+ * @brief 当たり判定
+ * 
+ * @param m 座標
+ * @param e 座標
+ * @return 当たっているか
+ ***********************************************/
+static bool hits_block(RectangleType* m, RectangleType* e)
+{
+    // MX - EX + A = A + B + 1
+    if ((u16)(m->x - e->x + m->w) < m->w + e->w + 1) {
+        return true;
+    }
+
+    return false;
 }
 
 /**********************************************/ /**

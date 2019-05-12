@@ -242,13 +242,47 @@
  */
 #define MAX_ENEGRY (30)
 
-#define ENERGY_X (136)
+/**
+ *  @brief エネルギー 余剰分
+ * 
+ */
+#define MAX_ENEGRY_BLANK (2)
 
+/**
+ * @brief エネルギー表示X座標
+ * 
+ */
+#define ENERGY_X (172)
+
+/**
+ * @brief エネルギー表示Y座標
+ * 
+ */
 #define ENERGY_Y (0)
 
+/**
+ * @brief エネルギー表示 バーの幅
+ * 
+ */
 #define ENERGY_W (2)
 
+/**
+ * @brief エネルギー表示 バーの高さ
+ * 
+ */
 #define ENERGY_H (8)
+
+/**
+ * @brief ダメージ
+ * 
+ */
+#define DAMAGE_ENEGRY (-10 << E_FIX)
+
+/**
+ * @brief 回復
+ * 
+ */
+#define RECOVERY_ENEGRY (5 << E_FIX)
 
 /***************************************************
  * 振動アニメ
@@ -466,7 +500,7 @@
 /**
  * @brief 地平線の色 2dot分
  */
-#define LINE_COLOR ((38 << 8) + 38)
+#define LINE_COLOR ((38 << 24) | (38 << 16) | (38 << 8) | 38)
 
 /***************************************************
  * 境界線
@@ -490,6 +524,21 @@
  */
 #define BOUNDARY_Y (SHIP_Y - BOUNDARY_H / 2)
 
+/***************************************************
+ * アイコン
+ ***************************************************/
+
+#define ICON_START_Y (-5)
+
+#define ICON_TARGET_Y (-20)
+
+#define ICON_LIFE (30)
+
+#define ICON_W (11)
+
+#define ICON_H (11)
+
+#define ICON_Y_ACC (-1 << FIX)
 
 /***************************************************
  * フラッシュ
@@ -522,7 +571,7 @@
 /**
  * スコア　X座標
  */
-#define SCORE_X (88)
+#define SCORE_X (82)
 /**
  * スコア　Y座標
  */
@@ -535,6 +584,44 @@
  * ハイスコア　Y座標
  */
 #define HISCORE_Y (64)
+
+/***************************************************
+ *　リング
+ ***************************************************/
+
+/**
+ * @brief リング数　桁
+ */
+#define RING_DIGIT (3)
+
+/**
+ * @brief リング数 X座標
+ */
+#define RING_X (148)
+
+/**
+ * @brief リング数　Y座標
+ */
+#define RING_Y (0)
+
+/***************************************************
+ *　レベル
+ ***************************************************/
+
+/**
+ * @brief レベル　桁
+ */
+#define LV_DIGIT (1)
+
+/**
+ * @brief レベル X座標
+ */
+#define LV_X (36)
+
+/**
+ * @brief レベル　Y座標
+ */
+#define LV_Y (0)
 
 /***************************************************
  *　BGM
@@ -576,8 +663,10 @@ enum {
     SPRITE_BOUNDARY_L = 3,
     // 境界線
     SPRITE_BOUNDARY_R = 4,
+    // リングアイコン
+    SPRITE_RINGICON = 5,
     // ブロック
-    SPRITE_STAR = 5,
+    SPRITE_STAR = 6,
 };
 
 /**
@@ -664,6 +753,8 @@ typedef struct
 {
     // レベル
     int lv;
+    // 獲得リング
+    int ring;
     // ステージの中心座標
     VectorType center;
     // 次のスターが出現するまでの間隔
@@ -735,6 +826,18 @@ typedef struct {
     // スプライト
     SpriteCharType sprite;
 } ALIGN(4) FireType;
+
+/**
+ * アイコン
+ */
+typedef struct {
+    // 表示期間
+    int life;
+    // 目標座標
+    PointType target;
+    // スプライト
+    SpriteCharType sprite;
+} ALIGN(4) IconType;
 
 /**
  * スター管理
@@ -825,6 +928,9 @@ typedef struct
 #define TILE_GUIDE1 (944) // 2tiles
 
 #define TILE_BOUNDARY1 (946) // 8tiles
+
+// リングアイコン
+#define TILE_RINGICON1 (954) // 8tiles
 
 ///////////////////////////////////////////////////////////////////// SRAM
 
@@ -930,6 +1036,13 @@ GLOBAL BoundaryType boundary_r;
  * 
  */
 GLOBAL BoundaryType boundary_l;
+
+/**
+ * @brief リングアイコン
+ * 
+ */
+GLOBAL IconType ring_icon;
+
 
 /**
  * スコア

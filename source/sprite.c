@@ -50,6 +50,9 @@
 // 境界線
 #include "sprite_boundary1.h"
 
+// リングアイコン
+#include "sprite_ringicon1.h"
+
 
 /***************************************************
  スプライト初期化
@@ -215,5 +218,8 @@ void init_sprite_chr(void)
 
     // 境界線
     CpuSet(sprite_boundary1Tiles, oam + 512 * 5 + 128 * 2 + 2048 * 2 + 32, (COPY32 | sprite_boundary1TilesLen / 4)); // 8dot
+
+    // リングアイコン
+    CpuSet(sprite_ringicon1Tiles, oam + 512 * 5 + 128 * 2 + 2048 * 2 + 32 + 128, (COPY32 | sprite_ringicon1TilesLen / 4)); // 16dot
 
 }

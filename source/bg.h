@@ -21,6 +21,7 @@
 #include "bmp_bg1.h"
 #include "bmp_energy1.h"
 #include "bmp_energy2.h"
+#include "bmp_num.h"
 
 #include "sprite_ship1.h"
 

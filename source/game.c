@@ -172,16 +172,13 @@ void init_game()
     // ゲームステート初期化
     game_state.scene = GAME_TITLE;
     stage.mode = 0;
+    score = 0;
+
 
     // FLASH初期化
     for (int i = 0; i < 32; i++) {
         stage.flash.color[i] = FLASH_COLOR;
     }
-
-    // パラメータ初期化
-    score = 0;
-    stage.lv = 1;
-    stage.ring = 0;
 
     // ハイスコアのロード
     //hiscore = load_hiscore();
@@ -223,8 +220,9 @@ create_new_stars()
     // 一定間隔で出現
     if (--stars.interval <= 0) {
 
+        int max = stars.max_stars;
         for (int i = 0; i < APPER_MAX_STARS; i++) {
-            if (stars.num < MAX_STARS) {
+            if (stars.num < max) {
                 init_star(
                     stars.num,
                     RND(0, STAR_X_STEP_NUM) * STAR_X_STEP + STAR_W / 2 - SCREEN_CENTER - STAR_X_STEP_BLANK,
@@ -234,7 +232,7 @@ create_new_stars()
         }
 
         // 次の出現間隔
-        stars.interval = STAR_INTERVAL;
+        stars.interval = stars.interval_rel;
     }
 }
 
@@ -250,13 +248,19 @@ move_stars()
         return;
     }
 
+    // ブロックの加速
+    stars.acc += DEF_STAR_ACC;
+    if (stars.acc > STAR_SPEED) {
+        stars.acc = STAR_SPEED;
+    }
+
     for (int i = 0; i < stars.num; i++) {
-        stars.list[i].vec.z += stars.list[i].acc.z;
+        //stars.list[i].vec.z += stars.list[i].acc.z;
+        stars.list[i].vec.z += stars.acc;
     }
 
     // スコア加算
     score++;
-
 
     // 先頭のスプライトデータの消去
     if (stars.list[0].vec.z >> FIX < MIN_Z) {
@@ -388,6 +392,14 @@ init_stage()
     // ステージの座標
     stage.center.x = 0;
     stage.center.y = 0;
+
+    stage.ring = 0;
+    
+    // レベル初期化
+    stage.lv = 1;
+    stage.next_lv = NEXT_LEVEL;
+    stars.interval_rel = DEF_STAR_INTERVAL;
+    stars.max_stars = MAX_STARS;
 }
 
 /**********************************************/ /**
@@ -481,7 +493,8 @@ static void
 init_star(int num, int x, int y)
 {
     // 加速度
-    stars.list[num].acc.z = STAR_SPEED;
+    //stars.list[num].acc.z = STAR_SPEED;
+    stars.acc = STAR_SPEED;
 
     // スプライト
     stars.list[num].target.x = x; // X座標目標値
@@ -674,7 +687,6 @@ draw_lines()
 static void
 draw_line(int y)
 {
-    int x = 0;
     u32* dst = (u32 *)current_frame + (y * SCREEN_WIDTH) / 4;
 
     for (int i = 0; i < LINE_W / 4; i++) {
@@ -766,7 +778,6 @@ static void
 check_stage_boundary()
 {
     int x = stage.center.x >> FIX;
-    int y = stage.center.y >> FIX;
 
     if (x < SHIP_MOVE_MIN_X) {
         stage.center.x = SHIP_MOVE_MIN_X << FIX;
@@ -990,8 +1001,8 @@ update_energy(int e)
 
     if (ship.energy < 0) {
         ship.energy = 0;
-    } else if (ship.energy > MAX_ENEGRY + MAX_ENEGRY_BLANK << E_FIX) {
-        ship.energy = MAX_ENEGRY + MAX_ENEGRY_BLANK << E_FIX;
+    } else if (ship.energy > (MAX_ENEGRY + MAX_ENEGRY_BLANK) << E_FIX) {
+        ship.energy = (MAX_ENEGRY + MAX_ENEGRY_BLANK) << E_FIX;
     }
 }
 
@@ -1078,16 +1089,25 @@ update_ring()
 }
 
 /**********************************************/ /**
- * @brief リング数表示
+ * @brief レベル表示
  ***********************************************/
 static void
 update_lv()
 {
-    int i;
+    // レベルアップ
+    if (--stage.next_lv < 0 && stage.lv < MAX_LV) {
+        stage.next_lv = NEXT_LEVEL;
+        stars.interval_rel = DEF_STAR_INTERVAL - stage.lv * STAR_INTERVAL_STEP;
+        ship.energy = MAX_ENEGRY+ MAX_ENEGRY_BLANK;
+
+        stage.lv++;
+    }
+
+    // レベル表示
     int pos = LV_DIGIT * NUM_W - NUM_W;
     int r = stage.lv;
-
-    for (i = 0; i < LV_DIGIT; i++)
+ 
+    for (int i = 0; i < LV_DIGIT; i++)
     {
         disp_num(LV_X + pos, LV_Y, r % 10);
         r /= 10;
@@ -1102,11 +1122,10 @@ update_lv()
 static void
 update_score()
 {
-    int i;
     int pos = SCORE_DIGIT * NUM_W - NUM_W;
     int sc = score;
 
-    for (i = 0; i < SCORE_DIGIT; i++)
+    for (int i = 0; i < SCORE_DIGIT; i++)
     {
         disp_num(SCORE_X + pos, SCORE_Y, sc % 10);
         sc /= 10;

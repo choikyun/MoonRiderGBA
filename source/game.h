@@ -395,6 +395,12 @@
 #define MAX_STARS (16)
 
 /**
+ * @brief dデフォルトの加速度
+ * 
+ */
+#define DEF_STAR_ACC (-4096 * 1)
+
+/**
  * Z加速度最大値
  */
 #define STAR_MAX_ACC (4) << FIX)
@@ -609,19 +615,43 @@
  ***************************************************/
 
 /**
- * @brief レベル　桁
+ * @brief 最高レベル
+ * 
+ */
+#define MAX_LV (5)
+
+/**
+ * @brief レベル表示　桁
  */
 #define LV_DIGIT (1)
 
 /**
- * @brief レベル X座標
+ * @brief レベル表示 X座標
  */
 #define LV_X (36)
 
 /**
- * @brief レベル　Y座標
+ * @brief レベル表示　Y座標
  */
 #define LV_Y (0)
+
+/**
+ * @brief 次のレベルまで（フレーム）
+ * 
+ */
+#define NEXT_LEVEL (60 * 60)
+
+/**
+ * @brief ブロック出現のインターバル
+ * 
+ */
+#define DEF_STAR_INTERVAL (40)
+
+/**
+ * @brief インターバル 刻み値
+ * 
+ */
+#define STAR_INTERVAL_STEP (4)
 
 /***************************************************
  *　BGM
@@ -753,6 +783,8 @@ typedef struct
 {
     // レベル
     int lv;
+    // 次のレベルまで（フレーム数）
+    int next_lv;
     // 獲得リング
     int ring;
     // ステージの中心座標
@@ -850,6 +882,10 @@ typedef struct
     int interval_rel;
     // 現在の数
     int num;
+    // 最大出現数
+    int max_stars;
+    // 加速度（全てのブロック共通）
+    int acc;
     // スターのリスト
     SpriteCharType list[MAX_STARS];
 } ALIGN(4) StarType;

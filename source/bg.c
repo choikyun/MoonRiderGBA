@@ -12,9 +12,9 @@
  * Choe Gyun (choikyun)
  *****************************************************/
 
+#include <gba.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <gba.h>
 
 #include "bg.h"
 
@@ -23,17 +23,20 @@
  ***************************************************/
 void init_bg()
 {
-  // MODE4を使用
-  // バックフレームにBGをロードし、毎フレームフロントフレームに転送する。
+    //// MODE4を使用
 
-  // モード設定
-  SetMode(DEF_MODE | BG2_ENABLE | OBJ_ENABLE | OBJ_1D_MAP);
+    // モード設定
+    SetMode(DEF_MODE | BG2_ENABLE | OBJ_ENABLE | OBJ_1D_MAP);
 
-  // パレット
-  load_bg_bitmap_pallet();
+    // パレット
+    load_bg_bitmap_pallet();
 
-  // BGをフレームにロード
-  load_frame_bitmap(DEF_BG_BITMAP);
+    // BGを各フレームにロード
+    load_frame_bitmap(DEF_BG_BITMAP);
+    flip_frame();
+
+    load_frame_bitmap(DEF_BG_BITMAP);
+    flip_frame();
 }
 
 /***************************************************
@@ -41,8 +44,8 @@ void init_bg()
  ***************************************************/
 void reset_frame()
 {
-  REG_DISPCNT &= 0xffff ^ BACKBUFFER; // 表示はフロントバッファ
-  current_frame = BACKFRAME;
+    REG_DISPCNT &= 0xffff ^ BACKBUFFER; // 表示はフロントバッファ
+    current_frame = BACKFRAME;
 }
 
 /*********************************************************************
@@ -53,29 +56,29 @@ void reset_frame()
 /***************************************************
  VRAMにBGビットマップ転送
  ***************************************************/
-void load_bg_bitmap(const u16 *data, int len)
+void load_bg_bitmap(const u16* data, int len)
 {
-  u16 *screen = (u16 *)VRAM;
+    u16* screen = (u16*)VRAM;
 
-  CpuSet(data, screen, (COPY16 | len));
+    CpuSet(data, screen, (COPY16 | len));
 }
 
 /***************************************************
  VRAMにBGビットマップ転送 32byte単位
  ***************************************************/
-void load_bg_bitmap_fast(const u16 *data, int len)
+void load_bg_bitmap_fast(const u16* data, int len)
 {
-  u16 *screen = (u16 *)VRAM;
+    u16* screen = (u16*)VRAM;
 
-  CpuFastSet(data, screen, len);
+    CpuFastSet(data, screen, len);
 }
 
 /***************************************************
  VRAMにビットマップ転送 圧縮LZ77
  ***************************************************/
-void load_bg_bitmap_lz77(const u16 *data)
+void load_bg_bitmap_lz77(const u16* data)
 {
-  LZ77UnCompVram((void *)data, (void *)VRAM);
+    LZ77UnCompVram((void*)data, (void*)VRAM);
 }
 
 /***************************************************
@@ -83,7 +86,7 @@ void load_bg_bitmap_lz77(const u16 *data)
  ***************************************************/
 void load_bg_bitmap_pallet(void)
 {
-  CpuSet(DEF_BG_PALLET, BG_PALETTE, (COPY16 | DEF_BG_PALLET_LEN / 2));
+    CpuSet(DEF_BG_PALLET, BG_PALETTE, (COPY16 | DEF_BG_PALLET_LEN / 2));
 }
 
 /***************************************************
@@ -101,62 +104,55 @@ void load_bg_tile(void)
 /***************************************************
  BG ビットマップ描画 15bit
  ***************************************************/
-void draw_bitmap16(int x, int y, int w, int h, const u16 *data, u16 trans)
+void draw_bitmap16(int x, int y, int w, int h, const u16* data, u16 trans)
 {
-  int i, j;
-  u16 *screen = (u16 *)VRAM + y * SCREEN_WIDTH + x;
+    int i, j;
+    u16* screen = (u16*)VRAM + y * SCREEN_WIDTH + x;
 
-  int blank = SCREEN_WIDTH - w;
-  for (j = 0; j < h; j++)
-  {
-    for (i = 0; i < w; i++)
-    {
-      if (*data != trans)
-        *screen++ = *data++;
-      else
-      {
-        screen++;
-        data++;
-      }
+    int blank = SCREEN_WIDTH - w;
+    for (j = 0; j < h; j++) {
+        for (i = 0; i < w; i++) {
+            if (*data != trans)
+                *screen++ = *data++;
+            else {
+                screen++;
+                data++;
+            }
+        }
+        screen += blank;
     }
-    screen += blank;
-  }
 }
 
 /***************************************************
  BG ビットマップ退避 15bit
  ***************************************************/
-void save_bitmap16(int x, int y, int w, int h, u16 *data)
+void save_bitmap16(int x, int y, int w, int h, u16* data)
 {
-  int i, j;
-  u16 *screen = (u16 *)VRAM + y * SCREEN_WIDTH + x;
+    int i, j;
+    u16* screen = (u16*)VRAM + y * SCREEN_WIDTH + x;
 
-  for (j = 0; j < h; j++)
-  {
-    for (i = 0; i < w; i++)
-    {
-      *data++ = *screen++;
+    for (j = 0; j < h; j++) {
+        for (i = 0; i < w; i++) {
+            *data++ = *screen++;
+        }
+        screen += SCREEN_WIDTH - w;
     }
-    screen += SCREEN_WIDTH - w;
-  }
 }
 
 /***************************************************
  BG ビットマップ復帰
  ***************************************************/
-void load_bitmap16(int x, int y, int w, int h, u16 *data)
+void load_bitmap16(int x, int y, int w, int h, u16* data)
 {
-  int i, j;
-  u16 *screen = (u16 *)VRAM + y * SCREEN_WIDTH + x;
+    int i, j;
+    u16* screen = (u16*)VRAM + y * SCREEN_WIDTH + x;
 
-  for (j = 0; j < h; j++)
-  {
-    for (i = 0; i < w; i++)
-    {
-      *screen++ = *data++;
+    for (j = 0; j < h; j++) {
+        for (i = 0; i < w; i++) {
+            *screen++ = *data++;
+        }
+        screen += SCREEN_WIDTH - w;
     }
-    screen += SCREEN_WIDTH - w;
-  }
 }
 
 /*********************************************************************
@@ -167,37 +163,43 @@ void load_bitmap16(int x, int y, int w, int h, u16 *data)
 /***************************************************
  BG ビットマップ描画 8bit
  ***************************************************/
-void draw_bitmap8(int x, int y, int w, int h, const u16 *data)
+void draw_bitmap8(int x, int y, int w, int h, const u16* data)
 {
-  u16 *screen = (u16 *)VRAM + (y * SCREEN_WIDTH + x) / 2; // VRAMの書き込みは16/32bit単位
+    u16* screen = (u16*)VRAM + (y * SCREEN_WIDTH + x) / 2; // VRAMの書き込みは16/32bit単位
 
-  int blank = (SCREEN_WIDTH - w) / 2;
-  for (int j = 0; j < h; j++)
-  {
-    for (int i = 0; i < w / 2; i++)
-    {
-      *screen++ = *data++;
+    int blank = (SCREEN_WIDTH - w) / 2;
+    for (int j = 0; j < h; j++) {
+        for (int i = 0; i < w / 2; i++) {
+            *screen++ = *data++;
+        }
+        screen += blank;
     }
-    screen += blank;
-  }
 }
 
 /***************************************************
  BG ビットマップ描画 8bit　フレーム
  ***************************************************/
-void draw_bitmap_frame(int x, int y, int w, int h, const u16 *data)
+void draw_bitmap_frame(int x, int y, int w, int h, const u16* data)
 {
-  u16 *screen = current_frame + (y * SCREEN_WIDTH + x) / 2; // VRAMの書き込みは16/32bit単位
+#ifdef SCREEN_BLANK
+    u16* screen = current_frame + SCREEN_BLANK + (y * SCREEN_WIDTH + x) / 2; // VRAMの書き込みは16/32bit単位
+#else
+    u16* screen = current_frame + (y * SCREEN_WIDTH + x) / 2; // VRAMの書き込みは16/32bit単位
+#endif
 
-  int blank = (SCREEN_WIDTH - w) / 2;
+    CpuFastSet(data, screen, SCREEN_WIDTH * SCREEN_HEIGHT / 4 - SCREEN_BLANK4);
+
+    /*
+  int blank = (SCREEN_WIDTH - w) / 4;
   for (int j = 0; j < h; j++)
   {
-    for (int i = 0; i < w / 2; i++)
+    for (int i = 0; i < w / 4; i++)
     {
       *screen++ = *data++;
     }
     screen += blank;
   }
+*/
 }
 
 /***************************************************
@@ -205,30 +207,30 @@ void draw_bitmap_frame(int x, int y, int w, int h, const u16 *data)
  ***************************************************/
 void flip_frame()
 {
-  REG_DISPCNT ^= BACKBUFFER;
-  current_frame = (u16 *)((u32)current_frame ^ FRAME_FLIP_ADDRESS);
+    REG_DISPCNT ^= BACKBUFFER;
+    current_frame = (u16*)((u32)current_frame ^ FRAME_FLIP_ADDRESS);
 }
 
 /***************************************************
   カレントフレームにビットマップ転送 圧縮LZ77
  ***************************************************/
-void load_frame_bitmap_lz77(const u16 *data)
+void load_frame_bitmap_lz77(const u16* data)
 {
-  LZ77UnCompVram((void *)data, (void *)current_frame);
+    LZ77UnCompVram((void*)data, (void*)current_frame);
 }
 
 /***************************************************
  カレントフレームにビットマップ転送
  ***************************************************/
-void load_frame_bitmap(const u16 *data)
+void load_frame_bitmap(const u16* data)
 {
-  CpuFastSet(data, current_frame, (240 * 160 / 4));
+    CpuFastSet(data, current_frame, (240 * 160 / 4));
 }
 
 /***************************************************
  カレントフレームをFILL
  ***************************************************/
-void fill_frame_bitmap(const u8 *color)
+void fill_frame_bitmap(const u8* color)
 {
-  CpuFastSet(color, current_frame, (FILL | (240 * 160 / 4)));
+    CpuFastSet(color, current_frame, (FILL | (240 * 160 / 4)));
 }

@@ -110,6 +110,25 @@
  */
 #define STAR_SPEED (-4096 * 25)
 
+/**
+ * @brief 次のレベルまで（フレーム）
+ * 
+ */
+#define NEXT_LEVEL (30 * 60)
+
+/**
+ * @brief ブロック出現のインターバル 初期値
+ * 
+ */
+#define DEF_STAR_INTERVAL (28)
+
+/**
+ * @brief インターバル 刻み値
+ * 
+ */
+#define STAR_INTERVAL_STEP (2)
+
+
 /***************************************************
  * モード
  ***************************************************/
@@ -212,7 +231,7 @@
 /**
  * 自機 速度
  */
-#define SHIP_SPEED (4096 * 1)
+#define SHIP_SPEED (4096 * 2)
 
 /**
  * @brief 自機自然減速
@@ -252,7 +271,7 @@
  * @brief エネルギー表示X座標
  * 
  */
-#define ENERGY_X (172)
+#define ENERGY_X (144)
 
 /**
  * @brief エネルギー表示Y座標
@@ -282,7 +301,27 @@
  * @brief 回復
  * 
  */
-#define RECOVERY_ENEGRY (5 << E_FIX)
+#define RECOVERY_ENEGRY (2 << E_FIX)
+
+/***************************************************
+ * 逆噴射
+ ***************************************************/
+
+/**
+ * @brief 使用エネルギー
+ */
+#define BOOTER_ENERGY (-1 << E_FIX)
+
+/**
+ * @brief 逆噴射の加速
+ */
+#define BOOSTER_ACC (1 << FIX)
+
+/**
+ * @brief 逆噴射時間
+ */
+#define BOOST_TIME (3 * 60)
+
 
 /***************************************************
  * 振動アニメ
@@ -577,7 +616,7 @@
 /**
  * スコア　X座標
  */
-#define SCORE_X (82)
+#define SCORE_X (42)
 /**
  * スコア　Y座標
  */
@@ -603,7 +642,7 @@
 /**
  * @brief リング数 X座標
  */
-#define RING_X (148)
+#define RING_X (116)
 
 /**
  * @brief リング数　Y座標
@@ -628,30 +667,13 @@
 /**
  * @brief レベル表示 X座標
  */
-#define LV_X (36)
+#define LV_X (16)
 
 /**
  * @brief レベル表示　Y座標
  */
 #define LV_Y (0)
 
-/**
- * @brief 次のレベルまで（フレーム）
- * 
- */
-#define NEXT_LEVEL (60 * 60)
-
-/**
- * @brief ブロック出現のインターバル
- * 
- */
-#define DEF_STAR_INTERVAL (40)
-
-/**
- * @brief インターバル 刻み値
- * 
- */
-#define STAR_INTERVAL_STEP (4)
 
 /***************************************************
  *　BGM
@@ -843,6 +865,8 @@ typedef struct
 typedef struct {
     // エネルギー
     int energy;
+    // 逆噴射
+    int booster;
     // 振動
     ShockType shock;
     // スプライト

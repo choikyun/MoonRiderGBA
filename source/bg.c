@@ -181,25 +181,15 @@ void draw_bitmap8(int x, int y, int w, int h, const u16* data)
  ***************************************************/
 void draw_bitmap_frame(int x, int y, int w, int h, const u16* data)
 {
-#ifdef SCREEN_BLANK
-    u16* screen = current_frame + SCREEN_BLANK + (y * SCREEN_WIDTH + x) / 2; // VRAMの書き込みは16/32bit単位
-#else
     u16* screen = current_frame + (y * SCREEN_WIDTH + x) / 2; // VRAMの書き込みは16/32bit単位
-#endif
 
-    CpuFastSet(data, screen, SCREEN_WIDTH * SCREEN_HEIGHT / 4 - SCREEN_BLANK4);
-
-    /*
-  int blank = (SCREEN_WIDTH - w) / 4;
-  for (int j = 0; j < h; j++)
-  {
-    for (int i = 0; i < w / 4; i++)
-    {
-      *screen++ = *data++;
+    int blank = (SCREEN_WIDTH - w) / 2;
+    for (int j = 0; j < h; j++) {
+        for (int i = 0; i < w / 2; i++) {
+            *screen++ = *data++;
+        }
+        screen += blank;
     }
-    screen += blank;
-  }
-*/
 }
 
 /***************************************************

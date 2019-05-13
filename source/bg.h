@@ -85,8 +85,8 @@
 #define FRAME_FLIP_ADDRESS ((u32)0xA000)
 
 // スクリーンのブランク ステータス表示部分は描画しない
-#define SCREEN_BLANK (8 * 240 / 2)
-#define SCREEN_BLANK4 (8 * 240 / 4)
+//#define SCREEN_BLANK (8 * 240 / 2)
+//#define SCREEN_BLANK4 (8 * 240 / 4)
 
 
 

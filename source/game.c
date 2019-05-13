@@ -250,7 +250,7 @@ move_stars()
 
     // ブロックの加速
     stars.acc += DEF_STAR_ACC;
-    if (stars.acc > STAR_SPEED) {
+    if (stars.acc < STAR_SPEED) {
         stars.acc = STAR_SPEED;
     }
 
@@ -399,6 +399,7 @@ init_stage()
     stage.lv = 1;
     stage.next_lv = NEXT_LEVEL;
     stars.interval_rel = DEF_STAR_INTERVAL;
+    stars.acc = STAR_SPEED;
     stars.max_stars = MAX_STARS;
 }
 
@@ -435,6 +436,7 @@ init_ship()
 
     // エネルギー
     ship.energy = (MAX_ENEGRY + MAX_ENEGRY_BLANK) << E_FIX;
+    ship.booster = 0;
 }
 
 /**********************************************/ /**
@@ -753,6 +755,16 @@ move_ship()
         }
         set_sprite_tile(SPRITE_SHIP, TILE_SHIP2);
         fire.sprite.vec.x = FIRE_X_RIGHT << FIX;
+    }
+
+    // 逆噴射
+    if (ship.booster) {
+        ship.booster--;
+    }
+    if (key & KEY_B && !ship.booster && ship.energy >> E_FIX > 10) {
+        stars.acc = BOOSTER_ACC;
+        ship.energy += BOOTER_ENERGY;
+        ship.booster = BOOST_TIME;
     }
 
     // 自然減速
@@ -1098,7 +1110,7 @@ update_lv()
     if (--stage.next_lv < 0 && stage.lv < MAX_LV) {
         stage.next_lv = NEXT_LEVEL;
         stars.interval_rel = DEF_STAR_INTERVAL - stage.lv * STAR_INTERVAL_STEP;
-        ship.energy = MAX_ENEGRY+ MAX_ENEGRY_BLANK;
+        ship.energy = (MAX_ENEGRY+ MAX_ENEGRY_BLANK) << E_FIX;
 
         stage.lv++;
     }

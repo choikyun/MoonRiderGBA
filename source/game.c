@@ -109,6 +109,8 @@ static void
 level_up();
 static void
 reset_message();
+static void
+disp_booster();
 
 //debug
 void vbaPrint(char* s);
@@ -132,12 +134,22 @@ void game()
     case GAME_DEMO:
         break;
 
+    case GAME_READY:
+        disp_ship();
+        disp_fire();
+        create_new_line();
+        move_lines();
+        draw_bg();
+        draw_lines();
+        break;
+
     case GAME_MAIN:
         move_ship();
         move_blocks();
 
         disp_ship();
         disp_fire();
+        disp_booster();
         disp_blocks();
         disp_guide();
         disp_ring_icon();
@@ -157,8 +169,6 @@ void game()
         level_up();
         break;
 
-    case GAME_READY:
-        break;
 
     case GAME_PAUSE:
         break;
@@ -221,15 +231,15 @@ static void
 create_new_blocks()
 {
     // 一定間隔で出現
-    if (MAX_Z - (stars.list[stars.num - 1].vec.z >> FIX) >= stars.interval) {
+    if (MAX_Z - (blocks.list[blocks.num - 1].vec.z >> FIX) >= blocks.interval) {
 
         for (int i = 0; i < APPER_MAX_BLOCKS; i++) {
-            if (stars.num < stars.max_blocks) {
+            if (blocks.num < blocks.max_blocks) {
                 init_star(
-                    stars.num,
+                    blocks.num,
                     RND(0, BLOCK_X_STEP_NUM) * BLOCK_X_STEP + BLOCK_W / 2 - SCREEN_CENTER - BLOCK_X_STEP_BLANK,
                     BLOCK_Y_TARGET);
-                stars.num++;
+                blocks.num++;
             }
         }
     }
@@ -243,33 +253,33 @@ move_blocks()
 {
     RectangleType m, e;
 
-    if (!stars.num) {
+    if (!blocks.num) {
         return;
     }
 
     // ブロックの加速
-    stars.acc += DEF_BLOCK_ACC;
-    if (stars.acc < BLOCK_SPEED) {
-        stars.acc = BLOCK_SPEED;
+    blocks.acc += DEF_BLOCK_ACC;
+    if (blocks.acc < BLOCK_SPEED) {
+        blocks.acc = BLOCK_SPEED;
     }
 
-    for (int i = 0; i < stars.num; i++) {
-        //stars.list[i].vec.z += stars.list[i].acc.z;
-        stars.list[i].vec.z += stars.acc;
+    for (int i = 0; i < blocks.num; i++) {
+        //blocks.list[i].vec.z += blocks.list[i].acc.z;
+        blocks.list[i].vec.z += blocks.acc;
     }
 
     // スコア加算
     score++;
 
     // 先頭のスプライトデータの消去
-    if (stars.list[0].vec.z >> FIX < MIN_Z) {
+    if (blocks.list[0].vec.z >> FIX < MIN_Z) {
         // 当たり判定
         m.x = (ship.sprite.vec.x >> FIX) + SHIP_MOVE_MAX_X - ship.sprite.center.x;
         m.w = ship.sprite.hit.w;
-        e.x = stars.list[0].target.x + SHIP_MOVE_MAX_X - stars.list[0].center.x + (stage.center.x >> FIX);
-        e.w = stars.list[0].hit.w;
+        e.x = blocks.list[0].target.x + SHIP_MOVE_MAX_X - blocks.list[0].center.x + (stage.center.x >> FIX);
+        e.w = blocks.list[0].hit.w;
         if (hits_block(&m, &e)) {
-            if (stars.list[0].type == NORMAL) {
+            if (blocks.list[0].type == NORMAL) {
                 flash();
                 shock();
                 update_energy(DAMAGE_ENEGRY);
@@ -283,14 +293,14 @@ move_blocks()
         // エネルギー消費
         update_energy(-abs(stage.center.x >> FIX));
 
-        stars.num--;
+        blocks.num--;
         CpuSet(
-            &stars.list[1],
-            &stars.list[0],
-            (COPY32 | (sizeof(SpriteCharType) / 4) * stars.num));
+            &blocks.list[1],
+            &blocks.list[0],
+            (COPY32 | (sizeof(SpriteCharType) / 4) * blocks.num));
 
         // スプライト消去
-        erase_sprite(SPRITE_BLOCK + stars.num);
+        erase_sprite(SPRITE_BLOCK + blocks.num);
     }
 }
 
@@ -342,6 +352,10 @@ init_sprite_setting()
     //// 炎 16*16 dot
     set_sprite_form(SPRITE_FIRE, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
     set_sprite_tile(SPRITE_FIRE, TILE_FIRE1);
+
+    /// 逆噴射 16*16 dot
+    set_sprite_form(SPRITE_BOOSTER, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
+    set_sprite_tile(SPRITE_BOOSTER, TILE_BOOSTER1);
 
     //// ガイド 8*8 dot
     set_sprite_form(SPRITE_GUIDE, OBJ_SIZE(0), OBJ_SQUARE, OBJ_256_COLOR);
@@ -400,10 +414,10 @@ init_stage()
     // レベル初期化
     stage.lv = 1;
     stage.next_lv = NEXT_LEVEL;
-    stars.interval = BLOCK_Z_INTERVAL;
-    //stars.interval_rel = DEF_BLOCK_INTERVAL;
-    stars.acc = BLOCK_SPEED;
-    stars.max_blocks = MAX_BLOCKS;
+    blocks.interval = BLOCK_Z_INTERVAL;
+    //blocks.interval_rel = DEF_BLOCK_INTERVAL;
+    blocks.acc = BLOCK_SPEED;
+    blocks.max_blocks = MAX_BLOCKS;
 }
 
 /**********************************************/ /**
@@ -466,6 +480,10 @@ init_fire()
     fire.anime.max_frame = 2;
     fire.anime.interval = fire.anime.interval_rel = FIRE_INTERVAL;
     fire.anime.is_start = true;
+
+    // 逆噴射
+    booster = fire;
+    booster.sprite.chr = SPRITE_BOOSTER;
 }
 
 /**********************************************/ /**
@@ -476,19 +494,19 @@ init_blocks()
 {
     for (int i = 0; i < MAX_BLOCKS; i++) {
         // スプライトの割当
-        stars.list[i].chr = SPRITE_BLOCK;
-        stars.list[i].center.x = BLOCK_SP_W / 2;
-        stars.list[i].center.y = BLOCK_SP_H / 2;
-        stars.list[i].rect.w = BLOCK_W;
-        stars.list[i].rect.h = BLOCK_H;
-        stars.list[i].hit.w = BLOCK_W - 1;
-        stars.list[i].hit.h = BLOCK_H - 1;
-        stars.list[i].fix.x = 0;
-        stars.list[i].fix.y = 0;
+        blocks.list[i].chr = SPRITE_BLOCK;
+        blocks.list[i].center.x = BLOCK_SP_W / 2;
+        blocks.list[i].center.y = BLOCK_SP_H / 2;
+        blocks.list[i].rect.w = BLOCK_W;
+        blocks.list[i].rect.h = BLOCK_H;
+        blocks.list[i].hit.w = BLOCK_W - 1;
+        blocks.list[i].hit.h = BLOCK_H - 1;
+        blocks.list[i].fix.x = 0;
+        blocks.list[i].fix.y = 0;
     }
 
-    stars.interval = 3 * 60;
-    stars.num = 0;
+    blocks.interval = 3 * 60;
+    blocks.num = 0;
 }
 
 /**********************************************/ /**
@@ -498,20 +516,20 @@ static void
 init_star(int num, int x, int y)
 {
     // 加速度
-    //stars.list[num].acc.z = BLOCK_SPEED;
-    stars.acc = BLOCK_SPEED;
+    //blocks.list[num].acc.z = BLOCK_SPEED;
+    blocks.acc = BLOCK_SPEED;
 
     // スプライト
-    stars.list[num].target.x = x; // X座標目標値
-    stars.list[num].target.y = y; // Y座標目標値
-    stars.list[num].vec.z = MAX_Z << FIX;
+    blocks.list[num].target.x = x; // X座標目標値
+    blocks.list[num].target.y = y; // Y座標目標値
+    blocks.list[num].vec.z = MAX_Z << FIX;
 
     set_affine_setting(SPRITE_BLOCK + num, num, 0);
 
     // ブロック or リング
-    stars.list[num].type = NORMAL;
+    blocks.list[num].type = NORMAL;
     if (!RND(0, 2)) {
-        stars.list[num].type = RING;
+        blocks.list[num].type = RING;
     }
 }
 
@@ -764,7 +782,7 @@ move_ship()
         ship.booster--;
     }
     if (key & KEY_B && !ship.booster && ship.energy >> E_FIX > 10) {
-        stars.acc = BOOSTER_ACC;
+        blocks.acc = BOOSTER_ACC;
         ship.energy += BOOTER_ENERGY;
         ship.booster = BOOST_TIME;
     }
@@ -835,6 +853,10 @@ disp_ship()
 static void
 disp_fire()
 {
+    if (ship.booster > 0) {
+        erase_sprite(fire.sprite.chr);
+    }
+
     // アニメ
     if (fire.anime.is_start && --fire.anime.interval < 0) {
         fire.anime.interval = fire.anime.interval_rel;
@@ -854,6 +876,37 @@ disp_fire()
 }
 
 /**********************************************/ /**
+ * @brief 逆噴射表示
+ ***********************************************/
+static void
+disp_booster()
+{
+    if (!ship.booster) {
+        erase_sprite(booster.sprite.chr);
+        return;
+    }
+
+    erase_sprite(fire.sprite.chr);
+
+    // アニメ
+    if (booster.anime.is_start && --booster.anime.interval < 0) {
+        booster.anime.interval = booster.anime.interval_rel;
+        booster.anime.frame = (booster.anime.frame + 1) % booster.anime.max_frame;
+        // タイル切り替え
+        set_sprite_tile(SPRITE_BOOSTER, TILE_BOOSTER1 + (booster.anime.frame * TILE_SIZE_16));
+    }
+
+    // ターゲット座標 更新
+    booster.sprite.target.x = fire.sprite.vec.x >> FIX;
+    booster.sprite.target.y = (fire.sprite.vec.y >> FIX) + BOOSTER_FIXED_Y;
+
+    // 座標変換
+    VectorType v = trans_device_coord(&booster.sprite);
+
+    move_sprite(booster.sprite.chr, v.x, v.y);
+}
+
+/**********************************************/ /**
  * @brief ブロック表示
  ***********************************************/
 static void
@@ -861,19 +914,19 @@ disp_blocks()
 {
     VectorType v;
 
-    for (int i = 0; i < stars.num; i++) {
+    for (int i = 0; i < blocks.num; i++) {
         // ステージ側が移動するのでターゲット座標の補正
-        //stars.list[cur].fix.x = stage.center.x >> FIX; // 視点をを移動しない場合はこちら
+        //blocks.list[cur].fix.x = stage.center.x >> FIX; // 視点をを移動しない場合はこちら
 
         // 座標変換
-        v = trans_device_coord(&stars.list[i]);
+        v = trans_device_coord(&blocks.list[i]);
 
         // アフィンパラメータ設定
         set_affine_setting(SPRITE_BLOCK + i, i, 0 /*OBJ_DOUBLE*/);
 
         // スケールを設定
         // ブロック or リング
-        if (stars.list[i].type == NORMAL) {
+        if (blocks.list[i].type == NORMAL) {
             set_scale(i, v.scale, v.scale /* * 1.2f*/);
             set_sprite_tile(SPRITE_BLOCK + i, TILE_BLOCK1);
         } else {
@@ -882,7 +935,7 @@ disp_blocks()
         }
 
         move_sprite(
-            stars.list[i].chr + i,
+            blocks.list[i].chr + i,
             // v.x,
             v.x + (stage.center.x >> FIX), // 視点を移動する場合はこちら
             v.y);
@@ -1108,10 +1161,13 @@ update_lv()
     // レベルアップ
     if (--stage.next_lv < 0 && stage.lv < MAX_LV) {
         stage.next_lv = NEXT_LEVEL;
-        //stars.interval_rel = DEF_BLOCK_INTERVAL - stage.lv * BLOCK_INTERVAL_STEP;
+        //blocks.interval_rel = DEF_BLOCK_INTERVAL - stage.lv * BLOCK_INTERVAL_STEP;
         ship.energy = (MAX_ENEGRY + MAX_ENEGRY_BLANK) << E_FIX;
 
         stage.lv++;
+
+        reset_message (&lv_mes);
+        lv_mes.is_start = true;
     }
 
     // レベル表示
@@ -1151,7 +1207,7 @@ level_up()
     }
 
     if (lv_mes.chr) {
-        draw_bitmap_frame(LV_MES_X, LV_MES_X, LV_MES_W, LV_MES_H, bmp_lv_blackBitmap);
+        draw_bitmap_frame(LV_MES_X, LV_MES_X, LV_MES_W, LV_MES_H, bmp_lv_black1Bitmap);
     }
 }
 

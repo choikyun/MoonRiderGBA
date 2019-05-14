@@ -301,7 +301,7 @@
  * @brief 回復
  * 
  */
-#define RECOVERY_ENEGRY (2 << E_FIX)
+#define RECOVERY_ENEGRY (5 << E_FIX)
 
 /***************************************************
  * 逆噴射
@@ -310,17 +310,24 @@
 /**
  * @brief 使用エネルギー
  */
-#define BOOTER_ENERGY (-1 << E_FIX)
+#define BOOTER_ENERGY (-RECOVERY_ENEGRY)
 
 /**
  * @brief 逆噴射の加速
  */
-#define BOOSTER_ACC (4 << FIX)
+#define BOOSTER_ACC (2 << FIX)
 
 /**
  * @brief 逆噴射時間
  */
-#define BOOST_TIME (3 * 60)
+#define BOOST_TIME (1 * 60)
+
+
+/**
+ * @brief 逆噴射 Y座標補正
+ */
+#define BOOSTER_FIXED_Y (-14)
+
 
 
 /***************************************************
@@ -738,16 +745,18 @@ enum {
     SPRITE_FIRE = 0,
     // 自機
     SPRITE_SHIP = 1,
+    // 逆噴射
+    SPRITE_BOOSTER = 2,
     // ガイド
-    SPRITE_GUIDE = 2,
+    SPRITE_GUIDE = 3,
     // 境界線
-    SPRITE_BOUNDARY_L = 3,
+    SPRITE_BOUNDARY_L = 4,
     // 境界線
-    SPRITE_BOUNDARY_R = 4,
+    SPRITE_BOUNDARY_R = 5,
     // リングアイコン
-    SPRITE_RINGICON = 5,
+    SPRITE_RINGICON = 6,
     // ブロック
-    SPRITE_BLOCK = 6,
+    SPRITE_BLOCK = 7,
 };
 
 /**
@@ -941,7 +950,7 @@ typedef struct
     int acc;
     // ブロックのリスト
     SpriteCharType list[MAX_BLOCKS];
-} ALIGN(4) StarType;
+} ALIGN(4) BlockType;
 
 /**
  * 地平線管理
@@ -1016,10 +1025,16 @@ typedef struct
 // ガイド
 #define TILE_GUIDE1 (944) // 2tiles
 
+// 境界線
 #define TILE_BOUNDARY1 (946) // 8tiles
 
 // リングアイコン
 #define TILE_RINGICON1 (954) // 8tiles
+
+// 逆噴射
+#define TILE_BOOSTER1 (962) // 8tiles
+#define TILE_BOOSTER2 (970) // 8
+
 
 ///////////////////////////////////////////////////////////////////// SRAM
 
@@ -1099,9 +1114,14 @@ GLOBAL ShipType ship;
 GLOBAL FireType fire;
 
 /**
+ * 逆噴射
+ */
+GLOBAL FireType booster;
+
+/**
  * ブロック
  */
-GLOBAL StarType stars;
+GLOBAL BlockType blocks;
 
 /**
  * 地平線

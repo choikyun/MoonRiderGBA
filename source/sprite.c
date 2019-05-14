@@ -228,5 +228,5 @@ void init_sprite_chr(void)
 
     // ブースター
     CpuSet(sprite_booster1Tiles, oam + 512 * 5 + 128 * 2 + 2048 * 2 + 32 + 128 * 2, (COPY32 | sprite_booster1TilesLen / 4)); // 16dot
-
+    CpuSet(sprite_fire2Tiles, oam + 512 * 5 + 128 * 2 + 2048 * 2 + 32 + 128 * 3, (COPY32 | sprite_fire2TilesLen / 4)); // 16dot
 }

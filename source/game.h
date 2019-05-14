@@ -98,17 +98,17 @@
 /**
  * 星の出現間隔
  */
-#define STAR_INTERVAL (19)
+#define BLOCK_INTERVAL (19)
 
 /**
  * 星の同時出現数
  */
-#define APPER_MAX_STARS (1)
+#define APPER_MAX_BLOCKS (1)
 
 /**
- * スター 速度
+ * ブロック 速度
  */
-#define STAR_SPEED (-4096 * 25)
+#define BLOCK_SPEED (-4096 * 25)
 
 /**
  * @brief 次のレベルまで（フレーム）
@@ -120,13 +120,13 @@
  * @brief ブロック出現のインターバル 初期値
  * 
  */
-#define DEF_STAR_INTERVAL (28)
+#define DEF_BLOCK_INTERVAL (28)
 
 /**
  * @brief インターバル 刻み値
  * 
  */
-#define STAR_INTERVAL_STEP (2)
+#define BLOCK_INTERVAL_STEP (2)
 
 
 /***************************************************
@@ -315,7 +315,7 @@
 /**
  * @brief 逆噴射の加速
  */
-#define BOOSTER_ACC (1 << FIX)
+#define BOOSTER_ACC (4 << FIX)
 
 /**
  * @brief 逆噴射時間
@@ -399,91 +399,97 @@
 #define FIRE_INTERVAL (3)
 
 /***************************************************
- * スター スプライト
+ * ブロック スプライト
  ***************************************************/
 
 /**
- * スター 幅
+ * ブロック 幅
  */
-#define STAR_W (40)
-//#define STAR_W (80)
+#define BLOCK_W (40)
+//#define BLOCK_W (80)
 
 /**
- * スター 高さ
+ * ブロック 高さ
  */
-#define STAR_H (40)
-//#define STAR_H (80)
+#define BLOCK_H (40)
+//#define BLOCK_H (80)
 
 /**
  * @brief スプライト幅
  * 
  */
-#define STAR_SP_W (64)
-//#define STAR_SP_W (128)
+#define BLOCK_SP_W (64)
+//#define BLOCK_SP_W (128)
 
 /**
  * @brief スプライト高さ
  * 
  */
-#define STAR_SP_H (64)
-//#define STAR_SP_H (128)
+#define BLOCK_SP_H (64)
+//#define BLOCK_SP_H (128)
 
 /**
- * スター最大数
+ * ブロック最大数
  */
-#define MAX_STARS (16)
+#define MAX_BLOCKS (16)
 
 /**
  * @brief dデフォルトの加速度
  * 
  */
-#define DEF_STAR_ACC (-4096 * 1)
+#define DEF_BLOCK_ACC (-4096 * 1)
 
 /**
  * Z加速度最大値
  */
-#define STAR_MAX_ACC (4) << FIX)
+#define BLOCK_MAX_ACC (4) << FIX)
 
 /**
- * スター出現間隔 X方向
- */
-#define STAR_X_STEP (40)
-
-/**
- * @brief スター出現 Y方向
+ * @brief ブロック出現間隔（Z方向）
  * 
  */
-#define STAR_Y_STEP (40)
+#define BLOCK_Z_INTERVAL (30)
+
+/**
+ * ブロック出現間隔 X方向
+ */
+#define BLOCK_X_STEP (40)
+
+/**
+ * @brief ブロック出現 Y方向
+ * 
+ */
+#define BLOCK_Y_STEP (40)
 
 /**
  * @brief X方向の出現数
  * 
  */
-#define STAR_X_STEP_NUM (10 - 1)
+#define BLOCK_X_STEP_NUM (10 - 1)
 
 /**
  * @brief X方向の余白 2キャラ分
  * 
  */
-#define STAR_X_STEP_BLANK (STAR_X_STEP *2)
+#define BLOCK_X_STEP_BLANK (BLOCK_X_STEP *2)
 
 /**
  * @brief Y方向の出現数
  * 
  */
-#define STAR_Y_STEP_NUM (0)
+#define BLOCK_Y_STEP_NUM (0)
 
 /**
  * @brief ブロック着地点の余白
  * 
  */
-#define STAR_Y_TARGET_BLANK (SCREEN_HEIGHT - STAR_H * 2 - FIX_STAGE_Y)
+#define BLOCK_Y_TARGET_BLANK (SCREEN_HEIGHT - BLOCK_H * 2 - FIX_STAGE_Y)
 
 /**
  * @brief ブロック着地点 Y座標
  * 
  */
-#define STAR_Y_TARGET (SHIP_Y - 40)
+#define BLOCK_Y_TARGET (SHIP_Y - 40)
 
 /***************************************************
  * ガイド
@@ -573,7 +579,7 @@
  * アイコン
  ***************************************************/
 
-#define ICON_START_Y (-5)
+#define ICON_BLOCK_Y (-5)
 
 #define ICON_TARGET_Y (-20)
 
@@ -674,6 +680,29 @@
  */
 #define LV_Y (0)
 
+/**
+ * @brief レベルメッセージ X座標
+ * 
+ */
+#define LV_MES_X (0)
+
+/**
+ * @brief レベルメッセージ Y座標
+ * 
+ */
+#define LV_MES_X (0)
+
+/**
+ * @brief レベルメッセージ 幅
+ * 
+ */
+#define LV_MES_W (16)
+
+/**
+ * @brief レベルメッセージ 高さ
+ * 
+ */
+#define LV_MES_H (8)
 
 /***************************************************
  *　BGM
@@ -718,7 +747,7 @@ enum {
     // リングアイコン
     SPRITE_RINGICON = 5,
     // ブロック
-    SPRITE_STAR = 6,
+    SPRITE_BLOCK = 6,
 };
 
 /**
@@ -811,7 +840,7 @@ typedef struct
     int ring;
     // ステージの中心座標
     VectorType center;
-    // 次のスターが出現するまでの間隔
+    // 次のブロックが出現するまでの間隔
     int star_interval;
     // モード
     int mode;
@@ -896,22 +925,22 @@ typedef struct {
 } ALIGN(4) IconType;
 
 /**
- * スター管理
+ * ブロック管理
  */
 typedef struct
 {
     // 出現間隔
     int interval;
     // 出現間隔リロード
-    int interval_rel;
+    //int interval_rel;
     // 現在の数
     int num;
     // 最大出現数
-    int max_stars;
+    int max_blocks;
     // 加速度（全てのブロック共通）
     int acc;
-    // スターのリスト
-    SpriteCharType list[MAX_STARS];
+    // ブロックのリスト
+    SpriteCharType list[MAX_BLOCKS];
 } ALIGN(4) StarType;
 
 /**
@@ -979,7 +1008,7 @@ typedef struct
 #define TILE_FIRE2 (680) // 8
 
 // ブロック
-#define TILE_STAR1 (688) // 128tiles
+#define TILE_BLOCK1 (688) // 128tiles
 
 // リング
 #define TILE_RING1 (816) // 128tiles
@@ -1070,7 +1099,7 @@ GLOBAL ShipType ship;
 GLOBAL FireType fire;
 
 /**
- * スター
+ * ブロック
  */
 GLOBAL StarType stars;
 
@@ -1102,6 +1131,12 @@ GLOBAL BoundaryType boundary_l;
  * 
  */
 GLOBAL IconType ring_icon;
+
+/**
+ * @brief レベルアップ表示
+ * 
+ */
+GLOBAL BlinkMessageType lv_mes;
 
 
 /**

@@ -6,7 +6,7 @@
  */
 
 /***************************************************
- * Meteorite
+ * Moon Rider
  * ver 1.0.0
  * 2019.04.19
  * Choi Gyun
@@ -34,7 +34,7 @@ init_ship();
 static void
 init_fire();
 static void
-init_stars();
+init_blocks();
 static void
 init_star(int, int, int);
 static void
@@ -46,7 +46,7 @@ move_ship();
 static void
 disp_ship();
 static void
-disp_stars();
+disp_blocks();
 static void
 disp_fire();
 static void
@@ -58,11 +58,11 @@ init_sprite_setting();
 static void
 init_stage();
 static void
-move_stars();
+move_blocks();
 static void
 check_stage_boundary();
 static void
-create_new_stars();
+create_new_blocks();
 static void
 copy_affine(int, int);
 static void
@@ -105,7 +105,10 @@ static void
 disp_num(int, int, u16);
 static void
 update_score();
-
+static void
+level_up();
+static void
+reset_message();
 
 //debug
 void vbaPrint(char* s);
@@ -131,16 +134,16 @@ void game()
 
     case GAME_MAIN:
         move_ship();
-        move_stars();
+        move_blocks();
 
         disp_ship();
         disp_fire();
-        disp_stars();
+        disp_blocks();
         disp_guide();
         disp_ring_icon();
         /*disp_boundary();*/
 
-        create_new_stars();
+        create_new_blocks();
         create_new_line();
 
         move_lines();
@@ -151,6 +154,7 @@ void game()
         update_ring();
         update_lv();
         update_score();
+        level_up();
         break;
 
     case GAME_READY:
@@ -174,7 +178,6 @@ void init_game()
     stage.mode = 0;
     score = 0;
 
-
     // FLASH初期化
     for (int i = 0; i < 32; i++) {
         stage.flash.color[i] = FLASH_COLOR;
@@ -192,8 +195,8 @@ void init_game()
     // 炎初期化
     init_fire();
 
-    // スター初期化
-    init_stars();
+    // ブロック初期化
+    init_blocks();
 
     // 地平線
     init_lines();
@@ -215,32 +218,28 @@ void init_game()
  * @brief ブロック作成
  ***********************************************/
 static void
-create_new_stars()
+create_new_blocks()
 {
     // 一定間隔で出現
-    if (--stars.interval <= 0) {
+    if (MAX_Z - (stars.list[stars.num - 1].vec.z >> FIX) >= stars.interval) {
 
-        int max = stars.max_stars;
-        for (int i = 0; i < APPER_MAX_STARS; i++) {
-            if (stars.num < max) {
+        for (int i = 0; i < APPER_MAX_BLOCKS; i++) {
+            if (stars.num < stars.max_blocks) {
                 init_star(
                     stars.num,
-                    RND(0, STAR_X_STEP_NUM) * STAR_X_STEP + STAR_W / 2 - SCREEN_CENTER - STAR_X_STEP_BLANK,
-                    STAR_Y_TARGET);
+                    RND(0, BLOCK_X_STEP_NUM) * BLOCK_X_STEP + BLOCK_W / 2 - SCREEN_CENTER - BLOCK_X_STEP_BLANK,
+                    BLOCK_Y_TARGET);
                 stars.num++;
             }
         }
-
-        // 次の出現間隔
-        stars.interval = stars.interval_rel;
     }
 }
 
 /**********************************************/ /**
- * @brief スター移動
+ * @brief ブロック移動
  ***********************************************/
 static void
-move_stars()
+move_blocks()
 {
     RectangleType m, e;
 
@@ -249,9 +248,9 @@ move_stars()
     }
 
     // ブロックの加速
-    stars.acc += DEF_STAR_ACC;
-    if (stars.acc < STAR_SPEED) {
-        stars.acc = STAR_SPEED;
+    stars.acc += DEF_BLOCK_ACC;
+    if (stars.acc < BLOCK_SPEED) {
+        stars.acc = BLOCK_SPEED;
     }
 
     for (int i = 0; i < stars.num; i++) {
@@ -291,7 +290,7 @@ move_stars()
             (COPY32 | (sizeof(SpriteCharType) / 4) * stars.num));
 
         // スプライト消去
-        erase_sprite(SPRITE_STAR + stars.num);
+        erase_sprite(SPRITE_BLOCK + stars.num);
     }
 }
 
@@ -359,15 +358,15 @@ init_sprite_setting()
     set_sprite_form(SPRITE_RINGICON, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
     set_sprite_tile(SPRITE_RINGICON, TILE_RINGICON1);
 
-    //// スター 64*64 dot
-    for (int i = 0; i < MAX_STARS; i++) {
-        set_sprite_form(SPRITE_STAR + i, OBJ_SIZE(Sprite_64x64), OBJ_SQUARE, OBJ_256_COLOR);
-        set_sprite_tile(SPRITE_STAR + i, TILE_STAR1);
+    //// ブロック 64*64 dot
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        set_sprite_form(SPRITE_BLOCK + i, OBJ_SIZE(Sprite_64x64), OBJ_SQUARE, OBJ_256_COLOR);
+        set_sprite_tile(SPRITE_BLOCK + i, TILE_BLOCK1);
     }
 }
 
 /**********************************************/ /**
- * @brief リスタート
+ * @brief リブロックト
  ***********************************************/
 static void
 restart()
@@ -378,6 +377,9 @@ restart()
     srand(REG_TM0CNT + seed);
     // seedをSRAMに保存
     SRAMWrite32(SRAM_SEED, seed);
+
+    // メッセージ初期化
+    reset_message(&lv_mes);
 
     // ステージ初期化
     init_stage();
@@ -394,13 +396,14 @@ init_stage()
     stage.center.y = 0;
 
     stage.ring = 0;
-    
+
     // レベル初期化
     stage.lv = 1;
     stage.next_lv = NEXT_LEVEL;
-    stars.interval_rel = DEF_STAR_INTERVAL;
-    stars.acc = STAR_SPEED;
-    stars.max_stars = MAX_STARS;
+    stars.interval = BLOCK_Z_INTERVAL;
+    //stars.interval_rel = DEF_BLOCK_INTERVAL;
+    stars.acc = BLOCK_SPEED;
+    stars.max_blocks = MAX_BLOCKS;
 }
 
 /**********************************************/ /**
@@ -466,20 +469,20 @@ init_fire()
 }
 
 /**********************************************/ /**
- * @brief すべてのスター初期化
+ * @brief すべてのブロック初期化
  ***********************************************/
 static void
-init_stars()
+init_blocks()
 {
-    for (int i = 0; i < MAX_STARS; i++) {
+    for (int i = 0; i < MAX_BLOCKS; i++) {
         // スプライトの割当
-        stars.list[i].chr = SPRITE_STAR;
-        stars.list[i].center.x = STAR_SP_W / 2;
-        stars.list[i].center.y = STAR_SP_H / 2;
-        stars.list[i].rect.w = STAR_W;
-        stars.list[i].rect.h = STAR_H;
-        stars.list[i].hit.w = STAR_W - 1;
-        stars.list[i].hit.h = STAR_H - 1;
+        stars.list[i].chr = SPRITE_BLOCK;
+        stars.list[i].center.x = BLOCK_SP_W / 2;
+        stars.list[i].center.y = BLOCK_SP_H / 2;
+        stars.list[i].rect.w = BLOCK_W;
+        stars.list[i].rect.h = BLOCK_H;
+        stars.list[i].hit.w = BLOCK_W - 1;
+        stars.list[i].hit.h = BLOCK_H - 1;
         stars.list[i].fix.x = 0;
         stars.list[i].fix.y = 0;
     }
@@ -489,21 +492,21 @@ init_stars()
 }
 
 /**********************************************/ /**
- * @brief スター初期化
+ * @brief ブロック初期化
  ***********************************************/
 static void
 init_star(int num, int x, int y)
 {
     // 加速度
-    //stars.list[num].acc.z = STAR_SPEED;
-    stars.acc = STAR_SPEED;
+    //stars.list[num].acc.z = BLOCK_SPEED;
+    stars.acc = BLOCK_SPEED;
 
     // スプライト
     stars.list[num].target.x = x; // X座標目標値
     stars.list[num].target.y = y; // Y座標目標値
     stars.list[num].vec.z = MAX_Z << FIX;
 
-    set_affine_setting(SPRITE_STAR + num, num, 0);
+    set_affine_setting(SPRITE_BLOCK + num, num, 0);
 
     // ブロック or リング
     stars.list[num].type = NORMAL;
@@ -553,7 +556,6 @@ init_ring_icon()
     ring_icon.sprite.rect.h = ICON_H;
     ring_icon.sprite.acc.y = ICON_Y_ACC;
 }
-
 
 /**********************************************/ /**
  * @brief ガイド初期化
@@ -632,7 +634,7 @@ static void
 create_new_line()
 {
     // ブロックと同じ加速度ですすむ
-    lines.z += STAR_SPEED;
+    lines.z += BLOCK_SPEED;
     if ((lines.z >> FIX) % LINE_INTERVAL != 0) {
         return;
     }
@@ -656,7 +658,7 @@ move_lines()
     }
 
     for (int i = 0; i < lines.num; i++) {
-        lines.list[i].vec.z += STAR_SPEED;
+        lines.list[i].vec.z += BLOCK_SPEED;
     }
 
     // 削除
@@ -689,7 +691,7 @@ draw_lines()
 static void
 draw_line(int y)
 {
-    u32* dst = (u32 *)current_frame + (y * SCREEN_WIDTH) / 4;
+    u32* dst = (u32*)current_frame + (y * SCREEN_WIDTH) / 4;
 
     for (int i = 0; i < LINE_W / 4; i++) {
         *(dst + i) = LINE_COLOR;
@@ -816,14 +818,14 @@ disp_ship()
     if (ship.shock.duration) {
         ship.shock.duration--;
 
-        if (! --ship.shock.interval) {
+        if (!--ship.shock.interval) {
             ship.shock.direc *= -1;
             ship.shock.interval = SHOCK_INTERVAL;
         }
         int r = ship.shock.direc * ship.shock.range;
-        move_sprite (ship.sprite.chr, v.x + r, v.y);
+        move_sprite(ship.sprite.chr, v.x + r, v.y);
     } else {
-        move_sprite (ship.sprite.chr, v.x, v.y);
+        move_sprite(ship.sprite.chr, v.x, v.y);
     }
 }
 
@@ -855,7 +857,7 @@ disp_fire()
  * @brief ブロック表示
  ***********************************************/
 static void
-disp_stars()
+disp_blocks()
 {
     VectorType v;
 
@@ -867,16 +869,16 @@ disp_stars()
         v = trans_device_coord(&stars.list[i]);
 
         // アフィンパラメータ設定
-        set_affine_setting(SPRITE_STAR + i, i, 0 /*OBJ_DOUBLE*/);
+        set_affine_setting(SPRITE_BLOCK + i, i, 0 /*OBJ_DOUBLE*/);
 
         // スケールを設定
         // ブロック or リング
         if (stars.list[i].type == NORMAL) {
             set_scale(i, v.scale, v.scale /* * 1.2f*/);
-            set_sprite_tile(SPRITE_STAR + i, TILE_STAR1);
+            set_sprite_tile(SPRITE_BLOCK + i, TILE_BLOCK1);
         } else {
             set_scale(i, v.scale, v.scale);
-            set_sprite_tile(SPRITE_STAR + i, TILE_RING1);
+            set_sprite_tile(SPRITE_BLOCK + i, TILE_RING1);
         }
 
         move_sprite(
@@ -968,7 +970,6 @@ disp_ring_icon()
     }
 }
 
-
 /**********************************************/ /**
  * @brief フラッシュ
  ***********************************************/
@@ -999,9 +1000,8 @@ set_ring_icon()
     ring_icon.life = ICON_LIFE;
     ring_icon.target.y = (ship.sprite.vec.y >> FIX) + ICON_TARGET_Y;
     ring_icon.sprite.vec.x = ship.sprite.vec.x;
-    ring_icon.sprite.vec.y = ship.sprite.vec.y + (ICON_START_Y << FIX);
+    ring_icon.sprite.vec.y = ship.sprite.vec.y + (ICON_BLOCK_Y << FIX);
 }
-
 
 /**********************************************/ /**
  * @brief エネルギー更新
@@ -1030,13 +1030,13 @@ draw_energy()
     }
 
     for (int i = 0; i < max; i++) {
-        draw_bitmap_frame (ENERGY_X + (i * 2), ENERGY_Y, ENERGY_W, ENERGY_H, bmp_energy1Bitmap);
+        draw_bitmap_frame(ENERGY_X + (i * 2), ENERGY_Y, ENERGY_W, ENERGY_H, bmp_energy1Bitmap);
     }
 
     int x = ENERGY_X + max * 2;
     max = MAX_ENEGRY - max;
     for (int j = 0; j < max; j++) {
-        draw_bitmap_frame (x + (j * 2), ENERGY_Y, ENERGY_W, ENERGY_H, bmp_energy2Bitmap);
+        draw_bitmap_frame(x + (j * 2), ENERGY_Y, ENERGY_W, ENERGY_H, bmp_energy2Bitmap);
     }
 }
 
@@ -1092,8 +1092,7 @@ update_ring()
     int pos = RING_DIGIT * NUM_W - NUM_W;
     int r = stage.ring;
 
-    for (i = 0; i < RING_DIGIT; i++)
-    {
+    for (i = 0; i < RING_DIGIT; i++) {
         disp_num(RING_X + pos, RING_Y, r % 10);
         r /= 10;
         pos -= (NUM_W);
@@ -1109,8 +1108,8 @@ update_lv()
     // レベルアップ
     if (--stage.next_lv < 0 && stage.lv < MAX_LV) {
         stage.next_lv = NEXT_LEVEL;
-        stars.interval_rel = DEF_STAR_INTERVAL - stage.lv * STAR_INTERVAL_STEP;
-        ship.energy = (MAX_ENEGRY+ MAX_ENEGRY_BLANK) << E_FIX;
+        //stars.interval_rel = DEF_BLOCK_INTERVAL - stage.lv * BLOCK_INTERVAL_STEP;
+        ship.energy = (MAX_ENEGRY + MAX_ENEGRY_BLANK) << E_FIX;
 
         stage.lv++;
     }
@@ -1118,15 +1117,43 @@ update_lv()
     // レベル表示
     int pos = LV_DIGIT * NUM_W - NUM_W;
     int r = stage.lv;
- 
-    for (int i = 0; i < LV_DIGIT; i++)
-    {
+
+    for (int i = 0; i < LV_DIGIT; i++) {
         disp_num(LV_X + pos, LV_Y, r % 10);
         r /= 10;
         pos -= (NUM_W);
     }
 }
 
+/**********************************************/ /**
+ * @brief レベルアップ表示
+ ***********************************************/
+static void
+level_up()
+{
+    if (!lv_mes.is_start) {
+        return;
+    }
+
+    // 点滅
+    if (!--lv_mes.wait) {
+        lv_mes.wait = lv_mes.wait_rel;
+        lv_mes.chr ^= 1;
+
+        if (!--lv_mes.count) {
+            reset_message(&lv_mes);
+
+            // BGM切り替え
+            //StopMusic();
+            //stage_bgm = (stage_bgm + 1) & MAX_STAGE_BGM;
+            //PlayMusic(MUSIC_STAGE + stage_bgm, true);
+        }
+    }
+
+    if (lv_mes.chr) {
+        draw_bitmap_frame(LV_MES_X, LV_MES_X, LV_MES_W, LV_MES_H, bmp_lv_blackBitmap);
+    }
+}
 
 /**********************************************/ /**
  * @brief スコア表示
@@ -1137,8 +1164,7 @@ update_score()
     int pos = SCORE_DIGIT * NUM_W - NUM_W;
     int sc = score;
 
-    for (int i = 0; i < SCORE_DIGIT; i++)
-    {
+    for (int i = 0; i < SCORE_DIGIT; i++) {
         disp_num(SCORE_X + pos, SCORE_Y, sc % 10);
         sc /= 10;
         pos -= (NUM_W);
@@ -1187,6 +1213,10 @@ disp_pause()
 static void
 reset_message(BlinkMessageType* m)
 {
+    m->is_start = false;
+    m->count = MES_COUNT;
+    m->chr = 0;
+    m->wait = m->wait_rel = MES_WAIT;
 }
 
 /**********************************************/ /**
@@ -1207,8 +1237,7 @@ reset_message_fast(BlinkMessageType* m)
 static void
 disp_num(int x, int y, u16 num)
 {
-    draw_bitmap_frame (x, y, NUM_W, NUM_H, bmp_numBitmap + 32 * num);
-
+    draw_bitmap_frame(x, y, NUM_W, NUM_H, bmp_numBitmap + 32 * num);
 }
 
 /**********************************************/ /**

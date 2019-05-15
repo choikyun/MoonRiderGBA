@@ -96,38 +96,25 @@
  ***************************************************/
 
 /**
- * 星の出現間隔
+ * ブロックの出現間隔
  */
 #define BLOCK_INTERVAL (19)
 
 /**
- * 星の同時出現数
+ * ブロックの同時出現数
  */
 #define APPER_MAX_BLOCKS (1)
 
 /**
  * ブロック 速度
  */
-#define BLOCK_SPEED (-4096 * 25)
+//#define BLOCK_SPEED (-4096 * 25)
 
 /**
  * @brief 次のレベルまで（フレーム）
  * 
  */
 #define NEXT_LEVEL (30 * 60)
-
-/**
- * @brief ブロック出現のインターバル 初期値
- * 
- */
-#define DEF_BLOCK_INTERVAL (28)
-
-/**
- * @brief インターバル 刻み値
- * 
- */
-#define BLOCK_INTERVAL_STEP (2)
-
 
 /***************************************************
  * モード
@@ -452,12 +439,6 @@
 #define BLOCK_MAX_ACC (4) << FIX)
 
 /**
- * @brief ブロック出現間隔（Z方向）
- * 
- */
-#define BLOCK_Z_INTERVAL (30)
-
-/**
  * ブロック出現間隔 X方向
  */
 #define BLOCK_X_STEP (40)
@@ -670,7 +651,7 @@
  * @brief 最高レベル
  * 
  */
-#define MAX_LV (5)
+#define MAX_LV (8)
 
 /**
  * @brief レベル表示　桁
@@ -847,6 +828,8 @@ typedef struct
     int next_lv;
     // 獲得リング
     int ring;
+    // 経過フレーム
+    int frame;
     // ステージの中心座標
     VectorType center;
     // 次のブロックが出現するまでの間隔
@@ -905,6 +888,8 @@ typedef struct {
     int energy;
     // 逆噴射
     int booster;
+    // 逆噴射可能か
+    bool allows_booster;
     // 振動
     ShockType shock;
     // スプライト
@@ -938,16 +923,20 @@ typedef struct {
  */
 typedef struct
 {
-    // 出現間隔
+    // 出現間隔 Z軸
     int interval;
-    // 出現間隔リロード
-    //int interval_rel;
+    // 出現間隔 Z軸 リロード
+    int interval_rel;
     // 現在の数
     int num;
     // 最大出現数
     int max_blocks;
     // 加速度（全てのブロック共通）
     int acc;
+    // デフォルトの速度（全てのブロック共通）
+    int speed;
+    // リング出現確率
+    int ring_chance;
     // ブロックのリスト
     SpriteCharType list[MAX_BLOCKS];
 } ALIGN(4) BlockType;

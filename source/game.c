@@ -111,6 +111,10 @@ static void
 reset_message();
 static void
 disp_booster();
+static void
+check_booster();
+static void
+set_level_param(int);
 
 //debug
 void vbaPrint(char* s);
@@ -144,6 +148,8 @@ void game()
         break;
 
     case GAME_MAIN:
+        stage.frame++;
+
         move_ship();
         move_blocks();
 
@@ -167,6 +173,7 @@ void game()
         update_lv();
         update_score();
         level_up();
+        check_booster();
         break;
 
 
@@ -186,6 +193,8 @@ void init_game()
     // ゲームステート初期化
     game_state.scene = GAME_TITLE;
     stage.mode = 0;
+    stage.frame = 0;
+    
     score = 0;
 
     // FLASH初期化
@@ -259,12 +268,11 @@ move_blocks()
 
     // ブロックの加速
     blocks.acc += DEF_BLOCK_ACC;
-    if (blocks.acc < BLOCK_SPEED) {
-        blocks.acc = BLOCK_SPEED;
+    if (blocks.acc < blocks.speed) {
+        blocks.acc = blocks.speed;
     }
 
     for (int i = 0; i < blocks.num; i++) {
-        //blocks.list[i].vec.z += blocks.list[i].acc.z;
         blocks.list[i].vec.z += blocks.acc;
     }
 
@@ -412,11 +420,9 @@ init_stage()
     stage.ring = 0;
 
     // レベル初期化
+    set_level_param(0);
     stage.lv = 1;
     stage.next_lv = NEXT_LEVEL;
-    blocks.interval = BLOCK_Z_INTERVAL;
-    //blocks.interval_rel = DEF_BLOCK_INTERVAL;
-    blocks.acc = BLOCK_SPEED;
     blocks.max_blocks = MAX_BLOCKS;
 }
 
@@ -454,6 +460,9 @@ init_ship()
     // エネルギー
     ship.energy = (MAX_ENEGRY + MAX_ENEGRY_BLANK) << E_FIX;
     ship.booster = 0;
+
+    // 逆噴射可能か
+    ship.allows_booster = true;
 }
 
 /**********************************************/ /**
@@ -517,7 +526,7 @@ init_star(int num, int x, int y)
 {
     // 加速度
     //blocks.list[num].acc.z = BLOCK_SPEED;
-    blocks.acc = BLOCK_SPEED;
+    blocks.acc = blocks.speed;
 
     // スプライト
     blocks.list[num].target.x = x; // X座標目標値
@@ -528,7 +537,7 @@ init_star(int num, int x, int y)
 
     // ブロック or リング
     blocks.list[num].type = NORMAL;
-    if (!RND(0, 2)) {
+    if (!RND(0, blocks.ring_chance)) {
         blocks.list[num].type = RING;
     }
 }
@@ -652,7 +661,7 @@ static void
 create_new_line()
 {
     // ブロックと同じ加速度ですすむ
-    lines.z += BLOCK_SPEED;
+    lines.z += blocks.acc;
     if ((lines.z >> FIX) % LINE_INTERVAL != 0) {
         return;
     }
@@ -676,7 +685,7 @@ move_lines()
     }
 
     for (int i = 0; i < lines.num; i++) {
-        lines.list[i].vec.z += BLOCK_SPEED;
+        lines.list[i].vec.z += blocks.acc;
     }
 
     // 削除
@@ -781,7 +790,7 @@ move_ship()
     if (ship.booster) {
         ship.booster--;
     }
-    if (key & KEY_B && !ship.booster && ship.energy >> E_FIX > 10) {
+    if (key & KEY_B && !ship.booster && ship.allows_booster) {
         blocks.acc = BOOSTER_ACC;
         ship.energy += BOOTER_ENERGY;
         ship.booster = BOOST_TIME;
@@ -1111,6 +1120,24 @@ draw_bg()
 }
 
 /**********************************************/ /**
+ * @brief 逆噴射できるかチェックする
+ ***********************************************/
+static void
+check_booster()
+{
+    // 経過時間とエネルギー残量を確認
+    if (stage.frame > 3 * 60 && ship.energy > 10 && !ship.booster) {
+        ship.allows_booster = true;
+        // アイコン表示
+        // todo
+    } else {
+        ship.allows_booster = false;
+        // アイコン非表示
+        // todo
+    }
+}
+
+/**********************************************/ /**
  * @brief ポーズ
  ***********************************************/
 static void
@@ -1161,11 +1188,10 @@ update_lv()
     // レベルアップ
     if (--stage.next_lv < 0 && stage.lv < MAX_LV) {
         stage.next_lv = NEXT_LEVEL;
-        //blocks.interval_rel = DEF_BLOCK_INTERVAL - stage.lv * BLOCK_INTERVAL_STEP;
-        ship.energy = (MAX_ENEGRY + MAX_ENEGRY_BLANK) << E_FIX;
+
+        set_level_param(stage.lv);
 
         stage.lv++;
-
         reset_message (&lv_mes);
         lv_mes.is_start = true;
     }
@@ -1179,6 +1205,40 @@ update_lv()
         r /= 10;
         pos -= (NUM_W);
     }
+}
+
+/**********************************************/ /**
+ * @brief レベル毎のパラメータをセット
+ * 
+ * @param lv レベル
+ ***********************************************/
+static void
+set_level_param(int lv)
+{
+    // ブロック速度, ブロック生成間隔, リング生成確率, 
+    static int param[MAX_LV][3] = {
+        {-4096 * 20, 40, 2},
+        {-4096 * 21, 38, 2},
+        {-4096 * 22, 36, 3},
+        {-4096 * 23, 34, 3},
+        {-4096 * 24, 32, 4},
+        {-4096 * 25, 30, 4},
+        {-4096 * 26, 28, 5},
+        {-4096 * 27, 26, 5}
+    };
+
+    // エネルギー回復
+    ship.energy = (MAX_ENEGRY + MAX_ENEGRY_BLANK) << E_FIX;
+
+    // ブロックスピード
+    blocks.speed = param[lv][0];
+
+    // ブロックの生成間隔 Z座標
+    blocks.interval = param[lv][1];
+    blocks.interval_rel = param[lv][1];
+
+    // リング生成確率
+    blocks.ring_chance = param[lv][2];
 }
 
 /**********************************************/ /**

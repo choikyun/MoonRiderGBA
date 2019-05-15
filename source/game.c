@@ -115,6 +115,9 @@ static void
 check_booster();
 static void
 set_level_param(int);
+static void
+disp_booster_icon();
+
 
 //debug
 void vbaPrint(char* s);
@@ -159,6 +162,7 @@ void game()
         disp_blocks();
         disp_guide();
         disp_ring_icon();
+        disp_booster_icon();
         /*disp_boundary();*/
 
         create_new_blocks();
@@ -364,6 +368,10 @@ init_sprite_setting()
     /// 逆噴射 16*16 dot
     set_sprite_form(SPRITE_BOOSTER, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
     set_sprite_tile(SPRITE_BOOSTER, TILE_BOOSTER1);
+
+    /// 逆噴射アイコン 8*8 dot
+    set_sprite_form(SPRITE_BOOSTERICON, OBJ_SIZE(0), OBJ_SQUARE, OBJ_256_COLOR);
+    set_sprite_tile(SPRITE_BOOSTERICON, TILE_BOOSTERICON1);
 
     //// ガイド 8*8 dot
     set_sprite_form(SPRITE_GUIDE, OBJ_SIZE(0), OBJ_SQUARE, OBJ_256_COLOR);
@@ -660,8 +668,7 @@ static bool hits_block(RectangleType* m, RectangleType* e)
 static void
 create_new_line()
 {
-    // ブロックと同じ加速度ですすむ
-    lines.z += blocks.acc;
+    lines.z += LINE_SPEED;
     if ((lines.z >> FIX) % LINE_INTERVAL != 0) {
         return;
     }
@@ -685,7 +692,7 @@ move_lines()
     }
 
     for (int i = 0; i < lines.num; i++) {
-        lines.list[i].vec.z += blocks.acc;
+        lines.list[i].vec.z += LINE_SPEED/*blocks.acc*/;
     }
 
     // 削除
@@ -969,6 +976,21 @@ disp_guide()
 }
 
 /**********************************************/ /**
+ * @brief 逆噴射アイコン
+ ***********************************************/
+static void
+disp_booster_icon()
+{
+    if (ship.allows_booster) {
+        set_sprite_tile(SPRITE_BOOSTERICON, TILE_BOOSTERICON2);
+    } else {
+        set_sprite_tile(SPRITE_BOOSTERICON, TILE_BOOSTERICON1);
+    }
+    move_sprite(SPRITE_BOOSTERICON, 232, 0);
+}
+
+
+/**********************************************/ /**
  * @brief 境界表示
  ***********************************************/
 static void
@@ -1126,7 +1148,7 @@ static void
 check_booster()
 {
     // 経過時間とエネルギー残量を確認
-    if (stage.frame > 3 * 60 && ship.energy > 10 && !ship.booster) {
+    if (stage.frame > 10 * 60 && (ship.energy >> E_FIX) > 15 && !ship.booster) {
         ship.allows_booster = true;
         // アイコン表示
         // todo

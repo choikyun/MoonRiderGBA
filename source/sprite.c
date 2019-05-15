@@ -56,6 +56,10 @@
 // ブースター
 #include "sprite_booster1.h"
 
+// ブースターアイコン
+#include "sprite_booster_icon1.h"
+#include "sprite_booster_icon2.h"
+
 
 
 /***************************************************
@@ -229,4 +233,8 @@ void init_sprite_chr(void)
     // ブースター
     CpuSet(sprite_booster1Tiles, oam + 512 * 5 + 128 * 2 + 2048 * 2 + 32 + 128 * 2, (COPY32 | sprite_booster1TilesLen / 4)); // 16dot
     CpuSet(sprite_fire2Tiles, oam + 512 * 5 + 128 * 2 + 2048 * 2 + 32 + 128 * 3, (COPY32 | sprite_fire2TilesLen / 4)); // 16dot
+
+    // ブースターアイコン
+    CpuSet(sprite_booster_icon1Tiles, oam + 512 * 5 + 128 * 2 + 2048 * 2 + 32 + 128 * 4, (COPY32 | sprite_booster_icon1TilesLen / 4)); // 8dot
+    CpuSet(sprite_booster_icon2Tiles, oam + 512 * 5 + 128 * 2 + 2048 * 2 + 32 + 128 * 4 + 32, (COPY32 | sprite_booster_icon1TilesLen / 4)); // 8dot
 }

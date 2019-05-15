@@ -512,6 +512,12 @@
 #define MAX_LINES (10)
 
 /**
+ * @brief 地平線 速度
+ * 
+ */
+#define LINE_SPEED (-4096 * 25)
+
+/**
  * @brief 地平線出現間隔 Z座標
  */
 #define LINE_INTERVAL (MAX_Z / MAX_LINES)
@@ -728,16 +734,18 @@ enum {
     SPRITE_SHIP = 1,
     // 逆噴射
     SPRITE_BOOSTER = 2,
+    // 逆噴射アイコン
+    SPRITE_BOOSTERICON = 3,
     // ガイド
-    SPRITE_GUIDE = 3,
+    SPRITE_GUIDE = 4,
     // 境界線
-    SPRITE_BOUNDARY_L = 4,
+    SPRITE_BOUNDARY_L = 5,
     // 境界線
-    SPRITE_BOUNDARY_R = 5,
+    SPRITE_BOUNDARY_R = 6,
     // リングアイコン
-    SPRITE_RINGICON = 6,
+    SPRITE_RINGICON = 7,
     // ブロック
-    SPRITE_BLOCK = 7,
+    SPRITE_BLOCK = 8,
 };
 
 /**
@@ -1023,6 +1031,10 @@ typedef struct
 // 逆噴射
 #define TILE_BOOSTER1 (962) // 8tiles
 #define TILE_BOOSTER2 (970) // 8
+
+#define TILE_BOOSTERICON1 (978) // 2tiles
+#define TILE_BOOSTERICON2 (980) // 2
+
 
 
 ///////////////////////////////////////////////////////////////////// SRAM

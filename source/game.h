@@ -65,12 +65,12 @@
 /**
  * メッセージ表示ウェイト
  */
-#define MES_WAIT (10)
+#define MES_WAIT (20)
 
 /**
  * メッセージ点滅カウント
  */
-#define MES_COUNT (20)
+#define MES_COUNT (10)
 
 /**
  * 一般オブジェクト　幅
@@ -744,13 +744,28 @@
  * @brief 爆風 最大値
  * 
  */
-#define MAX_BOMBS (4)
+#define MAX_BOMBS (2)
 
 /**
  * @brief 爆風 発生範囲
  * 
  */
 #define BOMB_RANGE (32)
+
+/**
+ * @brief 爆風 インターバル
+ */
+#define BOMB_INTERVAL (5)
+
+/**
+ * @brief 爆風 幅
+ */
+#define BOMB_W (16)
+
+/**
+ * @brief 爆風 高さ
+ */
+#define BOMB_H (16)
 
 /***************************************************
  *　BGM

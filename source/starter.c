@@ -54,7 +54,7 @@ int main(void)
     init_game();
 
     // タイトルのロード
-    //load_title ();
+    load_title ();
 
     // 割り込み初期化
     irqInit();

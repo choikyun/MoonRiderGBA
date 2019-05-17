@@ -18,13 +18,27 @@
 
 #include <gba.h>
 
+// タイトル
+#include "bmp_title.h"
+
+// 背景
 #include "bmp_bg1.h"
+
+// エネルギーバー
 #include "bmp_energy1.h"
 #include "bmp_energy2.h"
+
+// 数字
 #include "bmp_num.h"
+
+// レベル
 #include "bmp_lv_black1.h"
+
+// warning
 #include "bmp_warning.h"
 
+// gameover
+#include "bmp_over.h"
 
 #include "sprite_ship1.h"
 
@@ -78,8 +92,8 @@
 #define DEF_BG_PALLET_LEN sprite_ship1PalLen
 
 // タイトルビットマップデータ
-//#define DEF_TITLE_LEN bmp_titleBitmapLen
-//#define DEF_TITLE_BITMAP bmp_titleBitmap
+#define DEF_TITLE_LEN bmp_titleBitmapLen
+#define DEF_TITLE_BITMAP bmp_titleBitmap
 
 // MODE4 バックフレーム
 #define BACKFRAME ((u16 *)0x0600A000)

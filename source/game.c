@@ -122,7 +122,7 @@ init_booster_icon_anime();
 static void
 disp_warning();
 static void
-init_bomb();
+init_bomb(VectorType *);
 static void
 set_new_bomb();
 static void
@@ -170,6 +170,7 @@ void game()
 
         disp_ship();
         disp_fire();
+        disp_bomb();
         disp_booster();
         disp_blocks();
         disp_guide();
@@ -309,6 +310,10 @@ move_blocks()
                 flash();
                 shock();
                 update_energy(DAMAGE_ENERGY);
+
+                // debug
+                init_bomb(&ship.sprite.vec);
+
             } else {
                 stage.ring++;
                 set_ring_icon();
@@ -519,16 +524,6 @@ init_fire()
 }
 
 /**********************************************/ /**
- * @brief 爆風
- ***********************************************/
-static void
-init_bombs()
-{
-    bomb.num = 0;
-    bomb.max = 0;
-}
-
-/**********************************************/ /**
  * @brief 逆噴射アイコンアニメ初期化
  ***********************************************/
 static void
@@ -705,9 +700,10 @@ static bool hits_block(RectangleType* m, RectangleType* e)
  * @param v 爆風発生源
  ***********************************************/
 static void
-init_bomb(VectorType v) {
-    bomb.base.x = v.x >> FIX;
-    bomb.base.y = v.y >> FIX;
+init_bomb(VectorType *v)
+{
+    bomb.base.x = (v->x >> FIX) + FIX_STAGE_X - BOMB_W / 2;
+    bomb.base.y = (v->y >> FIX) + FIX_STAGE_Y - BOMB_H / 2;
 
     bomb.num = 0;
     bomb.max = MAX_BOMBS;
@@ -725,7 +721,7 @@ set_new_bomb()
         bomb.anime.is_start = true;
         bomb.anime.frame = 0;
         bomb.anime.max_frame = 4;
-        bomb.anime.interval = bomb.anime.interval_rel = 4;
+        bomb.anime.interval = bomb.anime.interval_rel = BOMB_INTERVAL;
 
         // スプライト初期化
         set_sprite_tile(SPRITE_BOMB, TILE_BOMB1);
@@ -733,22 +729,38 @@ set_new_bomb()
         bomb.sprite.vec.y = bomb.base.y + RND(0, BOMB_RANGE) - BOMB_RANGE / 2;
 
         bomb.num++;
+    } else {
+        bomb.num = bomb.max = 0;
     }
 }
 
 /**********************************************/ /**
- * @brief 爆風を表示 bomb.max 分繰り返す
+ * @brief 爆風を表示
  ***********************************************/
 static void
 disp_bomb()
 {
-    if(!bomb.max) {
+    if (!bomb.max) {
         return;
     }
 
+    // アニメ
+    if (!--bomb.anime.interval) {
+        bomb.anime.interval = bomb.anime.interval_rel;
+        bomb.anime.frame = (bomb.anime.frame + 1) % bomb.anime.max_frame;
+        
+        if (!bomb.anime.frame) {
+            // 次の爆風をセット
+            set_new_bomb();
+            erase_sprite(SPRITE_BOMB);
+            return;
+        }
 
+        // タイル変更
+        set_sprite_tile(SPRITE_BOMB, TILE_BOMB1 + bomb.anime.frame * TILE_SIZE_16);
+    }
 
-
+    move_sprite(SPRITE_BOMB, bomb.sprite.vec.x, bomb.sprite.vec.y);
 }
 
 /**********************************************/ /**
@@ -1324,12 +1336,12 @@ set_level_param(int lv)
     static int param[MAX_LV][3] = {
         { -4096 * 20, 40, 2 },
         { -4096 * 21, 38, 2 },
-        { -4096 * 22, 36, 3 },
+        { -4096 * 22, 36, 2 },
         { -4096 * 23, 34, 3 },
-        { -4096 * 24, 32, 4 },
-        { -4096 * 25, 30, 4 },
-        { -4096 * 26, 28, 5 },
-        { -4096 * 27, 26, 5 }
+        { -4096 * 24, 32, 3 },
+        { -4096 * 25, 30, 3 },
+        { -4096 * 26, 28, 4 },
+        { -4096 * 27, 26, 4 }
     };
 
     // エネルギー回復
@@ -1486,6 +1498,9 @@ disp_num(int x, int y, u16 num)
  ***********************************************/
 void load_title()
 {
+    load_bg_bitmap_lz77(DEF_TITLE_BITMAP);
+    //update_hiscore ();
+
 }
 
 /**********************************************/ /**

@@ -1,24 +1,24 @@
 
-//{{BLOCK(bmp_warning)
+//{{BLOCK(bmp_over)
 
 //======================================================================
 //
-//	bmp_warning, 140x24@8, 
+//	bmp_over, 140x24@8, 
 //	+ bitmap not compressed
 //	Total size: 3360 = 3360
 //
-//	Time-stamp: 2019-05-17, 23:14:28
+//	Time-stamp: 2019-05-17, 20:46:11
 //	Exported by Cearn's GBA Image Transmogrifier, v0.8.6
 //	( http://www.coranac.com/projects/#grit )
 //
 //======================================================================
 
-#ifndef GRIT_BMP_WARNING_H
-#define GRIT_BMP_WARNING_H
+#ifndef GRIT_BMP_OVER_H
+#define GRIT_BMP_OVER_H
 
-#define bmp_warningBitmapLen 3360
-extern const unsigned short bmp_warningBitmap[1680];
+#define bmp_overBitmapLen 3360
+extern const unsigned short bmp_overBitmap[1680];
 
-#endif // GRIT_BMP_WARNING_H
+#endif // GRIT_BMP_OVER_H
 
-//}}BLOCK(bmp_warning)
+//}}BLOCK(bmp_over)

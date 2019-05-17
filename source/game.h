@@ -65,12 +65,12 @@
 /**
  * メッセージ表示ウェイト
  */
-#define MES_WAIT (20)
+#define MES_WAIT (10)
 
 /**
  * メッセージ点滅カウント
  */
-#define MES_COUNT (10)
+#define MES_COUNT (20)
 
 /**
  * 一般オブジェクト　幅
@@ -246,19 +246,19 @@
  * @brief エネルギー
  * 
  */
-#define MAX_ENEGRY (30)
+#define MAX_ENERGY (30)
 
 /**
  *  @brief エネルギー 余剰分
  * 
  */
-#define MAX_ENEGRY_BLANK (2)
+#define MAX_ENERGY_BLANK (2)
 
 /**
  * @brief エネルギー表示X座標
  * 
  */
-#define ENERGY_X (144)
+#define ENERGY_X (168)
 
 /**
  * @brief エネルギー表示Y座標
@@ -282,13 +282,13 @@
  * @brief ダメージ
  * 
  */
-#define DAMAGE_ENEGRY (-10 << E_FIX)
+#define DAMAGE_ENERGY (-10 << E_FIX)
 
 /**
  * @brief 回復
  * 
  */
-#define RECOVERY_ENEGRY (5 << E_FIX)
+#define RECOVERY_ENERGY (5 << E_FIX)
 
 /***************************************************
  * 逆噴射
@@ -297,7 +297,7 @@
 /**
  * @brief 使用エネルギー
  */
-#define BOOTER_ENERGY (-RECOVERY_ENEGRY)
+#define BOOTER_ENERGY (-RECOVERY_ENERGY)
 
 /**
  * @brief 逆噴射の加速
@@ -309,12 +309,25 @@
  */
 #define BOOST_TIME (1 * 60)
 
-
 /**
  * @brief 逆噴射 Y座標補正
  */
-#define BOOSTER_FIXED_Y (-14)
+#define BOOSTER_FIXED_Y (-8)
 
+/**
+ * @brief 逆噴射アニメ インターバル
+ */
+#define BOOSTER_ICON_INTERVAL (3)
+
+/**
+ * @brief 逆噴射利用開始までの時間
+ */
+#define USE_BOOSTER_INTERVAL (20 * 60)
+
+/**
+ * @brief 逆噴射利用
+ */
+#define ALLOW_BOOSTER_ENERGY (MAX_ENERGY / 2)
 
 
 /***************************************************
@@ -324,7 +337,7 @@
 /**
  * 振幅
  */
-#define SHOCK_RANGE (2)
+#define SHOCK_RANGE (4)
 
 
 /**
@@ -616,7 +629,7 @@
 /**
  * スコア　X座標
  */
-#define SCORE_X (42)
+#define SCORE_X (76)
 /**
  * スコア　Y座標
  */
@@ -637,17 +650,42 @@
 /**
  * @brief リング数　桁
  */
-#define RING_DIGIT (3)
+#define RING_DIGIT (2)
 
 /**
  * @brief リング数 X座標
  */
-#define RING_X (116)
+#define RING_X (152)
 
 /**
  * @brief リング数　Y座標
  */
 #define RING_Y (0)
+
+/***************************************************
+ *　メッセージ表示
+ ***************************************************/
+
+/**
+ * メッセージ表示　X座標
+ */
+#define MES_X (50)
+/**
+ * メッセージ表示　Y座標
+ */
+#define MES_Y (60)
+/**
+ * メッセージ表示　幅
+ */
+#define MES_W (140)
+/**
+ * メッセージ表示　高さ
+ */
+#define MES_H (24)
+
+
+#define UNTIL_WARNING (3 * 60)
+
 
 /***************************************************
  *　レベル
@@ -667,7 +705,7 @@
 /**
  * @brief レベル表示 X座標
  */
-#define LV_X (16)
+#define LV_X (30)
 
 /**
  * @brief レベル表示　Y座標
@@ -690,7 +728,7 @@
  * @brief レベルメッセージ 幅
  * 
  */
-#define LV_MES_W (16)
+#define LV_MES_W (28)
 
 /**
  * @brief レベルメッセージ 高さ
@@ -1152,6 +1190,17 @@ GLOBAL BoundaryType boundary_l;
  * 
  */
 GLOBAL IconType ring_icon;
+
+/**
+ * @brief 逆噴射アイコンアニメ用
+ * 
+ */
+GLOBAL AnimeType booster_icon_anime;
+
+/**
+ * @brief 通常のメッセージ表示
+ */
+GLOBAL BlinkMessageType mes;
 
 /**
  * @brief レベルアップ表示

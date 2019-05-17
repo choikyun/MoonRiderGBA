@@ -117,7 +117,10 @@ static void
 set_level_param(int);
 static void
 disp_booster_icon();
-
+static void
+init_booster_icon_anime();
+static void
+disp_warning();
 
 //debug
 void vbaPrint(char* s);
@@ -142,12 +145,15 @@ void game()
         break;
 
     case GAME_READY:
+        stage.frame++;
+
         disp_ship();
         disp_fire();
         create_new_line();
         move_lines();
         draw_bg();
         draw_lines();
+        disp_warning();
         break;
 
     case GAME_MAIN:
@@ -233,6 +239,9 @@ void init_game()
     // アイコン
     init_ring_icon();
 
+    // 逆噴射アイコンアニメ
+    init_booster_icon_anime();
+
     // ステージ初期化
     init_stage();
 }
@@ -294,11 +303,11 @@ move_blocks()
             if (blocks.list[0].type == NORMAL) {
                 flash();
                 shock();
-                update_energy(DAMAGE_ENEGRY);
+                update_energy(DAMAGE_ENERGY);
             } else {
                 stage.ring++;
                 set_ring_icon();
-                update_energy(RECOVERY_ENEGRY);
+                update_energy(RECOVERY_ENERGY);
             }
         }
 
@@ -401,7 +410,7 @@ init_sprite_setting()
 static void
 restart()
 {
-    game_state.scene = GAME_MAIN;
+    game_state.scene = GAME_READY;
 
     // ランダマイズ
     srand(REG_TM0CNT + seed);
@@ -409,6 +418,7 @@ restart()
     SRAMWrite32(SRAM_SEED, seed);
 
     // メッセージ初期化
+    reset_message (&mes);
     reset_message(&lv_mes);
 
     // ステージ初期化
@@ -466,11 +476,8 @@ init_ship()
     ship.shock.duration = 0;
 
     // エネルギー
-    ship.energy = (MAX_ENEGRY + MAX_ENEGRY_BLANK) << E_FIX;
+    ship.energy = (MAX_ENERGY + MAX_ENERGY_BLANK) << E_FIX;
     ship.booster = 0;
-
-    // 逆噴射可能か
-    ship.allows_booster = true;
 }
 
 /**********************************************/ /**
@@ -504,6 +511,19 @@ init_fire()
 }
 
 /**********************************************/ /**
+ * @brief 逆噴射アイコンアニメ初期化
+ ***********************************************/
+static void
+init_booster_icon_anime()
+{
+    booster_icon_anime.is_start = true;
+    booster_icon_anime.frame = 0;
+    booster_icon_anime.max_frame = 2;
+    booster_icon_anime.interval = booster_icon_anime.interval_rel = BOOSTER_ICON_INTERVAL;
+
+}
+
+/**********************************************/ /**
  * @brief すべてのブロック初期化
  ***********************************************/
 static void
@@ -522,7 +542,7 @@ init_blocks()
         blocks.list[i].fix.y = 0;
     }
 
-    blocks.interval = 3 * 60;
+    //blocks.interval = 3 * 60;
     blocks.num = 0;
 }
 
@@ -772,10 +792,6 @@ move_ship()
     // デフォルトタイル
     set_sprite_tile(SPRITE_SHIP, TILE_SHIP1);
 
-    // デフォルトの炎の座標
-    fire.sprite.vec.x = FIRE_X << FIX;
-    fire.sprite.vec.y = FIRE_Y << FIX;
-
     // 移動
     if (key & KEY_LEFT) {
         ship.sprite.acc.x -= SHIP_SPEED;
@@ -810,10 +826,6 @@ move_ship()
 
     // 自機とは逆方向にステージを移動
     stage.center.x -= ship.sprite.acc.x;
-
-    // 炎
-    fire.sprite.vec.x = ship.sprite.vec.x;
-    fire.sprite.vec.y += ship.sprite.vec.y;
 
     // 境界判定
     check_stage_boundary();
@@ -881,9 +893,8 @@ disp_fire()
         set_sprite_tile(SPRITE_FIRE, TILE_FIRE1 + (fire.anime.frame * TILE_SIZE_16));
     }
 
-    // ターゲット座標 更新
-    fire.sprite.target.x = fire.sprite.vec.x >> FIX;
-    fire.sprite.target.y = fire.sprite.vec.y >> FIX;
+    fire.sprite.target.x = ship.sprite.vec.x >> FIX;
+    fire.sprite.target.y = FIRE_Y + (ship.sprite.vec.y >> FIX);
 
     // 座標変換
     VectorType v = trans_device_coord(&fire.sprite);
@@ -913,8 +924,8 @@ disp_booster()
     }
 
     // ターゲット座標 更新
-    booster.sprite.target.x = fire.sprite.vec.x >> FIX;
-    booster.sprite.target.y = (fire.sprite.vec.y >> FIX) + BOOSTER_FIXED_Y;
+    booster.sprite.target.x = ship.sprite.vec.x >> FIX;
+    booster.sprite.target.y = (ship.sprite.vec.y >> FIX) + BOOSTER_FIXED_Y;
 
     // 座標変換
     VectorType v = trans_device_coord(&booster.sprite);
@@ -982,7 +993,15 @@ static void
 disp_booster_icon()
 {
     if (ship.allows_booster) {
-        set_sprite_tile(SPRITE_BOOSTERICON, TILE_BOOSTERICON2);
+    
+        // アニメ
+        if (booster_icon_anime.is_start && --booster_icon_anime.interval < 0) {
+            booster_icon_anime.interval = booster_icon_anime.interval_rel;
+            booster_icon_anime.frame = (booster_icon_anime.frame + 1) % booster_icon_anime.max_frame;
+            // タイル切り替え
+            set_sprite_tile(SPRITE_BOOSTERICON, TILE_BOOSTERICON1 + (booster_icon_anime.frame * TILE_SIZE_8));
+        }
+
     } else {
         set_sprite_tile(SPRITE_BOOSTERICON, TILE_BOOSTERICON1);
     }
@@ -1097,8 +1116,8 @@ update_energy(int e)
 
     if (ship.energy < 0) {
         ship.energy = 0;
-    } else if (ship.energy > (MAX_ENEGRY + MAX_ENEGRY_BLANK) << E_FIX) {
-        ship.energy = (MAX_ENEGRY + MAX_ENEGRY_BLANK) << E_FIX;
+    } else if (ship.energy > (MAX_ENERGY + MAX_ENERGY_BLANK) << E_FIX) {
+        ship.energy = (MAX_ENERGY + MAX_ENERGY_BLANK) << E_FIX;
     }
 }
 
@@ -1109,8 +1128,8 @@ static void
 draw_energy()
 {
     int max = ship.energy >> E_FIX;
-    if (max > MAX_ENEGRY) {
-        max = MAX_ENEGRY;
+    if (max > MAX_ENERGY) {
+        max = MAX_ENERGY;
     }
 
     for (int i = 0; i < max; i++) {
@@ -1118,7 +1137,7 @@ draw_energy()
     }
 
     int x = ENERGY_X + max * 2;
-    max = MAX_ENEGRY - max;
+    max = MAX_ENERGY - max;
     for (int j = 0; j < max; j++) {
         draw_bitmap_frame(x + (j * 2), ENERGY_Y, ENERGY_W, ENERGY_H, bmp_energy2Bitmap);
     }
@@ -1148,14 +1167,10 @@ static void
 check_booster()
 {
     // 経過時間とエネルギー残量を確認
-    if (stage.frame > 10 * 60 && (ship.energy >> E_FIX) > 15 && !ship.booster) {
+    if (stage.frame > USE_BOOSTER_INTERVAL && (ship.energy >> E_FIX) > ALLOW_BOOSTER_ENERGY && !ship.booster) {
         ship.allows_booster = true;
-        // アイコン表示
-        // todo
     } else {
         ship.allows_booster = false;
-        // アイコン非表示
-        // todo
     }
 }
 
@@ -1250,7 +1265,7 @@ set_level_param(int lv)
     };
 
     // エネルギー回復
-    ship.energy = (MAX_ENEGRY + MAX_ENEGRY_BLANK) << E_FIX;
+    ship.energy = (MAX_ENERGY + MAX_ENERGY_BLANK) << E_FIX;
 
     // ブロックスピード
     blocks.speed = param[lv][0];
@@ -1334,6 +1349,27 @@ void update_hiscore()
 static void
 disp_warning()
 {
+   if (stage.frame < UNTIL_WARNING) {
+       return;
+   }
+
+  if (!--mes.wait)
+  {
+    mes.wait = mes.wait_rel;
+    mes.chr ^= 1;
+
+    if (!--mes.count)
+    {
+      game_state.scene = GAME_MAIN;
+      reset_message (&mes);
+      stage.frame = 0;
+      //stage_bgm = 0;
+      //PlayMusic (MUSIC_STAGE, PLAY_LOOP_ON);
+    }
+  }
+
+  if (mes.chr)
+    draw_bitmap_frame (MES_X, MES_Y, MES_W, MES_H, bmp_warningBitmap);
 }
 
 /**********************************************/ /**

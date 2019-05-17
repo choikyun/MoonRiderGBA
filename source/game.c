@@ -121,6 +121,12 @@ static void
 init_booster_icon_anime();
 static void
 disp_warning();
+static void
+init_bomb();
+static void
+set_new_bomb();
+static void
+disp_bomb();
 
 //debug
 void vbaPrint(char* s);
@@ -186,7 +192,6 @@ void game()
         check_booster();
         break;
 
-
     case GAME_PAUSE:
         break;
 
@@ -204,7 +209,7 @@ void init_game()
     game_state.scene = GAME_TITLE;
     stage.mode = 0;
     stage.frame = 0;
-    
+
     score = 0;
 
     // FLASH初期化
@@ -345,7 +350,7 @@ copy_sp_attr(int sorc, int dest)
 /**********************************************/ /**
  * @brief アフィンパラメータのコピー
  *
- *  @param sorc 元
+ * @param sorc 元
  * @param dest 先
  ***********************************************/
 static void
@@ -397,6 +402,9 @@ init_sprite_setting()
     set_sprite_form(SPRITE_RINGICON, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
     set_sprite_tile(SPRITE_RINGICON, TILE_RINGICON1);
 
+    /// 爆風
+    set_sprite_form(SPRITE_BOMB, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
+
     //// ブロック 64*64 dot
     for (int i = 0; i < MAX_BLOCKS; i++) {
         set_sprite_form(SPRITE_BLOCK + i, OBJ_SIZE(Sprite_64x64), OBJ_SQUARE, OBJ_256_COLOR);
@@ -418,7 +426,7 @@ restart()
     SRAMWrite32(SRAM_SEED, seed);
 
     // メッセージ初期化
-    reset_message (&mes);
+    reset_message(&mes);
     reset_message(&lv_mes);
 
     // ステージ初期化
@@ -511,6 +519,16 @@ init_fire()
 }
 
 /**********************************************/ /**
+ * @brief 爆風
+ ***********************************************/
+static void
+init_bombs()
+{
+    bomb.num = 0;
+    bomb.max = 0;
+}
+
+/**********************************************/ /**
  * @brief 逆噴射アイコンアニメ初期化
  ***********************************************/
 static void
@@ -520,7 +538,6 @@ init_booster_icon_anime()
     booster_icon_anime.frame = 0;
     booster_icon_anime.max_frame = 2;
     booster_icon_anime.interval = booster_icon_anime.interval_rel = BOOSTER_ICON_INTERVAL;
-
 }
 
 /**********************************************/ /**
@@ -683,6 +700,58 @@ static bool hits_block(RectangleType* m, RectangleType* e)
 }
 
 /**********************************************/ /**
+ * @brief 爆風初期化
+ * 
+ * @param v 爆風発生源
+ ***********************************************/
+static void
+init_bomb(VectorType v) {
+    bomb.base.x = v.x >> FIX;
+    bomb.base.y = v.y >> FIX;
+
+    bomb.num = 0;
+    bomb.max = MAX_BOMBS;
+    set_new_bomb();
+}
+
+/**********************************************/ /**
+ * @brief 新しい爆風をセット
+ ***********************************************/
+static void
+set_new_bomb()
+{
+    if (bomb.num < bomb.max) {
+        // アニメ初期化
+        bomb.anime.is_start = true;
+        bomb.anime.frame = 0;
+        bomb.anime.max_frame = 4;
+        bomb.anime.interval = bomb.anime.interval_rel = 4;
+
+        // スプライト初期化
+        set_sprite_tile(SPRITE_BOMB, TILE_BOMB1);
+        bomb.sprite.vec.x = bomb.base.x + RND(0, BOMB_RANGE) - BOMB_RANGE / 2;
+        bomb.sprite.vec.y = bomb.base.y + RND(0, BOMB_RANGE) - BOMB_RANGE / 2;
+
+        bomb.num++;
+    }
+}
+
+/**********************************************/ /**
+ * @brief 爆風を表示 bomb.max 分繰り返す
+ ***********************************************/
+static void
+disp_bomb()
+{
+    if(!bomb.max) {
+        return;
+    }
+
+
+
+
+}
+
+/**********************************************/ /**
  * @brief 新規ライン作成
  ***********************************************/
 static void
@@ -712,7 +781,7 @@ move_lines()
     }
 
     for (int i = 0; i < lines.num; i++) {
-        lines.list[i].vec.z += LINE_SPEED/*blocks.acc*/;
+        lines.list[i].vec.z += LINE_SPEED /*blocks.acc*/;
     }
 
     // 削除
@@ -993,7 +1062,7 @@ static void
 disp_booster_icon()
 {
     if (ship.allows_booster) {
-    
+
         // アニメ
         if (booster_icon_anime.is_start && --booster_icon_anime.interval < 0) {
             booster_icon_anime.interval = booster_icon_anime.interval_rel;
@@ -1007,7 +1076,6 @@ disp_booster_icon()
     }
     move_sprite(SPRITE_BOOSTERICON, 232, 0);
 }
-
 
 /**********************************************/ /**
  * @brief 境界表示
@@ -1229,7 +1297,7 @@ update_lv()
         set_level_param(stage.lv);
 
         stage.lv++;
-        reset_message (&lv_mes);
+        reset_message(&lv_mes);
         lv_mes.is_start = true;
     }
 
@@ -1252,16 +1320,16 @@ update_lv()
 static void
 set_level_param(int lv)
 {
-    // ブロック速度, ブロック生成間隔, リング生成確率, 
+    // ブロック速度, ブロック生成間隔, リング生成確率,
     static int param[MAX_LV][3] = {
-        {-4096 * 20, 40, 2},
-        {-4096 * 21, 38, 2},
-        {-4096 * 22, 36, 3},
-        {-4096 * 23, 34, 3},
-        {-4096 * 24, 32, 4},
-        {-4096 * 25, 30, 4},
-        {-4096 * 26, 28, 5},
-        {-4096 * 27, 26, 5}
+        { -4096 * 20, 40, 2 },
+        { -4096 * 21, 38, 2 },
+        { -4096 * 22, 36, 3 },
+        { -4096 * 23, 34, 3 },
+        { -4096 * 24, 32, 4 },
+        { -4096 * 25, 30, 4 },
+        { -4096 * 26, 28, 5 },
+        { -4096 * 27, 26, 5 }
     };
 
     // エネルギー回復
@@ -1349,27 +1417,26 @@ void update_hiscore()
 static void
 disp_warning()
 {
-   if (stage.frame < UNTIL_WARNING) {
-       return;
-   }
-
-  if (!--mes.wait)
-  {
-    mes.wait = mes.wait_rel;
-    mes.chr ^= 1;
-
-    if (!--mes.count)
-    {
-      game_state.scene = GAME_MAIN;
-      reset_message (&mes);
-      stage.frame = 0;
-      //stage_bgm = 0;
-      //PlayMusic (MUSIC_STAGE, PLAY_LOOP_ON);
+    if (stage.frame < UNTIL_WARNING) {
+        return;
     }
-  }
 
-  if (mes.chr)
-    draw_bitmap_frame (MES_X, MES_Y, MES_W, MES_H, bmp_warningBitmap);
+    if (!--mes.wait) {
+        mes.wait = mes.wait_rel;
+        mes.chr ^= 1;
+
+        if (!--mes.count) {
+            game_state.scene = GAME_MAIN;
+            reset_message(&mes);
+            stage.frame = 0;
+            //stage_bgm = 0;
+            //PlayMusic (MUSIC_STAGE, PLAY_LOOP_ON);
+        }
+    }
+
+    if (mes.chr) {
+        draw_bitmap_frame(MES_X, MES_Y, MES_W, MES_H, bmp_warningBitmap);
+    }
 }
 
 /**********************************************/ /**

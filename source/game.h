@@ -737,6 +737,22 @@
 #define LV_MES_H (8)
 
 /***************************************************
+ *　爆風
+ ***************************************************/
+
+/**
+ * @brief 爆風 最大値
+ * 
+ */
+#define MAX_BOMBS (4)
+
+/**
+ * @brief 爆風 発生範囲
+ * 
+ */
+#define BOMB_RANGE (32)
+
+/***************************************************
  *　BGM
  ***************************************************/
 
@@ -766,24 +782,26 @@ enum {
  * スプライトキャラクタ
  */
 enum {
+    // 爆風
+    SPRITE_BOMB,
     // 炎
-    SPRITE_FIRE = 0,
+    SPRITE_FIRE,
     // 自機
-    SPRITE_SHIP = 1,
+    SPRITE_SHIP,
     // 逆噴射
-    SPRITE_BOOSTER = 2,
+    SPRITE_BOOSTER,
     // 逆噴射アイコン
-    SPRITE_BOOSTERICON = 3,
+    SPRITE_BOOSTERICON,
     // ガイド
-    SPRITE_GUIDE = 4,
+    SPRITE_GUIDE,
     // 境界線
-    SPRITE_BOUNDARY_L = 5,
+    SPRITE_BOUNDARY_L,
     // 境界線
-    SPRITE_BOUNDARY_R = 6,
+    SPRITE_BOUNDARY_R,
     // リングアイコン
-    SPRITE_RINGICON = 7,
+    SPRITE_RINGICON,
     // ブロック
-    SPRITE_BLOCK = 8,
+    SPRITE_BLOCK,
 };
 
 /**
@@ -988,6 +1006,23 @@ typedef struct
 } ALIGN(4) BlockType;
 
 /**
+ * 爆発管理
+ */
+typedef struct
+{
+    // 現在の数
+    int num;
+    // 最大数
+    int max;
+    // ベース座標
+    PointType base;
+    // アニメ
+    AnimeType anime;
+    // スプライト
+    SpriteCharType sprite;
+} ALIGN(4) BombType;
+
+/**
  * 地平線管理
  */
 typedef struct
@@ -1070,10 +1105,15 @@ typedef struct
 #define TILE_BOOSTER1 (962) // 8tiles
 #define TILE_BOOSTER2 (970) // 8
 
+// 逆噴射アイコン
 #define TILE_BOOSTERICON1 (978) // 2tiles
 #define TILE_BOOSTERICON2 (980) // 2
 
-
+// 爆風
+#define TILE_BOMB1 (982) // 8tiles
+#define TILE_BOMB2 (990) // 8
+#define TILE_BOMB3 (998) // 8
+#define TILE_BOMB4 (1006) // 8
 
 ///////////////////////////////////////////////////////////////////// SRAM
 
@@ -1166,6 +1206,11 @@ GLOBAL BlockType blocks;
  * 地平線
  */
 GLOBAL LineType lines;
+
+ /**
+ * 地平線
+ */
+GLOBAL BombType bomb;
 
 /**
  * @brief ガイド

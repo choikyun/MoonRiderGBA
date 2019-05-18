@@ -122,11 +122,15 @@ init_booster_icon_anime();
 static void
 disp_warning();
 static void
-init_bomb(VectorType *);
+init_bomb(VectorType*, int);
 static void
 set_new_bomb();
 static void
 disp_bomb();
+static void
+disp_gameover();
+static void
+check_gameover();
 
 //debug
 void vbaPrint(char* s);
@@ -140,6 +144,7 @@ void game()
     game_state.keyr = keysDownRepeat();
 
     seed++;
+    stage.frame++;
 
     switch (game_state.scene) {
     case GAME_TITLE:
@@ -151,8 +156,6 @@ void game()
         break;
 
     case GAME_READY:
-        stage.frame++;
-
         disp_ship();
         disp_fire();
         create_new_line();
@@ -163,8 +166,6 @@ void game()
         break;
 
     case GAME_MAIN:
-        stage.frame++;
-
         move_ship();
         move_blocks();
 
@@ -180,7 +181,6 @@ void game()
 
         create_new_blocks();
         create_new_line();
-
         move_lines();
 
         draw_bg();
@@ -191,12 +191,23 @@ void game()
         update_score();
         level_up();
         check_booster();
+        check_gameover();
+
+        pause();
         break;
 
     case GAME_PAUSE:
+        disp_ship();
+        draw_bg();
+        draw_lines();
         break;
 
     case GAME_OVER:
+        disp_bomb();
+
+        draw_bg();
+        disp_gameover();
+        draw_lines();
         break;
     }
 }
@@ -310,10 +321,7 @@ move_blocks()
                 flash();
                 shock();
                 update_energy(DAMAGE_ENERGY);
-
-                // debug
-                init_bomb(&ship.sprite.vec);
-
+                init_bomb(&ship.sprite.vec, MAX_BLOCK_BOMBS);
             } else {
                 stage.ring++;
                 set_ring_icon();
@@ -448,6 +456,7 @@ init_stage()
     stage.center.x = 0;
     stage.center.y = 0;
 
+    // 獲得リング数
     stage.ring = 0;
 
     // レベル初期化
@@ -698,15 +707,16 @@ static bool hits_block(RectangleType* m, RectangleType* e)
  * @brief 爆風初期化
  * 
  * @param v 爆風発生源
+ * @param max 発生回数
  ***********************************************/
 static void
-init_bomb(VectorType *v)
+init_bomb(VectorType* v, int max)
 {
     bomb.base.x = (v->x >> FIX) + FIX_STAGE_X - BOMB_W / 2;
     bomb.base.y = (v->y >> FIX) + FIX_STAGE_Y - BOMB_H / 2;
 
     bomb.num = 0;
-    bomb.max = MAX_BOMBS;
+    bomb.max = max;
     set_new_bomb();
 }
 
@@ -748,7 +758,7 @@ disp_bomb()
     if (!--bomb.anime.interval) {
         bomb.anime.interval = bomb.anime.interval_rel;
         bomb.anime.frame = (bomb.anime.frame + 1) % bomb.anime.max_frame;
-        
+
         if (!bomb.anime.frame) {
             // 次の爆風をセット
             set_new_bomb();
@@ -1068,7 +1078,7 @@ disp_guide()
 }
 
 /**********************************************/ /**
- * @brief 逆噴射アイコン
+ * @brief 逆噴射アイコン 逆噴射可能時にオン
  ***********************************************/
 static void
 disp_booster_icon()
@@ -1090,7 +1100,7 @@ disp_booster_icon()
 }
 
 /**********************************************/ /**
- * @brief 境界表示
+ * @brief 境界表示 未使用
  ***********************************************/
 static void
 disp_boundary()
@@ -1125,7 +1135,7 @@ disp_boundary()
 }
 
 /**********************************************/ /**
- * @brief リングアイコン
+ * @brief リング獲得のアイコン
  ***********************************************/
 static void
 disp_ring_icon()
@@ -1183,7 +1193,7 @@ set_ring_icon()
     ring_icon.life = ICON_LIFE;
     ring_icon.target.y = (ship.sprite.vec.y >> FIX) + ICON_TARGET_Y;
     ring_icon.sprite.vec.x = ship.sprite.vec.x;
-    ring_icon.sprite.vec.y = ship.sprite.vec.y + (ICON_BLOCK_Y << FIX);
+    ring_icon.sprite.vec.y = ship.sprite.vec.y + (ICON_RING_Y << FIX);
 }
 
 /**********************************************/ /**
@@ -1260,7 +1270,6 @@ check_booster()
 static void
 pause()
 {
-    /*
     u16 key = game_state.key;
 
     if (key & KEY_SELECT)
@@ -1268,15 +1277,14 @@ pause()
         game_state.scene ^= GAME_PAUSE;
         if (game_state.scene & GAME_PAUSE)
         {
-            StopMusic();
-            PlaySound(SOUND_ITEM);
+            //StopMusic();
+            //PlaySound(SOUND_ITEM);
         }
         else
         {
-            PlayMusic(MUSIC_STAGE + stage_bgm, true);
+            //PlayMusic(MUSIC_STAGE + stage_bgm, true);
         }
     }
-    */
 }
 
 /**********************************************/ /**
@@ -1429,7 +1437,7 @@ void update_hiscore()
 static void
 disp_warning()
 {
-    if (stage.frame < UNTIL_WARNING) {
+    if (stage.frame < WAIT_WARNING) {
         return;
     }
 
@@ -1448,6 +1456,44 @@ disp_warning()
 
     if (mes.chr) {
         draw_bitmap_frame(MES_X, MES_Y, MES_W, MES_H, bmp_warningBitmap);
+    }
+}
+
+/**********************************************/ /**
+ * @brief ゲームオーバーメッセージ表示
+ ***********************************************/
+static void
+disp_gameover()
+{
+    if (stage.frame == 0) {
+        init_bomb(&ship.sprite.vec, MAX_OVER_BOMBS);
+    } else if (stage.frame > 3 * 60) {
+        draw_bitmap_frame(MES_X, MES_Y, MES_W, MES_H, bmp_overBitmap);
+
+        // タイトル画面へ
+        u16 key = game_state.key;
+        if (key & KEY_START) {
+            //save_hiscore(score);
+
+            reset_frame();
+            init_sprite();
+            init_game();
+            load_title();
+            StopMusic();
+
+            //PlayMusic(MUSIC_TITLE, PLAY_LOOP_ON);
+        }
+    }
+}
+
+/**********************************************/ /**
+ * @brief ゲームオーバー判定表示
+ ***********************************************/
+static void
+check_gameover()
+{
+    if (ship.energy <= 0) {
+        game_state.scene = GAME_OVER;
     }
 }
 
@@ -1500,7 +1546,6 @@ void load_title()
 {
     load_bg_bitmap_lz77(DEF_TITLE_BITMAP);
     //update_hiscore ();
-
 }
 
 /**********************************************/ /**

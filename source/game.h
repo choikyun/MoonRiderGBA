@@ -586,16 +586,40 @@
  * アイコン
  ***************************************************/
 
-#define ICON_BLOCK_Y (-5)
+/**
+ * @brief リングアイコン Y座標
+ * 
+ */
+#define ICON_RING_Y (-5)
 
+/**
+ * @brief リングアイコン ターゲット Y座標
+ * 
+ */
 #define ICON_TARGET_Y (-20)
 
+/**
+ * @brief アイコン 表示時間
+ * 
+ */
 #define ICON_LIFE (30)
 
+/**
+ * @brief アイコン 幅
+ * 
+ */
 #define ICON_W (11)
 
+/**
+ * @brief アイコン 高さ
+ * 
+ */
 #define ICON_H (11)
 
+/**
+ * @brief アイコン Y 加速度
+ * 
+ */
 #define ICON_Y_ACC (-1 << FIX)
 
 /***************************************************
@@ -667,24 +691,30 @@
  ***************************************************/
 
 /**
- * メッセージ表示　X座標
+ * @brief メッセージ表示　X座標
  */
 #define MES_X (50)
+
 /**
- * メッセージ表示　Y座標
+ * @brief メッセージ表示　Y座標
  */
 #define MES_Y (60)
+
 /**
- * メッセージ表示　幅
+ * @brief メッセージ表示　幅
  */
 #define MES_W (140)
+
 /**
- * メッセージ表示　高さ
+ * @brief メッセージ表示　高さ
  */
 #define MES_H (24)
 
-
-#define UNTIL_WARNING (3 * 60)
+/**
+ * @brief ワーニングメッセージ開始まで
+ * 
+ */
+#define WAIT_WARNING (3 * 60)
 
 
 /***************************************************
@@ -741,10 +771,16 @@
  ***************************************************/
 
 /**
- * @brief 爆風 最大値
+ * @brief 爆風 最大値 ブロック
  * 
  */
-#define MAX_BOMBS (2)
+#define MAX_BLOCK_BOMBS (3)
+
+/**
+ * @brief 爆風 最大値 ゲームオーバー
+ * 
+ */
+#define MAX_OVER_BOMBS (5)
 
 /**
  * @brief 爆風 発生範囲
@@ -772,14 +808,14 @@
  ***************************************************/
 
 /**
- * ステージBGM数
+ * @brief ステージBGM数
  */
 #define MAX_STAGE_BGM (3)
 
 ///////////////////////////////////////////////////////////////////// ENUM
 
 /**
- * シーン
+ * @brief シーン
  */
 enum {
     GAME_MAIN = 0,
@@ -794,7 +830,7 @@ enum {
 };
 
 /**
- * スプライトキャラクタ
+ * @brief スプライトキャラクタ
  */
 enum {
     // 爆風
@@ -820,7 +856,7 @@ enum {
 };
 
 /**
- * ブロックの種類
+ * @brief ブロックの種類
  */
 typedef enum {
     // 通常のブロック
@@ -829,10 +865,19 @@ typedef enum {
     RING,
 } BlockTypeEnum;
 
+/**
+ * @brief 爆風の種類
+ * 
+ */
+typedef enum {
+    BOMB_BLOCK,
+    BOMB_OVER
+};
+
 ///////////////////////////////////////////////////////////////////// 構造体
 
 /**
- * 座標 2d
+ * @brief 座標 2d
  */
 typedef struct
 {
@@ -841,7 +886,7 @@ typedef struct
 } ALIGN(4) PointType;
 
 /**
- * 矩形
+ * @brief 矩形
  */
 typedef struct
 {
@@ -852,7 +897,7 @@ typedef struct
 } ALIGN(4) RectangleType;
 
 /**
- * 座標 3d
+ * @brief 座標 3d
  */
 typedef struct
 {
@@ -864,7 +909,7 @@ typedef struct
 } ALIGN(4) VectorType;
 
 /**
- * 振動
+ * @brief 振動
  */
 typedef struct
 {
@@ -875,7 +920,7 @@ typedef struct
 } ALIGN(4) ShockType;
 
 /**
- * フラッシュ
+ * @brief フラッシュ
  */
 typedef struct
 {
@@ -884,7 +929,7 @@ typedef struct
 } ALIGN(4) FlashType;
 
 /**
- * ゲーム管理
+ * @brief ゲーム管理
  */
 typedef struct
 {
@@ -897,7 +942,7 @@ typedef struct
 } ALIGN(4) GameStateType;
 
 /**
- * ステージ管理
+ * @brief ステージ管理
  */
 typedef struct
 {
@@ -922,7 +967,7 @@ typedef struct
 } ALIGN(4) StageType;
 
 /**
- * フレームアニメ
+ * @brief フレームアニメ
  */
 typedef struct
 {
@@ -934,7 +979,7 @@ typedef struct
 } ALIGN(4) AnimeType;
 
 /**
- * スプライト
+ * @brief スプライト
  */
 typedef struct
 {
@@ -962,6 +1007,9 @@ typedef struct
     bool show;
 } ALIGN(4) SpriteCharType;
 
+/**
+ * @brief 自機
+ */
 typedef struct {
     // エネルギー
     int energy;
@@ -976,7 +1024,7 @@ typedef struct {
 } ALIGN(4) ShipType;
 
 /**
- * 炎
+ * @brief 炎
  */
 typedef struct {
     // アニメーション用
@@ -986,7 +1034,7 @@ typedef struct {
 } ALIGN(4) FireType;
 
 /**
- * アイコン
+ * @brief アイコン
  */
 typedef struct {
     // 表示期間
@@ -998,7 +1046,7 @@ typedef struct {
 } ALIGN(4) IconType;
 
 /**
- * ブロック管理
+ * @brief ブロック管理
  */
 typedef struct
 {
@@ -1021,7 +1069,7 @@ typedef struct
 } ALIGN(4) BlockType;
 
 /**
- * 爆発管理
+ * @brief 爆発管理
  */
 typedef struct
 {
@@ -1038,7 +1086,7 @@ typedef struct
 } ALIGN(4) BombType;
 
 /**
- * 地平線管理
+ * @brief 地平線管理
  */
 typedef struct
 {
@@ -1051,7 +1099,7 @@ typedef struct
 } ALIGN(4) LineType;
 
 /**
- * 境界線
+ * @brief 境界線
  */
 typedef struct {
     // アニメーション用
@@ -1061,7 +1109,7 @@ typedef struct {
 } ALIGN(4) BoundaryType;
 
 /**
- * 点滅メッセージ
+ * @brief 点滅メッセージ
  */
 typedef struct
 {
@@ -1075,7 +1123,7 @@ typedef struct
 } ALIGN(4) BlinkMessageType;
 
 /**
- * ウェイト
+ * @brief ウェイト
  */
 typedef struct
 {

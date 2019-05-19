@@ -232,6 +232,12 @@
  */
 #define MAX_SHIP_ACC (3 << FIX)
 
+/**
+ * @brief 自機警告点滅インターバル
+ * 
+ */
+#define SHIP_CAUTION_INTERVAL (3)
+
 /***************************************************
  * エネルギー
  ***************************************************/
@@ -668,50 +674,83 @@
 #define BONUS_DIGET (8)
 
 /**
- * ボーナス X座標
+ * ボーナス メッセージ X座標
  */
-#define BONUS_X (60)
+#define BONUS_MES_X (70)
 
 /**
- * ボーナス Y座標
+ * ボーナス メッセージ Y座標
  */
-#define BONUS_Y (95)
+#define BONUS_MES_Y (95)
 
 /**
- * ボーナス 幅
+ * ボーナス メッセージ 幅
  */
-#define BONUS_W (36)
+#define BONUS_MES_W (36)
 
 /**
- * ボーナス 高さ
+ * ボーナス メッセージ 高さ
  */
-#define BONUS_H (8)
+#define BONUS_MES_H (8)
 
 /**
- * ボーナス単位
+ * @brief ボーナス X座標
+ * 
  */
-#define BONUS_UNIT (100)
+#define BONUS_X (110)
+
+/**
+ * @brief ボーナス Y座標
+ * 
+ */
+#define BONUS_Y (BONUS_MES_Y)
+
+/**
+ * リングボーナス単位
+ */
+#define RING_BONUS_UNIT (100)
+
+/**
+ * @brief ブロックボーナスしきい値
+ * 
+ */
+#define BELOW_BLOCK_BONUS (50)
+
+/**
+ * @brief ブロックボーナス 
+ * 
+ */
+#define BLOCK_BONUS (100)
+
+/**
+ * トータル メッセージ X座標
+ */
+#define TOTAL_MES_X (70)
+
+/**
+ * トータル メッセージ Y座標
+ */
+#define TOTAL_MES_Y (108)
+
+/**
+ * トータル メッセージ 幅
+ */
+#define TOTAL_MES_W (36)
+
+/**
+ * トータル メッセージ 高さ
+ */
+#define TOTAL_MES_H (8)
 
 /**
  * トータル X座標
  */
-#define TOTAL_X (60)
+#define TOTAL_X (110)
 
 /**
  * トータル Y座標
  */
-#define TOTAL_Y (108)
-
-/**
- * トータル 幅
- */
-#define TOTAL_W (36)
-
-/**
- * トータル 高さ
- */
-#define TOTAL_H (8)
-
+#define TOTAL_Y (TOTAL_MES_Y)
 
 /***************************************************
  *　リング
@@ -1065,6 +1104,8 @@ typedef struct {
     bool allows_booster;
     // 振動
     ShockType shock;
+    // 点滅
+    FlashType flash;
     // スプライト
     SpriteCharType sprite;
 } ALIGN(4) ShipType;

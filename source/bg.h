@@ -40,6 +40,16 @@
 // gameover
 #include "bmp_over.h"
 
+// bonus
+#include "bmp_bonus.h"
+
+// total
+#include "bmp_total.h"
+
+// pause
+#include "bmp_pause.h"
+
+// 自機
 #include "sprite_ship1.h"
 
 

@@ -641,11 +641,6 @@
  ***************************************************/
 
 /**
- * スコア加算のための高度間隔
- */
-#define SCORE_HEIGHT_RANGE (32)
-
-/**
  * スコア表示桁
  */
 #define SCORE_DIGIT (8)
@@ -666,6 +661,57 @@
  * ハイスコア　Y座標
  */
 #define HISCORE_Y (64)
+
+/**
+ * ボーナス表示桁
+ */
+#define BONUS_DIGET (8)
+
+/**
+ * ボーナス X座標
+ */
+#define BONUS_X (60)
+
+/**
+ * ボーナス Y座標
+ */
+#define BONUS_Y (95)
+
+/**
+ * ボーナス 幅
+ */
+#define BONUS_W (36)
+
+/**
+ * ボーナス 高さ
+ */
+#define BONUS_H (8)
+
+/**
+ * ボーナス単位
+ */
+#define BONUS_UNIT (100)
+
+/**
+ * トータル X座標
+ */
+#define TOTAL_X (60)
+
+/**
+ * トータル Y座標
+ */
+#define TOTAL_Y (108)
+
+/**
+ * トータル 幅
+ */
+#define TOTAL_W (36)
+
+/**
+ * トータル 高さ
+ */
+#define TOTAL_H (8)
+
 
 /***************************************************
  *　リング
@@ -774,13 +820,13 @@
  * @brief 爆風 最大値 ブロック
  * 
  */
-#define MAX_BLOCK_BOMBS (3)
+#define MAX_BLOCK_BOMBS (2)
 
 /**
  * @brief 爆風 最大値 ゲームオーバー
  * 
  */
-#define MAX_OVER_BOMBS (5)
+#define MAX_OVER_BOMBS (3)
 
 /**
  * @brief 爆風 発生範囲
@@ -869,7 +915,7 @@ typedef enum {
  * @brief 爆風の種類
  * 
  */
-typedef enum {
+enum {
     BOMB_BLOCK,
     BOMB_OVER
 };
@@ -1321,6 +1367,17 @@ GLOBAL BlinkMessageType lv_mes;
  * スコア
  */
 GLOBAL int score;
+
+/**
+ * ボーナス
+ */
+GLOBAL int bonus;
+
+/**
+ * トータル
+ */
+GLOBAL int total;
+
 /**
  * ハイスコア
  */

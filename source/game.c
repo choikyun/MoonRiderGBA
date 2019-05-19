@@ -131,6 +131,10 @@ static void
 disp_gameover();
 static void
 check_gameover();
+static void
+pause();
+static void
+disp_pause();
 
 //debug
 void vbaPrint(char* s);
@@ -197,17 +201,28 @@ void game()
         break;
 
     case GAME_PAUSE:
+        pause();
         disp_ship();
         draw_bg();
+        draw_energy();
         draw_lines();
+        disp_pause();
         break;
 
     case GAME_OVER:
         disp_bomb();
 
+        move_blocks();
+        disp_blocks();
+
+        //create_new_blocks();
+        create_new_line();
+        move_lines();
+
         draw_bg();
-        disp_gameover();
+        draw_energy();
         draw_lines();
+        disp_gameover();
         break;
     }
 }
@@ -321,7 +336,7 @@ move_blocks()
                 flash();
                 shock();
                 update_energy(DAMAGE_ENERGY);
-                init_bomb(&ship.sprite.vec, MAX_BLOCK_BOMBS);
+                //init_bomb(&ship.sprite.vec, MAX_BLOCK_BOMBS);
             } else {
                 stage.ring++;
                 set_ring_icon();
@@ -1465,10 +1480,22 @@ disp_warning()
 static void
 disp_gameover()
 {
-    if (stage.frame == 0) {
+    if (stage.frame == 1) {
+
+        // 爆風
         init_bomb(&ship.sprite.vec, MAX_OVER_BOMBS);
-    } else if (stage.frame > 3 * 60) {
+
+    } else if (stage.frame > 2 * 60) {
+
+        // ゲームオーバー
         draw_bitmap_frame(MES_X, MES_Y, MES_W, MES_H, bmp_overBitmap);
+        
+        if (stage.frame > 2.5 * 60) {
+            // ボーナス
+            draw_bitmap_frame(BONUS_X, BONUS_Y, BONUS_W, BONUS_H, bmp_bonusBitmap);
+            // トータル
+            draw_bitmap_frame(TOTAL_X, TOTAL_Y, TOTAL_W, TOTAL_H, bmp_totalBitmap);
+        }
 
         // タイトル画面へ
         u16 key = game_state.key;
@@ -1494,6 +1521,17 @@ check_gameover()
 {
     if (ship.energy <= 0) {
         game_state.scene = GAME_OVER;
+
+        erase_sprite(ship.sprite.chr);
+        erase_sprite(fire.sprite.chr);
+
+        // ブロック消去
+        for(int i = 0; i < MAX_BLOCKS; i++) {
+            erase_sprite(SPRITE_BLOCK + i);
+        }
+
+        // フレームリセット
+        stage.frame = 0;
     }
 }
 
@@ -1503,6 +1541,7 @@ check_gameover()
 static void
 disp_pause()
 {
+    draw_bitmap_frame (MES_X, MES_Y, MES_W, MES_H, bmp_pauseBitmap);
 }
 
 /**********************************************/ /**

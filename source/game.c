@@ -2,7 +2,7 @@
  * @file game.c
  * @brief ゲーム本体
  * @date  2019.04.20 作成
- * @author Choe Gyun(choikyun)
+ * @author Choi Gyun
  */
 
 /***************************************************
@@ -27,118 +27,66 @@
 #include "sprite.h"
 
 void init_game();
-static void
-disp_title();
-static void
-init_ship();
-static void
-init_fire();
-static void
-init_blocks();
-static void
-init_star(int, int, int);
-static void
-init_guide();
-static void
-init_boundary();
-static void
-move_ship();
-static void
-disp_ship();
-static void
-disp_blocks();
-static void
-disp_fire();
-static void
-disp_guide();
-static void
-draw_bg();
-static void
-init_sprite_setting();
-static void
-init_stage();
-static void
-move_blocks();
-static void
-check_stage_boundary();
-static void
-create_new_blocks();
-static void
-copy_affine(int, int);
-static void
-copy_sp_attr(int, int);
-static void
-init_lines();
-static void
-create_new_line();
-static void
-move_lines();
-static void
-draw_lines();
-static void
-draw_line(int);
-static void
-draw_energy();
-static VectorType
-trans_device_coord(SpriteCharType*);
-static void
-disp_boundary();
-static void
-flash();
-static void
-shock();
-static bool
-hits_block();
-static void
-update_energy(int);
-static void
-init_ring_icon();
-static void
-set_ring_icon();
-static void
-disp_ring_icon();
-static void
-update_ring();
-static void
-update_lv();
-static void
-disp_num(int, int, u16);
-static void
-update_score();
-static void
-level_up();
-static void
-reset_message();
-static void
-disp_booster();
-static void
-check_booster();
-static void
-set_level_param(int);
-static void
-disp_booster_icon();
-static void
-init_booster_icon_anime();
-static void
-disp_warning();
-static void
-init_bomb(VectorType*, int);
-static void
-set_new_bomb();
-static void
-disp_bomb();
-static void
-disp_gameover();
-static void
-check_gameover();
-static void
-pause();
-static void
-disp_pause();
-static void
-disp_bravo_icon();
-static void
-set_bravo_icon();
+
+static void disp_title();
+static void init_ship();
+static void init_fire();
+static void init_blocks();
+static void init_star(int, int, int);
+static void init_guide();
+static void init_boundary();
+static void move_ship();
+static void disp_ship();
+static void disp_blocks();
+static void disp_fire();
+static void disp_guide();
+static void draw_bg();
+static void init_sprite_setting();
+static void init_stage();
+static void move_blocks();
+static void check_stage_boundary();
+static void create_new_blocks();
+static void copy_affine(int, int);
+static void copy_sp_attr(int, int);
+static void init_lines();
+static void create_new_line();
+static void move_lines();
+static void draw_lines();
+static void draw_line(int);
+static void draw_energy();
+static VectorType trans_device_coord(SpriteCharType*);
+static void disp_boundary();
+static void flash();
+static void shock();
+static bool hits_block();
+static void update_energy(int);
+static void init_ring_icon();
+static void set_ring_icon();
+static void disp_ring_icon();
+static void update_ring();
+static void update_lv();
+static void disp_num(int, int, u16);
+static void update_score(int, int, int);
+static void level_up();
+static void reset_message();
+static void disp_booster();
+static void check_booster();
+static void set_level_param(int);
+static void disp_booster_icon();
+static void init_booster_icon_anime();
+static void disp_warning();
+static void init_bomb(VectorType*, int);
+static void set_new_bomb();
+static void disp_bomb();
+static void disp_gameover();
+static void check_gameover();
+static void pause();
+static void disp_pause();
+static void add_score(int);
+static void add_bonus(int);
+static void disp_bravo_icon();
+static void set_bravo_icon();
+
 
 //debug
 void vbaPrint(char* s);
@@ -197,9 +145,11 @@ void game()
         draw_energy();
         update_ring();
         update_lv();
-        update_score();
+        update_score(score, SCORE_X, SCORE_Y);
         level_up();
         check_booster();
+
+        add_score(1);
         check_gameover();
 
         pause();
@@ -227,7 +177,10 @@ void game()
         draw_bg();
         draw_energy();
         draw_lines();
+        update_ring();
+        update_lv();
         disp_gameover();
+        update_score(score, SCORE_X, SCORE_Y);
         break;
     }
 }
@@ -326,9 +279,6 @@ move_blocks()
         blocks.list[i].vec.z += blocks.acc;
     }
 
-    // スコア加算
-    score++;
-
     // 先頭のスプライトデータの消去
     if (blocks.list[0].vec.z >> FIX < MIN_Z) {
         // 当たり判定
@@ -336,16 +286,23 @@ move_blocks()
         m.w = ship.sprite.hit.w;
         e.x = blocks.list[0].target.x + SHIP_MOVE_MAX_X - blocks.list[0].center.x + (stage.center.x >> FIX);
         e.w = blocks.list[0].hit.w;
-        if (hits_block(&m, &e)) {
+        if (hits_block(&m, &e) && game_state.scene == GAME_MAIN) {
+            // ブロック or リング
             if (blocks.list[0].type == NORMAL) {
                 flash();
                 shock();
                 update_energy(DAMAGE_ENERGY);
-                //init_bomb(&ship.sprite.vec, MAX_BLOCK_BOMBS);
             } else {
                 stage.ring++;
                 set_ring_icon();
+                ship.sprite.show = true;
                 update_energy(RECOVERY_ENERGY);
+            }
+        } else {
+            // ブロック通過 ボーナススコア
+            // ギリギリでかわせばボーナス
+            if (abs(abs(blocks.list[0].target.x) - abs(stage.center.x >> FIX)) < BELOW_BLOCK_BONUS) {
+                add_bonus(BLOCK_BONUS);
             }
         }
 
@@ -500,6 +457,7 @@ init_ship()
     ship.sprite.acc.x = ship.sprite.acc.y = 0;
 
     // 自機スプライト
+    ship.sprite.show = true;
     ship.sprite.chr = SPRITE_SHIP;
     ship.sprite.vec.x = SHIP_X << FIX;
     ship.sprite.vec.y = SHIP_Y << FIX;
@@ -965,7 +923,7 @@ move_ship()
 }
 
 /**********************************************/ /**
- * @brief ステージ境界チェック
+ * @brief ステージ境界チェック 両端は繋がっている
  ***********************************************/
 static void
 check_stage_boundary()
@@ -973,11 +931,9 @@ check_stage_boundary()
     int x = stage.center.x >> FIX;
 
     if (x < SHIP_MOVE_MIN_X) {
-        stage.center.x = SHIP_MOVE_MIN_X << FIX;
-        ship.sprite.acc.x /= -2;
-    } else if (x > SHIP_MOVE_MAX_X) {
         stage.center.x = SHIP_MOVE_MAX_X << FIX;
-        ship.sprite.acc.x /= -2;
+    } else if (x > SHIP_MOVE_MAX_X) {
+        stage.center.x = SHIP_MOVE_MIN_X << FIX;
     }
 }
 
@@ -993,7 +949,20 @@ disp_ship()
     // 座標変換
     VectorType v = trans_device_coord(&ship.sprite);
 
+    // エネルギー警告
+    if (ship.energy >> E_FIX <= MAX_ENERGY / 4)
+    {
+        if (!--ship.flash.interval)
+        {
+            ship.flash.interval = SHIP_CAUTION_INTERVAL;
+            ship.sprite.show ^= 1;
+        }
+    } else {
+        ship.flash.interval = SHIP_CAUTION_INTERVAL;
+    }
+    
     // 振動
+    int range = 0;
     if (ship.shock.duration) {
         ship.shock.duration--;
 
@@ -1001,10 +970,13 @@ disp_ship()
             ship.shock.direc *= -1;
             ship.shock.interval = SHOCK_INTERVAL;
         }
-        int r = ship.shock.direc * ship.shock.range;
-        move_sprite(ship.sprite.chr, v.x + r, v.y);
+        range = ship.shock.direc * ship.shock.range;
+    }
+    
+    if (ship.sprite.show) {
+        move_sprite(ship.sprite.chr, v.x + range, v.y);
     } else {
-        move_sprite(ship.sprite.chr, v.x, v.y);
+        erase_sprite(ship.sprite.chr);
     }
 }
 
@@ -1349,16 +1321,12 @@ pause()
 {
     u16 key = game_state.key;
 
-    if (key & KEY_SELECT)
-    {
+    if (key & KEY_SELECT) {
         game_state.scene ^= GAME_PAUSE;
-        if (game_state.scene & GAME_PAUSE)
-        {
+        if (game_state.scene & GAME_PAUSE) {
             //StopMusic();
             //PlaySound(SOUND_ITEM);
-        }
-        else
-        {
+        } else {
             //PlayMusic(MUSIC_STAGE + stage_bgm, true);
         }
     }
@@ -1474,16 +1442,34 @@ level_up()
 }
 
 /**********************************************/ /**
+ * @brief スコア加算
+ ***********************************************/
+static void
+add_score(int s)
+{
+    score += s;
+}
+
+/**********************************************/ /**
+ * @brief ボーナス加算
+ ***********************************************/
+static void
+add_bonus(int b)
+{
+    bonus += b;
+}
+
+/**********************************************/ /**
  * @brief スコア表示
  ***********************************************/
 static void
-update_score()
+update_score(int score, int x, int y)
 {
     int pos = SCORE_DIGIT * NUM_W - NUM_W;
     int sc = score;
 
     for (int i = 0; i < SCORE_DIGIT; i++) {
-        disp_num(SCORE_X + pos, SCORE_Y, sc % 10);
+        disp_num(x + pos, y, sc % 10);
         sc /= 10;
         pos -= (NUM_W);
     }
@@ -1551,12 +1537,15 @@ disp_gameover()
 
         // ゲームオーバー
         draw_bitmap_frame(MES_X, MES_Y, MES_W, MES_H, bmp_overBitmap);
-        
+
         if (stage.frame > 2.5 * 60) {
             // ボーナス
-            draw_bitmap_frame(BONUS_X, BONUS_Y, BONUS_W, BONUS_H, bmp_bonusBitmap);
+            draw_bitmap_frame(BONUS_MES_X, BONUS_MES_Y, BONUS_MES_W, BONUS_MES_H, bmp_bonusBitmap);
             // トータル
-            draw_bitmap_frame(TOTAL_X, TOTAL_Y, TOTAL_W, TOTAL_H, bmp_totalBitmap);
+            draw_bitmap_frame(TOTAL_MES_X, TOTAL_MES_Y, TOTAL_MES_W, TOTAL_MES_H, bmp_totalBitmap);
+
+            update_score(bonus, BONUS_X, BONUS_Y);
+            update_score(total, TOTAL_X, TOTAL_Y);
         }
 
         // タイトル画面へ
@@ -1588,9 +1577,15 @@ check_gameover()
         erase_sprite(fire.sprite.chr);
 
         // ブロック消去
-        for(int i = 0; i < MAX_BLOCKS; i++) {
+        for (int i = 0; i < MAX_BLOCKS; i++) {
             erase_sprite(SPRITE_BLOCK + i);
         }
+
+        // ボーナススコア
+        bonus += stage.ring * RING_BONUS_UNIT;
+
+        // トータルスコア
+        total = score + bonus;
 
         // フレームリセット
         stage.frame = 0;
@@ -1603,7 +1598,7 @@ check_gameover()
 static void
 disp_pause()
 {
-    draw_bitmap_frame (MES_X, MES_Y, MES_W, MES_H, bmp_pauseBitmap);
+    draw_bitmap_frame(MES_X, MES_Y, MES_W, MES_H, bmp_pauseBitmap);
 }
 
 /**********************************************/ /**

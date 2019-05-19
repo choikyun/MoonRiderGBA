@@ -86,7 +86,7 @@ static void add_score(int);
 static void add_bonus(int);
 static void disp_bravo_icon();
 static void set_bravo_icon();
-
+static void init_bravo_icon();
 
 //debug
 void vbaPrint(char* s);
@@ -149,7 +149,7 @@ void game()
         level_up();
         check_booster();
 
-        add_score(1);
+        add_score(NORMAL_SCORE);
         check_gameover();
 
         pause();
@@ -226,8 +226,11 @@ void init_game()
     // 境界線
     init_boundary();
 
-    // アイコン
+    // リングアイコン
     init_ring_icon();
+
+    // ブラボーアイコン
+    init_bravo_icon();
 
     // 逆噴射アイコンアニメ
     init_booster_icon_anime();
@@ -286,7 +289,9 @@ move_blocks()
         m.w = ship.sprite.hit.w;
         e.x = blocks.list[0].target.x + SHIP_MOVE_MAX_X - blocks.list[0].center.x + (stage.center.x >> FIX);
         e.w = blocks.list[0].hit.w;
+
         if (hits_block(&m, &e) && game_state.scene == GAME_MAIN) {
+            
             // ブロック or リング
             if (blocks.list[0].type == NORMAL) {
                 flash();
@@ -298,12 +303,17 @@ move_blocks()
                 ship.sprite.show = true;
                 update_energy(RECOVERY_ENERGY);
             }
-        } else {
-            // ブロック通過 ボーナススコア
-            // ギリギリでかわせばボーナス
-            if (abs(abs(blocks.list[0].target.x) - abs(stage.center.x >> FIX)) < BELOW_BLOCK_BONUS) {
+
+        } else if(game_state.scene == GAME_MAIN){
+        
+            // ボーナススコア
+            // ブロックをギリギリでかわせばボーナス
+            if (blocks.list[0].type == NORMAL
+                && abs((m.x + m.w / 2) - (e.x + e.w / 2)) <= BELOW_BLOCK_BONUS) {
                 add_bonus(BLOCK_BONUS);
+                set_bravo_icon();
             }
+        
         }
 
         // エネルギー消費
@@ -619,7 +629,7 @@ init_ring_icon()
  * @brief ブラボーアイコン初期化
  ***********************************************/
 static void
-init_ring_icon()
+init_bravo_icon()
 {
     bravo_icon.life = 0;
 
@@ -1194,7 +1204,7 @@ disp_bravo_icon()
 
     move_sprite(bravo_icon.sprite.chr, v.x, v.y);
 
-    if (--ring_icon.life == 0) {
+    if (--bravo_icon.life == 0) {
         erase_sprite(bravo_icon.sprite.chr);
     }
 }
@@ -1242,7 +1252,7 @@ set_bravo_icon()
     bravo_icon.life = BRAVO_LIFE;
     bravo_icon.target.y = (ship.sprite.vec.y >> FIX) + BRAVO_TARGET_Y;
     bravo_icon.sprite.vec.x = ship.sprite.vec.x;
-    bravo_icon.sprite.vec.y = ship.sprite.vec.y + (ICON_RING_Y << FIX);
+    bravo_icon.sprite.vec.y = ship.sprite.vec.y + (BRAVO_TARGET_Y << FIX);
 }
 
 /**********************************************/ /**
@@ -1575,6 +1585,8 @@ check_gameover()
 
         erase_sprite(ship.sprite.chr);
         erase_sprite(fire.sprite.chr);
+        erase_sprite(ring_icon.sprite.chr);
+        erase_sprite(bravo_icon.sprite.chr);
 
         // ブロック消去
         for (int i = 0; i < MAX_BLOCKS; i++) {

@@ -647,6 +647,11 @@
  ***************************************************/
 
 /**
+ * 通常のスコア フレーム毎
+ */
+#define NORMAL_SCORE (10)
+
+/**
  * スコア表示桁
  */
 #define SCORE_DIGIT (8)
@@ -681,7 +686,7 @@
 /**
  * ボーナス メッセージ Y座標
  */
-#define BONUS_MES_Y (95)
+#define BONUS_MES_Y (90)
 
 /**
  * ボーナス メッセージ 幅
@@ -730,7 +735,7 @@
 /**
  * トータル メッセージ Y座標
  */
-#define TOTAL_MES_Y (108)
+#define TOTAL_MES_Y (100)
 
 /**
  * トータル メッセージ 幅
@@ -783,7 +788,7 @@
 /**
  * @brief メッセージ表示　Y座標
  */
-#define MES_Y (60)
+#define MES_Y (50)
 
 /**
  * @brief メッセージ表示　幅
@@ -865,7 +870,7 @@
  * @brief 爆風 最大値 ゲームオーバー
  * 
  */
-#define MAX_OVER_BOMBS (3)
+#define MAX_OVER_BOMBS (4)
 
 /**
  * @brief 爆風 発生範囲
@@ -892,14 +897,29 @@
  *　ブラボーメッセージ
  ***************************************************/
 
-#define BRAVO_LIFE (1 * 60)
+/**
+ * @brief ブラボー 表示時間
+ */
+#define BRAVO_LIFE (20)
 
+/**
+ * @brief ブラボー Y座標
+ */
 #define BRAVO_TARGET_Y (-15)
 
+/**
+ * @brief ブラボー 幅
+ */
 #define BRAVO_W (32)
 
+/**
+ * @brief ブラボー 高さ
+ */
 #define BRAVO_H (8)
 
+/**
+ * @brief ブラボー Z座標
+ */
 #define BRAVO_Z (MIN_Z)
 
 

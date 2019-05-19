@@ -66,8 +66,8 @@
 #include "sprite_bomb3.h"
 #include "sprite_bomb4.h"
 
-
-
+// ブラボー
+#include "sprite_bravo1.h"
 
 /***************************************************
  スプライト初期化
@@ -251,4 +251,6 @@ void init_sprite_chr(void)
     CpuSet(sprite_bomb3Tiles, oam + 512 * 5 + 128 * 2 + 2048 * 2 + 32 + 128 * 4 + 32 * 2 + 128 * 2, (COPY32 | sprite_bomb3TilesLen / 4)); // 16dot
     CpuSet(sprite_bomb4Tiles, oam + 512 * 5 + 128 * 2 + 2048 * 2 + 32 + 128 * 4 + 32 * 2 + 128 * 3, (COPY32 | sprite_bomb4TilesLen / 4)); // 16dot
 
+    // ブラボー
+    CpuSet(sprite_bravo1Tiles, oam + 512 * 5 + 128 * 2 + 2048 * 2 + 32 + 128 * 4 + 32 * 2 + 128 * 4, (COPY32 | sprite_bravo1TilesLen / 4)); // 32dot
 }

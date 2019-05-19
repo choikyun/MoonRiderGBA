@@ -135,6 +135,10 @@ static void
 pause();
 static void
 disp_pause();
+static void
+disp_bravo_icon();
+static void
+set_bravo_icon();
 
 //debug
 void vbaPrint(char* s);
@@ -181,6 +185,7 @@ void game()
         disp_guide();
         disp_ring_icon();
         disp_booster_icon();
+        disp_bravo_icon();
         /*disp_boundary();*/
 
         create_new_blocks();
@@ -430,8 +435,12 @@ init_sprite_setting()
     set_sprite_form(SPRITE_RINGICON, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
     set_sprite_tile(SPRITE_RINGICON, TILE_RINGICON1);
 
-    /// 爆風
+    /// 爆風 16*16 dot
     set_sprite_form(SPRITE_BOMB, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
+
+    /// ブラボー 8*32 dot
+    set_sprite_form(SPRITE_BRAVOICON, OBJ_SIZE(2), OBJ_WIDE, OBJ_256_COLOR);
+    set_sprite_tile(SPRITE_BRAVOICON, TILE_BRAVO1);
 
     //// ブロック 64*64 dot
     for (int i = 0; i < MAX_BLOCKS; i++) {
@@ -441,7 +450,7 @@ init_sprite_setting()
 }
 
 /**********************************************/ /**
- * @brief リブロックト
+ * @brief リスタート
  ***********************************************/
 static void
 restart()
@@ -646,6 +655,24 @@ init_ring_icon()
     ring_icon.sprite.rect.w = ICON_W;
     ring_icon.sprite.rect.h = ICON_H;
     ring_icon.sprite.acc.y = ICON_Y_ACC;
+}
+
+/**********************************************/ /**
+ * @brief ブラボーアイコン初期化
+ ***********************************************/
+static void
+init_ring_icon()
+{
+    bravo_icon.life = 0;
+
+    bravo_icon.sprite.chr = SPRITE_BRAVOICON;
+    bravo_icon.sprite.vec.z = MIN_Z << FIX;
+    bravo_icon.sprite.center.x = BRAVO_W / 2;
+    bravo_icon.sprite.center.y = BRAVO_H / 2;
+    bravo_icon.sprite.fix.y = 0;
+    bravo_icon.sprite.fix.y = 0;
+    bravo_icon.sprite.rect.w = BRAVO_W;
+    bravo_icon.sprite.rect.h = BRAVO_H;
 }
 
 /**********************************************/ /**
@@ -1179,6 +1206,29 @@ disp_ring_icon()
 }
 
 /**********************************************/ /**
+ * @brief ブロックをすれすれで通過すごいねアイコン
+ ***********************************************/
+static void
+disp_bravo_icon()
+{
+    if (!bravo_icon.life) {
+        return;
+    }
+
+    bravo_icon.sprite.target.x = bravo_icon.sprite.vec.x >> FIX;
+    bravo_icon.sprite.target.y = bravo_icon.sprite.vec.y >> FIX;
+
+    VectorType v = trans_device_coord(&bravo_icon.sprite);
+
+    move_sprite(bravo_icon.sprite.chr, v.x, v.y);
+
+    if (--ring_icon.life == 0) {
+        erase_sprite(bravo_icon.sprite.chr);
+    }
+}
+
+
+/**********************************************/ /**
  * @brief フラッシュ
  ***********************************************/
 static void
@@ -1209,6 +1259,18 @@ set_ring_icon()
     ring_icon.target.y = (ship.sprite.vec.y >> FIX) + ICON_TARGET_Y;
     ring_icon.sprite.vec.x = ship.sprite.vec.x;
     ring_icon.sprite.vec.y = ship.sprite.vec.y + (ICON_RING_Y << FIX);
+}
+
+/**********************************************/ /**
+ * @brief ブラボーアイコンセット
+ ***********************************************/
+static void
+set_bravo_icon()
+{
+    bravo_icon.life = BRAVO_LIFE;
+    bravo_icon.target.y = (ship.sprite.vec.y >> FIX) + BRAVO_TARGET_Y;
+    bravo_icon.sprite.vec.x = ship.sprite.vec.x;
+    bravo_icon.sprite.vec.y = ship.sprite.vec.y + (ICON_RING_Y << FIX);
 }
 
 /**********************************************/ /**

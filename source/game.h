@@ -850,6 +850,21 @@
 #define BOMB_H (16)
 
 /***************************************************
+ *　ブラボーメッセージ
+ ***************************************************/
+
+#define BRAVO_LIFE (1 * 60)
+
+#define BRAVO_TARGET_Y (-15)
+
+#define BRAVO_W (32)
+
+#define BRAVO_H (8)
+
+#define BRAVO_Z (MIN_Z)
+
+
+/***************************************************
  *　BGM
  ***************************************************/
 
@@ -879,6 +894,8 @@ enum {
  * @brief スプライトキャラクタ
  */
 enum {
+    // ブラボー
+    SPRITE_BRAVOICON,
     // 爆風
     SPRITE_BOMB,
     // 炎
@@ -1224,6 +1241,9 @@ typedef struct
 #define TILE_BOMB3 (998) // 8
 #define TILE_BOMB4 (1006) // 8
 
+// ブラボー
+#define TILE_BRAVO1 (1014) // 8tiles
+
 ///////////////////////////////////////////////////////////////////// SRAM
 
 /**
@@ -1362,6 +1382,11 @@ GLOBAL BlinkMessageType mes;
  */
 GLOBAL BlinkMessageType lv_mes;
 
+/**
+ * @brief ブラボーアイコン
+ * 
+ */
+GLOBAL IconType bravo_icon;
 
 /**
  * スコア

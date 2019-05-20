@@ -74,7 +74,7 @@ extern u8 s2_bin[]; // 効果音2　爆発
 extern u8 s3_bin[]; // 効果音3　ゲームオーバー
 extern u8 s4_bin[]; // 効果音4　レベルアップ
 extern u8 s5_bin[]; // 効果音5　アイテム
-extern u8 s6_bin[]; // 効果音6　都市破壊
+extern u8 s6_bin[]; // 効果音6　衝突
 
 
 #define SAMPLING_S0 (1323)
@@ -87,7 +87,7 @@ extern u8 s6_bin[]; // 効果音6　都市破壊
 
 enum
 {
-  SOUND_ENEMY, SOUND_ROCKON, SOUND_BOMB, SOUND_OVER, SOUND_LEVELUP, SOUND_ITEM, SOUND_CRASH_CITY,
+  SOUND_ENEMY, SOUND_ROCKON, SOUND_BOMB, SOUND_OVER, SOUND_LEVELUP, SOUND_ITEM, SOUND_CRASH,
 };
 
 //*************************************************************

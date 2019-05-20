@@ -297,11 +297,13 @@ move_blocks()
                 flash();
                 shock();
                 update_energy(DAMAGE_ENERGY);
+                PlaySound(SOUND_CRASH);
             } else {
                 stage.ring++;
                 set_ring_icon();
                 ship.sprite.show = true;
                 update_energy(RECOVERY_ENERGY);
+                PlaySound(SOUND_ITEM);
             }
 
         } else if(game_state.scene == GAME_MAIN){
@@ -1334,10 +1336,10 @@ pause()
     if (key & KEY_SELECT) {
         game_state.scene ^= GAME_PAUSE;
         if (game_state.scene & GAME_PAUSE) {
-            //StopMusic();
-            //PlaySound(SOUND_ITEM);
+            StopMusic();
+            PlaySound(SOUND_ITEM);
         } else {
-            //PlayMusic(MUSIC_STAGE + stage_bgm, true);
+            PlayMusic(MUSIC_STAGE + stage_bgm, true);
         }
     }
 }
@@ -1374,6 +1376,8 @@ update_lv()
         stage.lv++;
         reset_message(&lv_mes);
         lv_mes.is_start = true;
+        
+        //PlaySound(SOUND_LEVELUP);
     }
 
     // レベル表示
@@ -1440,9 +1444,9 @@ level_up()
             reset_message(&lv_mes);
 
             // BGM切り替え
-            //StopMusic();
-            //stage_bgm = (stage_bgm + 1) & MAX_STAGE_BGM;
-            //PlayMusic(MUSIC_STAGE + stage_bgm, true);
+            StopMusic();
+            stage_bgm = (stage_bgm + 1) & MAX_STAGE_BGM;
+            PlayMusic(MUSIC_STAGE + stage_bgm, true);
         }
     }
 
@@ -1522,8 +1526,8 @@ disp_warning()
             game_state.scene = GAME_MAIN;
             reset_message(&mes);
             stage.frame = 0;
-            //stage_bgm = 0;
-            //PlayMusic (MUSIC_STAGE, PLAY_LOOP_ON);
+            stage_bgm = 0;
+            PlayMusic (MUSIC_STAGE, PLAY_LOOP_ON);
         }
     }
 

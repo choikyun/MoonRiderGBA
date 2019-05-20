@@ -46,7 +46,7 @@ extern u8 m3_bin[]; // 曲3 ステージ
 extern u8 m4_bin[]; // 曲4 ステージ
 
 
-#define SAMPLING_M0 (163295)
+#define SAMPLING_M0 (264914)
 #define SAMPLING_M1 (151199)
 #define SAMPLING_M2 (132299)
 #define SAMPLING_M3 (145985)
@@ -68,8 +68,8 @@ enum
 // 効果音データ
 // DirectsoundBで再生
 //*************************************************************
-extern u8 s0_bin[]; // 効果音0 敵ミサイル発射
-extern u8 s1_bin[]; // 効果音1　ロックオン
+extern u8 s0_bin[]; // 効果音0　噴射
+extern u8 s1_bin[]; // 効果音1　ブラボー
 extern u8 s2_bin[]; // 効果音2　爆発
 extern u8 s3_bin[]; // 効果音3　ゲームオーバー
 extern u8 s4_bin[]; // 効果音4　レベルアップ
@@ -77,7 +77,7 @@ extern u8 s5_bin[]; // 効果音5　アイテム
 extern u8 s6_bin[]; // 効果音6　衝突
 
 
-#define SAMPLING_S0 (1323)
+#define SAMPLING_S0 (8000)
 #define SAMPLING_S1 (12809)
 #define SAMPLING_S2 (4421)
 #define SAMPLING_S3 (16269)
@@ -87,7 +87,7 @@ extern u8 s6_bin[]; // 効果音6　衝突
 
 enum
 {
-  SOUND_ENEMY, SOUND_ROCKON, SOUND_BOMB, SOUND_OVER, SOUND_LEVELUP, SOUND_ITEM, SOUND_CRASH,
+  SOUND_BOOSTER, SOUND_BRAVO, SOUND_BOMB, SOUND_OVER, SOUND_LEVELUP, SOUND_ITEM, SOUND_CRASH,
 };
 
 //*************************************************************

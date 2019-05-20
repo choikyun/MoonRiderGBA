@@ -33,13 +33,13 @@ const WaveListType MusicList[] =
 const WaveListType SoundList[] =
   {
     //データアドレス, データ長, 優先度(数字が小さいほど高い）
-    { s0_bin, SAMPLING_S0, 30 }, // ミサイル発射
-    { s1_bin, SAMPLING_S1, 50 }, // ロックオン
-    { s2_bin, SAMPLING_S2, 20 }, // 爆発
-    { s3_bin, SAMPLING_S3, 2 }, // ゲームオーバー
-    { s4_bin, SAMPLING_S4, 10}, // アイテム
-    { s5_bin, SAMPLING_S5, 1 }, // レベルアップ
-    { s6_bin, SAMPLING_S6, 5 }, // 都市破壊
+    { s0_bin, SAMPLING_S0, 30 }, // 噴射
+    { s1_bin, SAMPLING_S1, 50 }, // ブラボー
+    { s2_bin, SAMPLING_S2, 2 }, // 爆発
+    { s3_bin, SAMPLING_S3, 1 }, // ゲームオーバー
+    { s4_bin, SAMPLING_S4, 10}, // レベルアップ
+    { s5_bin, SAMPLING_S5, 10 }, // アイテム
+    { s6_bin, SAMPLING_S6, 5 }, // 衝突
   };
 
 //*************************************************************

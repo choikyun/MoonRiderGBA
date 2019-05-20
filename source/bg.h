@@ -97,8 +97,8 @@
 #define DEF_BG_LEN bmp_bg1BitmapLen
 #define DEF_BG_BITMAP bmp_bg1Bitmap
 
-// BGパレット
-#define DEF_BG_PALLET bmp_bg1Pal
+// パレット
+#define DEF_BG_PALLET sprite_ship1Pal
 #define DEF_BG_PALLET_LEN sprite_ship1PalLen
 
 // タイトルビットマップデータ

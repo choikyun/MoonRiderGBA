@@ -203,7 +203,7 @@ void init_game()
     }
 
     // ハイスコアのロード
-    //hiscore = load_hiscore();
+    hiscore = load_hiscore();
 
     // スプライト初期化
     init_sprite_setting();
@@ -424,6 +424,7 @@ init_sprite_setting()
 static void
 restart()
 {
+    StopMusic();
     game_state.scene = GAME_READY;
 
     // ランダマイズ
@@ -920,6 +921,8 @@ move_ship()
         blocks.acc = BOOSTER_ACC;
         ship.energy += BOOTER_ENERGY;
         ship.booster = BOOST_TIME;
+
+        PlaySound(SOUND_BOOSTER);
     }
 
     // 自然減速
@@ -1255,6 +1258,8 @@ set_bravo_icon()
     bravo_icon.target.y = (ship.sprite.vec.y >> FIX) + BRAVO_TARGET_Y;
     bravo_icon.sprite.vec.x = ship.sprite.vec.x;
     bravo_icon.sprite.vec.y = ship.sprite.vec.y + (BRAVO_TARGET_Y << FIX);
+
+    PlaySound(SOUND_BRAVO);
 }
 
 /**********************************************/ /**
@@ -1546,8 +1551,15 @@ disp_gameover()
 
         // 爆風
         init_bomb(&ship.sprite.vec, MAX_OVER_BOMBS);
+        PlaySound(SOUND_BOMB);
 
     } else if (stage.frame > 2 * 60) {
+
+        // 効果音
+        if (stage.frame == 2 * 60 + 30) {
+            StopMusic();
+            PlaySound(SOUND_OVER);
+        }
 
         // ゲームオーバー
         draw_bitmap_frame(MES_X, MES_Y, MES_W, MES_H, bmp_overBitmap);
@@ -1565,7 +1577,7 @@ disp_gameover()
         // タイトル画面へ
         u16 key = game_state.key;
         if (key & KEY_START) {
-            //save_hiscore(score);
+            save_hiscore(total);
 
             reset_frame();
             init_sprite();
@@ -1573,7 +1585,7 @@ disp_gameover()
             load_title();
             StopMusic();
 
-            //PlayMusic(MUSIC_TITLE, PLAY_LOOP_ON);
+            PlayMusic(MUSIC_TITLE, PLAY_LOOP_ON);
         }
     }
 }

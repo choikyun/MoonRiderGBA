@@ -1,5 +1,8 @@
 /build/
 /sound/
 /command.sav
-.vscode/
+/.vscode/
 
+starbow.elf
+starbow.sav
+.vscode/c_cpp_properties.json

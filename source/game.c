@@ -1381,8 +1381,6 @@ update_lv()
         stage.lv++;
         reset_message(&lv_mes);
         lv_mes.is_start = true;
-        
-        //PlaySound(SOUND_LEVELUP);
     }
 
     // レベル表示

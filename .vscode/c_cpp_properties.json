@@ -1,12 +1,12 @@
 {
     "configurations": [
         {
-            "name": "Win32",
+            "name": "OSX",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:\\devkitPro\\libgba\\include",
-                "C:\\devkitPro\\devkitARM\\arm-none-eabi\\include",
-                "C:\\devkitPro\\devkitARM\\lib\\gcc\\arm-none-eabi\\6.3.0\\include"
+                "/opt/devkitpro/libgba/include",
+                "/opt/devkitpro/devkitARM/arm-none-eabi/include",
+                "/opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/8.3.0/include"
             ],
             "defines": [
                 "_DEBUG",

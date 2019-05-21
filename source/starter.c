@@ -54,7 +54,7 @@ int main(void)
     init_game();
 
     // タイトルのロード
-    load_title ();
+    load_title();
 
     // 割り込み初期化
     irqInit();
@@ -64,7 +64,7 @@ int main(void)
     irqEnable(IRQ_VBLANK | IRQ_TIMER0 | IRQ_TIMER1);
 
     // タイトル
-    PlayMusic (MUSIC_TITLE, PLAY_LOOP_ON);
+    PlayMusic(MUSIC_TITLE, PLAY_LOOP_ON);
 
     // メインループ
     while (1) {

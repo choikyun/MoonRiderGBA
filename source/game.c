@@ -66,6 +66,7 @@ static void disp_ring_icon();
 static void update_ring();
 static void update_lv();
 static void disp_num(int, int, u16);
+static void disp_num_title(int, int, u16);
 static void update_score(int, int, int);
 static void level_up();
 static void reset_message();
@@ -291,7 +292,7 @@ move_blocks()
         e.w = blocks.list[0].hit.w;
 
         if (hits_block(&m, &e) && game_state.scene == GAME_MAIN) {
-            
+
             // ブロック or リング
             if (blocks.list[0].type == NORMAL) {
                 flash();
@@ -306,8 +307,8 @@ move_blocks()
                 PlaySound(SOUND_ITEM);
             }
 
-        } else if(game_state.scene == GAME_MAIN){
-        
+        } else if (game_state.scene == GAME_MAIN) {
+
             // ボーナススコア
             // ブロックをギリギリでかわせばボーナス
             if (blocks.list[0].type == NORMAL
@@ -315,7 +316,6 @@ move_blocks()
                 add_bonus(BLOCK_BONUS);
                 set_bravo_icon();
             }
-        
         }
 
         // エネルギー消費
@@ -424,7 +424,6 @@ init_sprite_setting()
 static void
 restart()
 {
-    StopMusic();
     game_state.scene = GAME_READY;
 
     // ランダマイズ
@@ -965,17 +964,15 @@ disp_ship()
     VectorType v = trans_device_coord(&ship.sprite);
 
     // エネルギー警告
-    if (ship.energy >> E_FIX <= MAX_ENERGY / 4)
-    {
-        if (!--ship.flash.interval)
-        {
+    if (ship.energy >> E_FIX <= MAX_ENERGY / 4) {
+        if (!--ship.flash.interval) {
             ship.flash.interval = SHIP_CAUTION_INTERVAL;
             ship.sprite.show ^= 1;
         }
     } else {
         ship.flash.interval = SHIP_CAUTION_INTERVAL;
     }
-    
+
     // 振動
     int range = 0;
     if (ship.shock.duration) {
@@ -987,7 +984,7 @@ disp_ship()
         }
         range = ship.shock.direc * ship.shock.range;
     }
-    
+
     if (ship.sprite.show) {
         move_sprite(ship.sprite.chr, v.x + range, v.y);
     } else {
@@ -1213,7 +1210,6 @@ disp_bravo_icon()
         erase_sprite(bravo_icon.sprite.chr);
     }
 }
-
 
 /**********************************************/ /**
  * @brief フラッシュ
@@ -1497,18 +1493,15 @@ update_score(int score, int x, int y)
  ***********************************************/
 void update_hiscore()
 {
-    /*
     int i;
     int pos = SCORE_DIGIT * NUM_W - NUM_W;
     int sc = hiscore;
 
-    for (i = 0; i < SCORE_DIGIT; i++)
-    {
+    for (i = 0; i < SCORE_DIGIT; i++) {
         disp_num_title(HISCORE_X + pos, HISCORE_Y, sc % 10);
         sc /= 10;
         pos -= (NUM_W);
     }
-    */
 }
 
 /**********************************************/ /**
@@ -1530,7 +1523,7 @@ disp_warning()
             reset_message(&mes);
             stage.frame = 0;
             stage_bgm = 0;
-            PlayMusic (MUSIC_STAGE, PLAY_LOOP_ON);
+            PlayMusic(MUSIC_STAGE, PLAY_LOOP_ON);
         }
     }
 
@@ -1662,12 +1655,24 @@ disp_num(int x, int y, u16 num)
 }
 
 /**********************************************/ /**
+ * @brief タイトル(FRAME1)に数字表示
+ * @param x X座標
+ * @param y Y座標
+ * @param num 表示する数値
+ ***********************************************/
+static void
+disp_num_title(int x, int y, u16 num)
+{
+    draw_bitmap8(x, y, NUM_W, NUM_H, bmp_numBitmap + 32 * num);
+}
+
+/**********************************************/ /**
  *  タイトル ビットマップ転送
  ***********************************************/
 void load_title()
 {
     load_bg_bitmap_lz77(DEF_TITLE_BITMAP);
-    //update_hiscore ();
+    update_hiscore();
 }
 
 /**********************************************/ /**
@@ -1681,10 +1686,10 @@ disp_title()
     if (key & KEY_START) {
         restart();
         stage.demo = false;
-        //  StopMusic ();
+        StopMusic();
     } else if ((key & KEY_R) && (key & KEY_B)) {
-        //  clear_hiscore ();
-        //  update_hiscore ();
+        clear_hiscore();
+        update_hiscore();
     }
 }
 

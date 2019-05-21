@@ -667,11 +667,11 @@
 /**
  * ハイスコア　X座標
  */
-#define HISCORE_X (70)
+#define HISCORE_X (124)
 /**
  * ハイスコア　Y座標
  */
-#define HISCORE_Y (64)
+#define HISCORE_Y (107)
 
 /**
  * ボーナス表示桁

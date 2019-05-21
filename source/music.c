@@ -35,11 +35,11 @@ const WaveListType SoundList[] =
     //データアドレス, データ長, 優先度(数字が小さいほど高い）
     { s0_bin, SAMPLING_S0, 40 }, // 噴射
     { s1_bin, SAMPLING_S1, 60 }, // ブラボー
-    { s2_bin, SAMPLING_S2, 20 }, // 爆発
+    { s2_bin, SAMPLING_S2, 5 }, // 爆発
     { s3_bin, SAMPLING_S3, 10 }, // ゲームオーバー
     { s4_bin, SAMPLING_S4, 30}, // レベルアップ
     { s5_bin, SAMPLING_S5, 20 }, // アイテム
-    { s6_bin, SAMPLING_S6, 5 }, // 衝突
+    { s6_bin, SAMPLING_S6, 20 }, // 衝突
   };
 
 //*************************************************************

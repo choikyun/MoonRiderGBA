@@ -31,12 +31,8 @@ void init_bg()
     // パレット
     load_bg_bitmap_pallet();
 
-    // BGを各フレームにロード
+    // BGをフレームにロード
     load_frame_bitmap(DEF_BG_BITMAP);
-    flip_frame();
-
-    load_frame_bitmap(DEF_BG_BITMAP);
-    flip_frame();
 }
 
 /***************************************************

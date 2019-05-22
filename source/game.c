@@ -32,7 +32,7 @@ static void disp_title();
 static void init_ship();
 static void init_fire();
 static void init_blocks();
-static void init_star(int, int, int);
+static void init_block(int, int, int);
 static void init_guide();
 static void init_boundary();
 static void move_ship();
@@ -46,8 +46,6 @@ static void init_stage();
 static void move_blocks();
 static void check_stage_boundary();
 static void create_new_blocks();
-static void copy_affine(int, int);
-static void copy_sp_attr(int, int);
 static void init_lines();
 static void create_new_line();
 static void move_lines();
@@ -203,6 +201,11 @@ void init_game()
         stage.flash.color[i] = FLASH_COLOR;
     }
 
+    // LINE初期化
+    for (int i = 0; i < 32; i++) {
+        lines.color[i] = LINE_COLOR;
+    }
+
     // ハイスコアのロード
     hiscore = load_hiscore();
 
@@ -251,7 +254,7 @@ create_new_blocks()
 
         for (int i = 0; i < APPER_MAX_BLOCKS; i++) {
             if (blocks.num < blocks.max_blocks) {
-                init_star(
+                init_block(
                     blocks.num,
                     RND(0, BLOCK_X_STEP_NUM) * BLOCK_X_STEP + BLOCK_W / 2 - SCREEN_CENTER - BLOCK_X_STEP_BLANK,
                     BLOCK_Y_TARGET);
@@ -333,41 +336,6 @@ move_blocks()
 }
 
 /**********************************************/ /**
- * @brief スプライト属性のコピー
- *
- * @param sorc 元
- * @param dest 先
- ***********************************************/
-static void
-copy_sp_attr(int sorc, int dest)
-{
-    OBJATTR* s = OAM + sorc;
-    OBJATTR* d = OAM + dest;
-
-    d->attr0 = s->attr0;
-    d->attr1 = s->attr1;
-    d->attr2 = s->attr2;
-}
-
-/**********************************************/ /**
- * @brief アフィンパラメータのコピー
- *
- * @param sorc 元
- * @param dest 先
- ***********************************************/
-static void
-copy_affine(int sorc, int dest)
-{
-    OBJAFFINE* s = (OBJAFFINE*)OAM + sorc;
-    OBJAFFINE* d = (OBJAFFINE*)OAM + dest;
-
-    d->pa = s->pa;
-    d->pb = s->pb;
-    d->pc = s->pc;
-    d->pd = s->pd;
-}
-
-/**********************************************/ /**
  * @brief スプライト初期化
  ***********************************************/
 static void
@@ -381,11 +349,11 @@ init_sprite_setting()
     set_sprite_form(SPRITE_FIRE, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
     set_sprite_tile(SPRITE_FIRE, TILE_FIRE1);
 
-    /// 逆噴射 16*16 dot
+    //// 逆噴射 16*16 dot
     set_sprite_form(SPRITE_BOOSTER, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
     set_sprite_tile(SPRITE_BOOSTER, TILE_BOOSTER1);
 
-    /// 逆噴射アイコン 8*8 dot
+    //// 逆噴射アイコン 8*8 dot
     set_sprite_form(SPRITE_BOOSTERICON, OBJ_SIZE(0), OBJ_SQUARE, OBJ_256_COLOR);
     set_sprite_tile(SPRITE_BOOSTERICON, TILE_BOOSTERICON1);
 
@@ -404,10 +372,10 @@ init_sprite_setting()
     set_sprite_form(SPRITE_RINGICON, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
     set_sprite_tile(SPRITE_RINGICON, TILE_RINGICON1);
 
-    /// 爆風 16*16 dot
+    //// 爆風 16*16 dot
     set_sprite_form(SPRITE_BOMB, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
 
-    /// ブラボー 8*32 dot
+    //// ブラボー 8*32 dot
     set_sprite_form(SPRITE_BRAVOICON, OBJ_SIZE(2), OBJ_WIDE, OBJ_256_COLOR);
     set_sprite_tile(SPRITE_BRAVOICON, TILE_BRAVO1);
 
@@ -432,8 +400,8 @@ restart()
     SRAMWrite32(SRAM_SEED, seed);
 
     // メッセージ初期化
-    reset_message(&mes);
-    reset_message(&lv_mes);
+    reset_message(&mes, MES_BLINK_NORMAL);
+    reset_message(&lv_mes, MES_BLINK_NORMAL);
 
     // ステージ初期化
     init_stage();
@@ -493,6 +461,7 @@ init_ship()
 
     // エネルギー
     ship.energy = (MAX_ENERGY + MAX_ENERGY_BLANK) << E_FIX;
+    // 逆噴射
     ship.booster = 0;
 }
 
@@ -557,7 +526,6 @@ init_blocks()
         blocks.list[i].fix.y = 0;
     }
 
-    //blocks.interval = 3 * 60;
     blocks.num = 0;
 }
 
@@ -565,10 +533,9 @@ init_blocks()
  * @brief ブロック初期化
  ***********************************************/
 static void
-init_star(int num, int x, int y)
+init_block(int num, int x, int y)
 {
     // 加速度
-    //blocks.list[num].acc.z = BLOCK_SPEED;
     blocks.acc = blocks.speed;
 
     // スプライト
@@ -739,18 +706,21 @@ static void
 set_new_bomb()
 {
     if (bomb.num < bomb.max) {
-        // アニメ初期化
-        bomb.anime.is_start = true;
-        bomb.anime.frame = 0;
-        bomb.anime.max_frame = 4;
-        bomb.anime.interval = bomb.anime.interval_rel = BOMB_INTERVAL;
+        for(int i = 0; i < FIRE_BOMBS; i++) {
+            // アニメ初期化
+            bomb.list[i].anime.is_start = true;
+            bomb.list[i].anime.frame = 0;
+            bomb.list[i].anime.max_frame = 4;
+            bomb.list[i].anime.interval = bomb.list[i].anime.interval_rel = BOMB_INTERVAL;
 
-        // スプライト初期化
-        set_sprite_tile(SPRITE_BOMB, TILE_BOMB1);
-        bomb.sprite.vec.x = bomb.base.x + RND(0, BOMB_RANGE) - BOMB_RANGE / 2;
-        bomb.sprite.vec.y = bomb.base.y + RND(0, BOMB_RANGE) - BOMB_RANGE / 2;
+            // スプライト初期化
+            set_sprite_tile(SPRITE_BOMB + i, TILE_BOMB1);
+            bomb.list[i].sprite.vec.x = bomb.base.x + RND(0, BOMB_RANGE) - BOMB_RANGE / 2;
+            bomb.list[i].sprite.vec.y = bomb.base.y + RND(0, BOMB_RANGE) - BOMB_RANGE / 2;
 
-        bomb.num++;
+            bomb.num++;
+            PlaySound(SOUND_BOMB);
+        }
     } else {
         bomb.num = bomb.max = 0;
     }
@@ -766,23 +736,25 @@ disp_bomb()
         return;
     }
 
-    // アニメ
-    if (!--bomb.anime.interval) {
-        bomb.anime.interval = bomb.anime.interval_rel;
-        bomb.anime.frame = (bomb.anime.frame + 1) % bomb.anime.max_frame;
+    for(int i = 0; i < FIRE_BOMBS; i++) {
+        // アニメ
+        if (!--bomb.list[i].anime.interval) {
+            bomb.list[i].anime.interval = bomb.list[i].anime.interval_rel;
+            bomb.list[i].anime.frame = (bomb.list[i].anime.frame + 1) % bomb.list[i].anime.max_frame;
 
-        if (!bomb.anime.frame) {
-            // 次の爆風をセット
-            set_new_bomb();
-            erase_sprite(SPRITE_BOMB);
-            return;
+            if (!bomb.list[i].anime.frame) {
+                // 次の爆風をセット
+                set_new_bomb();
+                erase_sprite(SPRITE_BOMB + i);
+                return;
+            }
+
+            // タイル変更
+            set_sprite_tile(SPRITE_BOMB + i, TILE_BOMB1 + bomb.list[i].anime.frame * TILE_SIZE_16);
         }
 
-        // タイル変更
-        set_sprite_tile(SPRITE_BOMB, TILE_BOMB1 + bomb.anime.frame * TILE_SIZE_16);
+        move_sprite(SPRITE_BOMB + i, bomb.list[i].sprite.vec.x, bomb.list[i].sprite.vec.y);
     }
-
-    move_sprite(SPRITE_BOMB, bomb.sprite.vec.x, bomb.sprite.vec.y);
 }
 
 /**********************************************/ /**
@@ -850,9 +822,8 @@ draw_line(int y)
 {
     u32* dst = (u32*)current_frame + (y * SCREEN_WIDTH) / 4;
 
-    for (int i = 0; i < LINE_W / 4; i++) {
-        *(dst + i) = LINE_COLOR;
-    }
+    CpuFastSet(&lines.color, current_frame, (FILL | (SCREEN_WIDTH / 4)));
+
 }
 
 /**********************************************/ /**
@@ -1375,7 +1346,7 @@ update_lv()
         set_level_param(stage.lv);
 
         stage.lv++;
-        reset_message(&lv_mes);
+        reset_message(&lv_mes, MES_BLINK_NORMAL);
         lv_mes.is_start = true;
     }
 
@@ -1440,7 +1411,7 @@ level_up()
         lv_mes.chr ^= 1;
 
         if (!--lv_mes.count) {
-            reset_message(&lv_mes);
+            reset_message(&lv_mes, MES_BLINK_NORMAL);
 
             // BGM切り替え
             StopMusic();
@@ -1520,7 +1491,7 @@ disp_warning()
 
         if (!--mes.count) {
             game_state.scene = GAME_MAIN;
-            reset_message(&mes);
+            reset_message(&mes, MES_BLINK_NORMAL);
             stage.frame = 0;
             stage_bgm = 0;
             PlayMusic(MUSIC_STAGE, PLAY_LOOP_ON);
@@ -1541,8 +1512,8 @@ disp_gameover()
     if (stage.frame == 1) {
 
         // 爆風
-        init_bomb(&ship.sprite.vec, MAX_OVER_BOMBS);
-        PlaySound(SOUND_BOMB);
+        init_bomb(&ship.sprite.vec, REP_OVER_BOMBS);
+        //PlaySound(SOUND_BOMB);
 
     } else if (stage.frame > 2 * 60) {
 
@@ -1623,14 +1594,22 @@ disp_pause()
 /**********************************************/ /**
  * @brief 点滅メッセージ用パラメータのリセット
  * @param *m メッセージパラメータポインタ
+ * @param mode 通常｜高速
  ***********************************************/
 static void
-reset_message(BlinkMessageType* m)
+reset_message(BlinkMessageType* m, int mode)
 {
     m->is_start = false;
-    m->count = MES_COUNT;
     m->chr = 0;
-    m->wait = m->wait_rel = MES_WAIT;
+
+    if(mode == MES_BLINK_NORMAL) {
+        m->count = MES_COUNT;
+        m->wait = m->wait_rel = MES_WAIT;
+    } else {
+        m->count = MES_COUNT * 2;
+        m->wait = m->wait_rel = MES_WAIT / 2;
+    }
+
 }
 
 /**********************************************/ /**

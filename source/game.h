@@ -187,7 +187,7 @@
 #define SHIP_Y (128)
 
 /**
- * 自機 Y座標
+ * 自機 Z座標
  */
 #define SHIP_Z MIN_Z
 
@@ -562,9 +562,9 @@
 #define LINE_Y_TARGET (SCREEN_HEIGHT - FIX_STAGE_Y)
 
 /**
- * @brief 地平線の色 2dot分
+ * @brief 地平線の色
  */
-#define LINE_COLOR ((38 << 24) | (38 << 16) | (38 << 8) | 38)
+#define LINE_COLOR (38)
 
 /***************************************************
  * 境界線
@@ -859,18 +859,23 @@
 /***************************************************
  *　爆風
  ***************************************************/
-
 /**
  * @brief 爆風 最大値 ブロック
  * 
  */
-#define MAX_BLOCK_BOMBS (2)
+#define FIRE_BOMBS (2)
 
 /**
- * @brief 爆風 最大値 ゲームオーバー
+ * @brief 爆風 繰り返し回数 ブロック
  * 
  */
-#define MAX_OVER_BOMBS (4)
+#define REP_BLOCK_BOMBS (2)
+
+/**
+ * @brief 爆風 繰り返し回数 ゲームオーバー
+ * 
+ */
+#define REP_OVER_BOMBS (4)
 
 /**
  * @brief 爆風 発生範囲
@@ -958,7 +963,7 @@ enum {
     // 爆風
     SPRITE_BOMB,
     // 炎
-    SPRITE_FIRE,
+    SPRITE_FIRE = 3,
     // 自機
     SPRITE_SHIP,
     // 逆噴射
@@ -994,6 +999,15 @@ typedef enum {
 enum {
     BOMB_BLOCK,
     BOMB_OVER
+};
+
+/**
+ * @brief メッセージ点滅モード
+ * 
+ */
+enum {
+    MES_BLINK_NORMAL,
+    MES_BLINK_FAST
 };
 
 ///////////////////////////////////////////////////////////////////// 構造体
@@ -1203,10 +1217,7 @@ typedef struct
     int max;
     // ベース座標
     PointType base;
-    // アニメ
-    AnimeType anime;
-    // スプライト
-    SpriteCharType sprite;
+    FireType list[FIRE_BOMBS];
 } ALIGN(4) BombType;
 
 /**
@@ -1218,6 +1229,8 @@ typedef struct
     int num;
     // 進んだ距離 Z軸
     int z;
+    // カラー
+    u8 color[32];
     // 地平線のリスト
     SpriteCharType list[MAX_LINES];
 } ALIGN(4) LineType;

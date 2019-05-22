@@ -201,11 +201,6 @@ void init_game()
         stage.flash.color[i] = FLASH_COLOR;
     }
 
-    // LINE初期化
-    for (int i = 0; i < 32; i++) {
-        lines.color[i] = LINE_COLOR;
-    }
-
     // ハイスコアのロード
     hiscore = load_hiscore();
 
@@ -373,7 +368,9 @@ init_sprite_setting()
     set_sprite_tile(SPRITE_RINGICON, TILE_RINGICON1);
 
     //// 爆風 16*16 dot
-    set_sprite_form(SPRITE_BOMB, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
+    for(int i = 0; i < FIRE_BOMBS; i++) {
+        set_sprite_form(SPRITE_BOMB + i, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
+    }
 
     //// ブラボー 8*32 dot
     set_sprite_form(SPRITE_BRAVOICON, OBJ_SIZE(2), OBJ_WIDE, OBJ_256_COLOR);
@@ -822,8 +819,9 @@ draw_line(int y)
 {
     u32* dst = (u32*)current_frame + (y * SCREEN_WIDTH) / 4;
 
-    CpuFastSet(&lines.color, current_frame, (FILL | (SCREEN_WIDTH / 4)));
-
+    for (int i = 0; i < LINE_W / 4; i++) {
+        *(dst + i) = LINE_COLOR;
+    }
 }
 
 /**********************************************/ /**

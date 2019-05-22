@@ -564,7 +564,7 @@
 /**
  * @brief 地平線の色
  */
-#define LINE_COLOR (38)
+#define LINE_COLOR (38 | 38 << 8 | 38 << 16 | 38 << 24)
 
 /***************************************************
  * 境界線
@@ -725,7 +725,7 @@
  * @brief ブロックボーナス 
  * 
  */
-#define BLOCK_BONUS (100)
+#define BLOCK_BONUS (1000)
 
 /**
  * トータル メッセージ X座標
@@ -1230,7 +1230,7 @@ typedef struct
     // 進んだ距離 Z軸
     int z;
     // カラー
-    u8 color[32];
+    //u8 color[32];
     // 地平線のリスト
     SpriteCharType list[MAX_LINES];
 } ALIGN(4) LineType;

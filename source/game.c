@@ -327,7 +327,7 @@ move_blocks()
             if (blocks.list[0].type == NORMAL
                 && abs((m.x + m.w / 2) - (e.x + e.w / 2)) <= BELOW_BLOCK_BONUS) {
                 add_bonus(BLOCK_BONUS);
-                ship.energy = MAX_ENERGY;
+                ship.energy = MAX_ENERGY << E_FIX;
                 set_bravo_icon();
             }
         }

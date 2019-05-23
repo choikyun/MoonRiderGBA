@@ -733,23 +733,29 @@ disp_bomb()
         return;
     }
 
+    // アニメ
     for(int i = 0; i < FIRE_BOMBS; i++) {
-        // アニメ
         if (!--bomb.list[i].anime.interval) {
             bomb.list[i].anime.interval = bomb.list[i].anime.interval_rel;
             bomb.list[i].anime.frame = (bomb.list[i].anime.frame + 1) % bomb.list[i].anime.max_frame;
 
-            if (!bomb.list[i].anime.frame) {
-                // 次の爆風をセット
-                set_new_bomb();
-                erase_sprite(SPRITE_BOMB + i);
-                return;
-            }
-
             // タイル変更
             set_sprite_tile(SPRITE_BOMB + i, TILE_BOMB1 + bomb.list[i].anime.frame * TILE_SIZE_16);
         }
+    }
 
+    // 終了判定
+    if (!bomb.list[0].anime.frame) {
+        set_new_bomb();
+        
+        for (int i = 0; i <FIRE_BOMBS; i++) {
+            erase_sprite(SPRITE_BOMB + i);
+        }
+        return;
+    }
+
+    // 表示
+    for (int i = 0; i < FIRE_BOMBS; i++) {
         move_sprite(SPRITE_BOMB + i, bomb.list[i].sprite.vec.x, bomb.list[i].sprite.vec.y);
     }
 }

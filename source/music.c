@@ -39,7 +39,7 @@ const WaveListType SoundList[] =
     { s3_bin, SAMPLING_S3, 10 }, // ゲームオーバー
     { s4_bin, SAMPLING_S4, 30}, // レベルアップ
     { s5_bin, SAMPLING_S5, 20 }, // アイテム
-    { s6_bin, SAMPLING_S6, 20 }, // 衝突
+    { s6_bin, SAMPLING_S6, 15 }, // 衝突
   };
 
 //*************************************************************

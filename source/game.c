@@ -86,6 +86,11 @@ static void add_bonus(int);
 static void disp_bravo_icon();
 static void set_bravo_icon();
 static void init_bravo_icon();
+static void select_mode();
+static void trophy();
+static void disp_trophy_mes();
+static void disp_trophy();
+static void init_trophy();
 
 //debug
 void vbaPrint(char* s);
@@ -104,7 +109,7 @@ void game()
     switch (game_state.scene) {
     case GAME_TITLE:
         disp_title();
-        //select_mode();
+        select_mode();
         break;
 
     case GAME_DEMO:
@@ -133,11 +138,12 @@ void game()
         disp_ring_icon();
         disp_booster_icon();
         disp_bravo_icon();
-        /*disp_boundary();*/
 
         create_new_blocks();
         create_new_line();
         move_lines();
+
+        trophy();
 
         draw_bg();
         draw_lines();
@@ -147,6 +153,7 @@ void game()
         update_score(score, SCORE_X, SCORE_Y);
         level_up();
         check_booster();
+        disp_trophy_mes();
 
         add_score(NORMAL_SCORE);
         check_gameover();
@@ -169,7 +176,6 @@ void game()
         move_blocks();
         disp_blocks();
 
-        //create_new_blocks();
         create_new_line();
         move_lines();
 
@@ -201,8 +207,17 @@ void init_game()
         stage.flash.color[i] = FLASH_COLOR;
     }
 
+    // モード
+      stage.mode = SRAMRead32(SRAM_MODE);
+    if ((u32)stage.mode > 1 ) {
+        stage.mode = 0;// 数値がおかしかったらリセット
+    }
+
     // ハイスコアのロード
     hiscore = load_hiscore();
+
+    // トロフィー初期化
+    init_trophy();
 
     // スプライト初期化
     init_sprite_setting();
@@ -312,6 +327,7 @@ move_blocks()
             if (blocks.list[0].type == NORMAL
                 && abs((m.x + m.w / 2) - (e.x + e.w / 2)) <= BELOW_BLOCK_BONUS) {
                 add_bonus(BLOCK_BONUS);
+                ship.energy = MAX_ENERGY;
                 set_bravo_icon();
             }
         }
@@ -336,6 +352,10 @@ move_blocks()
 static void
 init_sprite_setting()
 {
+    //// 矢印 8*8 dot
+    set_sprite_form(SPRITE_ARROW, OBJ_SIZE(0), OBJ_SQUARE, OBJ_256_COLOR);
+    set_sprite_tile(SPRITE_ARROW, TILE_ARROW);
+
     //// 自機 32*32 dot
     set_sprite_form(SPRITE_SHIP, OBJ_SIZE(2), OBJ_SQUARE, OBJ_256_COLOR);
     set_sprite_tile(SPRITE_SHIP, TILE_SHIP1);
@@ -368,7 +388,7 @@ init_sprite_setting()
     set_sprite_tile(SPRITE_RINGICON, TILE_RINGICON1);
 
     //// 爆風 16*16 dot
-    for(int i = 0; i < FIRE_BOMBS; i++) {
+    for (int i = 0; i < FIRE_BOMBS; i++) {
         set_sprite_form(SPRITE_BOMB + i, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
     }
 
@@ -399,6 +419,9 @@ restart()
     // メッセージ初期化
     reset_message(&mes, MES_BLINK_NORMAL);
     reset_message(&lv_mes, MES_BLINK_NORMAL);
+    
+    // トロフィー用メッセージ初期化
+    reset_message(&trophy_mes, MES_BLINK_FAST);
 
     // ステージ初期化
     init_stage();
@@ -703,7 +726,7 @@ static void
 set_new_bomb()
 {
     if (bomb.num < bomb.max) {
-        for(int i = 0; i < FIRE_BOMBS; i++) {
+        for (int i = 0; i < FIRE_BOMBS; i++) {
             // アニメ初期化
             bomb.list[i].anime.is_start = true;
             bomb.list[i].anime.frame = 0;
@@ -715,9 +738,9 @@ set_new_bomb()
             bomb.list[i].sprite.vec.x = bomb.base.x + RND(0, BOMB_RANGE) - BOMB_RANGE / 2;
             bomb.list[i].sprite.vec.y = bomb.base.y + RND(0, BOMB_RANGE) - BOMB_RANGE / 2;
 
-            bomb.num++;
             PlaySound(SOUND_BOMB);
         }
+        bomb.num++;
     } else {
         bomb.num = bomb.max = 0;
     }
@@ -734,10 +757,14 @@ disp_bomb()
     }
 
     // アニメ
-    for(int i = 0; i < FIRE_BOMBS; i++) {
+    bool complete = false;
+    for (int i = 0; i < FIRE_BOMBS; i++) {
         if (!--bomb.list[i].anime.interval) {
             bomb.list[i].anime.interval = bomb.list[i].anime.interval_rel;
             bomb.list[i].anime.frame = (bomb.list[i].anime.frame + 1) % bomb.list[i].anime.max_frame;
+            if (!bomb.list[0].anime.frame) {
+                complete = true;
+            }
 
             // タイル変更
             set_sprite_tile(SPRITE_BOMB + i, TILE_BOMB1 + bomb.list[i].anime.frame * TILE_SIZE_16);
@@ -745,10 +772,10 @@ disp_bomb()
     }
 
     // 終了判定
-    if (!bomb.list[0].anime.frame) {
+    if (complete) {
         set_new_bomb();
-        
-        for (int i = 0; i <FIRE_BOMBS; i++) {
+
+        for (int i = 0; i < FIRE_BOMBS; i++) {
             erase_sprite(SPRITE_BOMB + i);
         }
         return;
@@ -1374,29 +1401,37 @@ static void
 set_level_param(int lv)
 {
     // ブロック速度, ブロック生成間隔, リング生成確率,
-    static int param[MAX_LV][3] = {
-        { -4096 * 20, 40, 2 },
-        { -4096 * 21, 38, 2 },
-        { -4096 * 22, 36, 2 },
-        { -4096 * 23, 34, 3 },
-        { -4096 * 24, 32, 3 },
-        { -4096 * 25, 30, 3 },
-        { -4096 * 26, 28, 4 },
-        { -4096 * 27, 26, 4 }
+    static int param[MAX_MODE][MAX_LV][3] = {
+        { { -4096 * 20, 40, 2 },
+            { -4096 * 21, 38, 2 },
+            { -4096 * 22, 36, 2 },
+            { -4096 * 23, 34, 3 },
+            { -4096 * 24, 32, 3 },
+            { -4096 * 25, 30, 3 },
+            { -4096 * 26, 28, 4 },
+            { -4096 * 27, 26, 4 } },
+        { { -4096 * 24, 40, 4 },
+            { -4096 * 25, 38, 4 },
+            { -4096 * 26, 36, 4 },
+            { -4096 * 27, 34, 5 },
+            { -4096 * 28, 32, 5 },
+            { -4096 * 29, 30, 5 },
+            { -4096 * 30, 28, 6 },
+            { -4096 * 31, 26, 6 } }
     };
 
     // エネルギー回復
-    ship.energy = (MAX_ENERGY + MAX_ENERGY_BLANK) << E_FIX;
+    //ship.energy = (MAX_ENERGY + MAX_ENERGY_BLANK) << E_FIX;
 
     // ブロックスピード
-    blocks.speed = param[lv][0];
+    blocks.speed = param[stage.mode][lv][0];
 
     // ブロックの生成間隔 Z座標
-    blocks.interval = param[lv][1];
-    blocks.interval_rel = param[lv][1];
+    blocks.interval = param[stage.mode][lv][1];
+    blocks.interval_rel = param[stage.mode][lv][1];
 
     // リング生成確率
-    blocks.ring_chance = param[lv][2];
+    blocks.ring_chance = param[stage.mode][lv][2];
 }
 
 /**********************************************/ /**
@@ -1477,6 +1512,83 @@ void update_hiscore()
         sc /= 10;
         pos -= (NUM_W);
     }
+
+    disp_trophy ();
+}
+
+/**********************************************//**
+ * @brief トロフィーマーク表示
+ ***********************************************/
+void disp_trophy ()
+{
+  int x = TROPHY_X;
+  // トロフィー表示
+  for (int i = 0; i < MAX_TROPHY; i++)
+  {
+    if (trophy_unlocked[i])
+      draw_bitmap8 (x, TROPHY_Y, TROPHY_W, TROPHY_H, bmp_trophyBitmap);
+    else
+      draw_bitmap8 (x, TROPHY_Y, TROPHY_W, TROPHY_H, bmp_notrophyBitmap);
+
+    x += TROPHY_W;
+  }
+}
+
+/**********************************************//**
+ * トロフィー（実績）解除
+ ***********************************************/
+static void
+trophy ()
+{
+  /*
+   * 実績1：
+   */
+    //trophy_mes.is_start = true;
+  
+  /*
+   * 実績2：
+   */
+
+  /*
+   * 実績3：
+   */
+
+  /*
+   * 実績4：
+   */
+
+  /*
+   * 実績5：
+   */
+
+  /*
+   * 実績6：
+   */
+}
+
+/**********************************************//**
+ *  トロフィー獲得メッセージ
+ ***********************************************/
+static void
+disp_trophy_mes ()
+{
+  if (!trophy_mes.is_start)
+    return;
+
+  // 点滅
+  if (!--trophy_mes.wait)
+  {
+    trophy_mes.wait = trophy_mes.wait_rel;
+    trophy_mes.chr ^= 1;
+
+    if (!--trophy_mes.count)
+    {
+      reset_message(&trophy_mes, MES_BLINK_FAST);
+    }
+  }
+
+  if (trophy_mes.chr)
+    draw_bitmap_frame (UNLOCK_MES_X, UNLOCK_MES_Y, UNLOCK_MES_W, UNLOCK_MES_H, bmp_unlockedBitmap);
 }
 
 /**********************************************/ /**
@@ -1606,23 +1718,13 @@ reset_message(BlinkMessageType* m, int mode)
     m->is_start = false;
     m->chr = 0;
 
-    if(mode == MES_BLINK_NORMAL) {
+    if (mode == MES_BLINK_NORMAL) {
         m->count = MES_COUNT;
         m->wait = m->wait_rel = MES_WAIT;
     } else {
         m->count = MES_COUNT * 2;
         m->wait = m->wait_rel = MES_WAIT / 2;
     }
-
-}
-
-/**********************************************/ /**
- * @brief 点滅メッセージ用パラメータのリセット
- * @param *m メッセージパラメータポインタ
- ***********************************************/
-static void
-reset_message_fast(BlinkMessageType* m)
-{
 }
 
 /**********************************************/ /**
@@ -1672,7 +1774,42 @@ disp_title()
         StopMusic();
     } else if ((key & KEY_R) && (key & KEY_B)) {
         clear_hiscore();
+        init_trophy ();
         update_hiscore();
+    }
+}
+
+/**********************************************/ /**
+ * @brief モード設定
+ ***********************************************/
+static void
+select_mode()
+{
+    if (game_state.scene != GAME_TITLE) {
+        erase_sprite(SPRITE_ARROW);
+        return;
+    }
+
+    u16 key = game_state.key;
+    if (key & KEY_SELECT) {
+        PlaySound(SOUND_LEVELUP);
+
+        stage.mode ^= 1;
+        SRAMWrite32(SRAM_MODE, stage.mode);
+        hiscore = load_hiscore();
+    }
+
+    update_hiscore();
+    move_sprite(SPRITE_ARROW, MODE_ARROW_X + MODE_ARROW_X2 * stage.mode, MODE_ARROW_Y);
+}
+
+/**********************************************/ /**
+ * @brief トロフィー初期化
+ ***********************************************/
+void init_trophy()
+{
+    for (int i = 0; i < MAX_TROPHY; i++) {
+        trophy_unlocked[i] = false;
     }
 }
 

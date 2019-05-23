@@ -69,6 +69,9 @@
 // ブラボー
 #include "sprite_bravo1.h"
 
+// 矢印
+#include "sprite_arrow.h"
+
 /***************************************************
  スプライト初期化
  ***************************************************/
@@ -253,4 +256,7 @@ void init_sprite_chr(void)
 
     // ブラボー
     CpuSet(sprite_bravo1Tiles, oam + 512 * 5 + 128 * 2 + 2048 * 2 + 32 + 128 * 4 + 32 * 2 + 128 * 4, (COPY32 | sprite_bravo1TilesLen / 4)); // 32dot
+
+    // 矢印
+    CpuSet(sprite_arrowTiles, oam + 512 * 5 + 128 * 2 + 2048 * 2 + 32 + 128 * 4 + 32 * 2 + 128 * 5, (COPY32 | sprite_arrowTilesLen / 4)); // 8dot
 }

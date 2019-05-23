@@ -1,24 +1,24 @@
 
-//{{BLOCK(bmp_bg1)
+//{{BLOCK(bmp_trophy)
 
 //======================================================================
 //
-//	bmp_bg1, 240x160@8, 
+//	bmp_trophy, 8x8@8, 
 //	+ bitmap not compressed
-//	Total size: 38400 = 38400
+//	Total size: 64 = 64
 //
-//	Time-stamp: 2019-05-24, 01:08:58
+//	Time-stamp: 2019-05-24, 00:43:03
 //	Exported by Cearn's GBA Image Transmogrifier, v0.8.6
 //	( http://www.coranac.com/projects/#grit )
 //
 //======================================================================
 
-#ifndef GRIT_BMP_BG1_H
-#define GRIT_BMP_BG1_H
+#ifndef GRIT_BMP_TROPHY_H
+#define GRIT_BMP_TROPHY_H
 
-#define bmp_bg1BitmapLen 38400
-extern const unsigned short bmp_bg1Bitmap[19200];
+#define bmp_trophyBitmapLen 64
+extern const unsigned short bmp_trophyBitmap[32];
 
-#endif // GRIT_BMP_BG1_H
+#endif // GRIT_BMP_TROPHY_H
 
-//}}BLOCK(bmp_bg1)
+//}}BLOCK(bmp_trophy)

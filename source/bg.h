@@ -49,8 +49,18 @@
 // pause
 #include "bmp_pause.h"
 
+// トロフィー オン
+#include "bmp_trophy.h"
+
+// トロフィー オフ
+#include "bmp_notrophy.h"
+
+// アンロックメッセージ
+#include "bmp_unlocked.h"
+
 // 自機
 #include "sprite_ship1.h"
+
 
 
 #ifdef GLOBAL_VALUE_DEFINE

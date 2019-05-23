@@ -125,6 +125,66 @@
  */
 #define MAX_MODE (2)
 
+#define MODE_ARROW_X (84)
+
+#define MODE_ARROW_X2 (38)
+
+#define MODE_ARROW_Y (122)
+
+/***************************************************
+ * トロフィー
+ ***************************************************/
+
+/**
+ * トロフィーの数
+ */
+#define MAX_TROPHY (6)
+
+/**
+ * アンロックメッセージ　X座標
+ */
+#define UNLOCK_MES_X (90)
+
+/**
+ * アンロックメッセージ　Y座標
+ */
+#define UNLOCK_MES_Y (76)
+
+/**
+ * アンロックメッセージ　インターバル
+ */
+#define UNLOCK_MES_INTERVAL (6)
+
+/**
+ * アンロックメッセージ　幅
+ */
+#define UNLOCK_MES_W (48)
+
+/**
+ * アンロックメッセージ　高さ
+ */
+#define UNLOCK_MES_H (7)
+
+/**
+ * トロフィーマーク　X座標
+ */
+#define TROPHY_X (192)
+
+/**
+ * トロフィーマーク　Y座標
+ */
+#define TROPHY_Y (1)
+
+/**
+ * トロフィーマーク　幅
+ */
+#define TROPHY_W (8)
+
+/**
+ * トロフィーマーク　高さ
+ */
+#define TROPHY_H (8)
+
 /***************************************************
  * ステージ
  ***************************************************/
@@ -875,7 +935,7 @@
  * @brief 爆風 繰り返し回数 ゲームオーバー
  * 
  */
-#define REP_OVER_BOMBS (4)
+#define REP_OVER_BOMBS (3)
 
 /**
  * @brief 爆風 発生範囲
@@ -958,12 +1018,14 @@ enum {
  * @brief スプライトキャラクタ
  */
 enum {
+    // 矢印
+    SPRITE_ARROW,
     // ブラボー
     SPRITE_BRAVOICON,
     // 爆風
     SPRITE_BOMB,
     // 炎
-    SPRITE_FIRE = 3,
+    SPRITE_FIRE = 4,
     // 自機
     SPRITE_SHIP,
     // 逆噴射
@@ -1318,30 +1380,42 @@ typedef struct
 // ブラボー
 #define TILE_BRAVO1 (1014) // 8tiles
 
+// 矢印
+#define TILE_ARROW (1022) // 2tiles
+
+
 ///////////////////////////////////////////////////////////////////// SRAM
 
 /**
  * ハイスコアSRAM保存用
  */
 #define SRAM_CHECK (0)
+
 /**
  * ハイスコアSRAM保存用
  */
 #define SRAM_HISCORE_NORMAL (4)
+
 /**
  * ハイスコアSRAM保存用
  */
 #define SRAM_HISCORE_HARD (8)
 
 /**
+ * トロフィーフラグ
+ */
+#define SRAM_TROPHY_NORMAL (12) // 4*6
+#define SRAM_TROPHY_HARD (36) // 4*6
+
+/**
  * 乱数の種
  */
-#define SRAM_SEED (12)
+#define SRAM_SEED (100)
 
 /**
  * ゲームモード保存
  */
-#define SRAM_MODE (16)
+#define SRAM_MODE (104)
 
 /**
  * SRAM書き込みフラグ
@@ -1457,6 +1531,12 @@ GLOBAL BlinkMessageType mes;
 GLOBAL BlinkMessageType lv_mes;
 
 /**
+ *　@brief トロフィーメッセージ表示
+ */
+GLOBAL BlinkMessageType trophy_mes;
+
+
+/**
  * @brief ブラボーアイコン
  * 
  */
@@ -1491,6 +1571,11 @@ GLOBAL u32 seed;
  * 現在のステージBGM
  */
 GLOBAL int stage_bgm;
+
+/**
+ * トロフィー解除フラグ
+ */
+GLOBAL bool trophy_unlocked[MAX_TROPHY];
 
 ///////////////////////////////////////////////////////////////////// プロトタイプ
 

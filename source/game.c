@@ -91,6 +91,7 @@ static void trophy();
 static void disp_trophy_mes();
 static void disp_trophy();
 static void init_trophy();
+static void reset_trophy_requirement();
 
 //debug
 void vbaPrint(char* s);
@@ -213,11 +214,14 @@ void init_game()
         stage.mode = 0;// 数値がおかしかったらリセット
     }
 
-    // ハイスコアのロード
-    hiscore = load_hiscore();
-
     // トロフィー初期化
     init_trophy();
+    
+    // ハイスコア,トロフィーのロード
+    hiscore = load_hiscore();
+
+    // トロフィー条件の初期化
+    reset_trophy_requremnet();
 
     // スプライト初期化
     init_sprite_setting();
@@ -311,12 +315,16 @@ move_blocks()
                 flash();
                 shock();
                 update_energy(DAMAGE_ENERGY);
+                // トロフィー用
+                trophy_req.continuas_ring++;
                 PlaySound(SOUND_CRASH);
             } else {
                 stage.ring++;
                 set_ring_icon();
                 ship.sprite.show = true;
                 update_energy(RECOVERY_ENERGY);
+                // トロフィー獲得条件リセット
+                reset_trophy_req();
                 PlaySound(SOUND_ITEM);
             }
 
@@ -329,6 +337,8 @@ move_blocks()
                 add_bonus(BLOCK_BONUS);
                 ship.energy = MAX_ENERGY << E_FIX;
                 set_bravo_icon();
+                // トロフィー用
+                trophy_req.continuas_bravo++;
             }
         }
 
@@ -1513,7 +1523,7 @@ void update_hiscore()
         pos -= (NUM_W);
     }
 
-    disp_trophy ();
+    disp_trophy();
 }
 
 /**********************************************//**
@@ -1540,30 +1550,59 @@ void disp_trophy ()
 static void
 trophy ()
 {
-  /*
-   * 実績1：
-   */
-    //trophy_mes.is_start = true;
+    /*
+     * 実績1：3連続リング獲得
+     */
+    if (trophy_req.continuas_ring > 3 && !trophy_unlocked[0]) {
+        trophy_mes.is_start = true;
+        trophy_unlocked[0] = true;
+        return;
+    }
   
-  /*
-   * 実績2：
-   */
+    /*
+     * 実績2：3連続ブラボー
+     */
+    if (trophy_req.continuas_bravo > 3 && !trophy_unlocked[1]) {
+        trophy_mes.is_start = true;
+        trophy_unlocked[1] = true;
+        return;
+    }
 
-  /*
-   * 実績3：
-   */
+    /*
+     * 実績3：スコア100000獲得
+     */
+    if (score >= 100000 && !trophy_unlocked[2]) {
+        trophy_mes.is_start = true;
+        trophy_unlocked[2] = true;
+        return;
+    }
 
-  /*
-   * 実績4：
-   */
+    /*
+     * 実績4：5連続リング獲得
+     */
+    if (trophy_req.continuas_ring > 5 && !trophy_unlocked[3]) {
+        trophy_mes.is_start = true;
+        trophy_unlocked[3] = true;
+        return;
+    }
 
-  /*
-   * 実績5：
-   */
+    /*
+     * 実績5：5連続ブラボー
+     */
+    if (trophy_req.continuas_bravo > 5 && !trophy_unlocked[4]) {
+        trophy_mes.is_start = true;
+        trophy_unlocked[4] = true;
+        return;
+    }
 
-  /*
-   * 実績6：
-   */
+    /*
+     * 実績6：スコア500000獲得
+     */
+    if (score >= 500000 && !trophy_unlocked[5]) {
+        trophy_mes.is_start = true;
+        trophy_unlocked[5] = true;
+        return;
+    }
 }
 
 /**********************************************//**
@@ -1589,6 +1628,16 @@ disp_trophy_mes ()
 
   if (trophy_mes.chr)
     draw_bitmap_frame (UNLOCK_MES_X, UNLOCK_MES_Y, UNLOCK_MES_W, UNLOCK_MES_H, bmp_unlockedBitmap);
+}
+
+/**********************************************//**
+ *  @brief トロフィー獲得条件 リセット
+ ***********************************************/
+static void
+reset_trophy_requirement()
+{
+    trophy_req.continuas_ring = 0;
+    trophy_req.continuas_bravo = 0;
 }
 
 /**********************************************/ /**
@@ -1774,7 +1823,7 @@ disp_title()
         StopMusic();
     } else if ((key & KEY_R) && (key & KEY_B)) {
         clear_hiscore();
-        init_trophy ();
+        init_trophy();
         update_hiscore();
     }
 }

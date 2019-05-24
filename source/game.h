@@ -1329,6 +1329,18 @@ typedef struct
     int wait;
 } ALIGN(4) WaitType;
 
+/**
+ * @brief トロフィー獲得条件
+ * 
+ */
+typedef struct
+{
+    // 連続獲得リング
+    int continuas_ring;
+    // 連続獲得ブラボー
+    int continuas_bravo;
+}ALIGN(4) TrophyRequiremnet;
+
 ///////////////////////////////////////////////////////////////////// タイル番号
 
 // タイルサイズ
@@ -1535,6 +1547,10 @@ GLOBAL BlinkMessageType lv_mes;
  */
 GLOBAL BlinkMessageType trophy_mes;
 
+/**
+ *　@brief トロフィー獲得条件
+ */
+GLOBAL TrophyRequiremnet trophy_req;
 
 /**
  * @brief ブラボーアイコン

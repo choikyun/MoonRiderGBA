@@ -81,6 +81,9 @@ void save_hiscore(int sc)
         SRAMWrite32(SRAM_HISCORE_NORMAL, sc);
     else if (sc > hiscore && check == SRAM_ON && stage.mode == 1)
         SRAMWrite32(SRAM_HISCORE_HARD, sc);
+
+    // トロフィー
+    save_trophy(trophy_unlocked);
 }
 
 /***************************************************
@@ -95,7 +98,62 @@ int load_hiscore()
     else
         hi = SRAMRead32(SRAM_HISCORE_HARD);
 
+    // トロフィー
+    load_trophy(trophy_unlocked);        
+
     return hi;
+}
+
+/***************************************************
+トロフィー　セーブ
+ ***************************************************/
+void
+save_trophy (bool *tropthy_unlocked)
+{
+  if (stage.mode == 0)
+  {
+    SRAMWrite32(SRAM_TROPHY_NORMAL, tropthy_unlocked[0]);
+    SRAMWrite32(SRAM_TROPHY_NORMAL+4, tropthy_unlocked[1]);
+    SRAMWrite32(SRAM_TROPHY_NORMAL+8, tropthy_unlocked[2]);
+    SRAMWrite32(SRAM_TROPHY_NORMAL+12, tropthy_unlocked[3]);
+    SRAMWrite32(SRAM_TROPHY_NORMAL+16, tropthy_unlocked[4]);
+    SRAMWrite32(SRAM_TROPHY_NORMAL+20, tropthy_unlocked[5]);
+  }
+  else
+  {
+    SRAMWrite32(SRAM_TROPHY_HARD, tropthy_unlocked[0]);
+    SRAMWrite32(SRAM_TROPHY_HARD+4, tropthy_unlocked[1]);
+    SRAMWrite32(SRAM_TROPHY_HARD+8, tropthy_unlocked[2]);
+    SRAMWrite32(SRAM_TROPHY_HARD+12, tropthy_unlocked[3]);
+    SRAMWrite32(SRAM_TROPHY_HARD+16, tropthy_unlocked[4]);
+    SRAMWrite32(SRAM_TROPHY_HARD+20, tropthy_unlocked[5]);
+  }
+}
+
+/***************************************************
+トロフィー　ロード
+ ***************************************************/
+void
+load_trophy (bool *tropthy_unlocked)
+{
+  if (stage.mode == 0)
+  {
+    tropthy_unlocked[0] = SRAMRead32 (SRAM_TROPHY_NORMAL);
+    tropthy_unlocked[1] = SRAMRead32 (SRAM_TROPHY_NORMAL+4);
+    tropthy_unlocked[2] = SRAMRead32 (SRAM_TROPHY_NORMAL+8);
+    tropthy_unlocked[3] = SRAMRead32 (SRAM_TROPHY_NORMAL+12);
+    tropthy_unlocked[4] = SRAMRead32 (SRAM_TROPHY_NORMAL+16);
+    tropthy_unlocked[5] = SRAMRead32 (SRAM_TROPHY_NORMAL+20);
+  }
+  else
+  {
+    tropthy_unlocked[0] = SRAMRead32 (SRAM_TROPHY_HARD);
+    tropthy_unlocked[1] = SRAMRead32 (SRAM_TROPHY_HARD+4);
+    tropthy_unlocked[2] = SRAMRead32 (SRAM_TROPHY_HARD+8);
+    tropthy_unlocked[3] = SRAMRead32 (SRAM_TROPHY_HARD+12);
+    tropthy_unlocked[4] = SRAMRead32 (SRAM_TROPHY_HARD+16);
+    tropthy_unlocked[5] = SRAMRead32 (SRAM_TROPHY_HARD+20);
+  }
 }
 
 /***************************************************

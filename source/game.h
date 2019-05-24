@@ -1072,6 +1072,16 @@ enum {
     MES_BLINK_FAST
 };
 
+/**
+ * @brief トロフィー獲得条件リセット
+ * 
+ */
+enum {
+    RESET_TROPHY_ALL,
+    RESET_TROPHY_RING,
+    RESET_TROPHY_BRAVO
+};
+
 ///////////////////////////////////////////////////////////////////// 構造体
 
 /**
@@ -1353,8 +1363,8 @@ typedef struct
 #define TILE_SHIP1 (512) // 32tiles
 #define TILE_SHIP2 (544) // 32
 #define TILE_SHIP3 (576) // 32
-#define TILE_SHIP4 (608) // 32
-#define TILE_SHIP5 (640) // 32
+//#define TILE_SHIP4 (608) // 32
+//#define TILE_SHIP5 (640) // 32
 
 // 炎
 #define TILE_FIRE1 (672) // 8tiles
@@ -1370,7 +1380,7 @@ typedef struct
 #define TILE_GUIDE1 (944) // 2tiles
 
 // 境界線
-#define TILE_BOUNDARY1 (946) // 8tiles
+//#define TILE_BOUNDARY1 (946) // 8tiles
 
 // リングアイコン
 #define TILE_RINGICON1 (954) // 8tiles

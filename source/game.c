@@ -91,7 +91,7 @@ static void trophy();
 static void disp_trophy_mes();
 static void disp_trophy();
 static void init_trophy();
-static void reset_trophy_requirement();
+static void reset_trophy_requirement(int);
 
 //debug
 void vbaPrint(char* s);
@@ -221,7 +221,7 @@ void init_game()
     hiscore = load_hiscore();
 
     // トロフィー条件の初期化
-    reset_trophy_requremnet();
+    reset_trophy_requirement(RESET_TROPHY_ALL);
 
     // スプライト初期化
     init_sprite_setting();
@@ -308,6 +308,7 @@ move_blocks()
         e.x = blocks.list[0].target.x + SHIP_MOVE_MAX_X - blocks.list[0].center.x + (stage.center.x >> FIX);
         e.w = blocks.list[0].hit.w;
 
+        // 自機との当たり判定
         if (hits_block(&m, &e) && game_state.scene == GAME_MAIN) {
 
             // ブロック or リング
@@ -315,19 +316,18 @@ move_blocks()
                 flash();
                 shock();
                 update_energy(DAMAGE_ENERGY);
-                // トロフィー用
-                trophy_req.continuas_ring++;
+                // トロフィー獲得条件リセット
+                reset_trophy_requirement(RESET_TROPHY_ALL);
                 PlaySound(SOUND_CRASH);
             } else {
                 stage.ring++;
+                trophy_req.continuas_ring++;
                 set_ring_icon();
-                ship.sprite.show = true;
                 update_energy(RECOVERY_ENERGY);
-                // トロフィー獲得条件リセット
-                reset_trophy_req();
                 PlaySound(SOUND_ITEM);
             }
 
+        // かわした
         } else if (game_state.scene == GAME_MAIN) {
 
             // ボーナススコア
@@ -337,9 +337,14 @@ move_blocks()
                 add_bonus(BLOCK_BONUS);
                 ship.energy = MAX_ENERGY << E_FIX;
                 set_bravo_icon();
-                // トロフィー用
                 trophy_req.continuas_bravo++;
+            } else {
+                // トロフィー獲得条件リセット ブラボー
+                reset_trophy_requirement(RESET_TROPHY_BRAVO);
             }
+
+            // トロフィー獲得条件リセット リング
+            reset_trophy_requirement(RESET_TROPHY_RING);
         }
 
         // エネルギー消費
@@ -387,11 +392,11 @@ init_sprite_setting()
     set_sprite_tile(SPRITE_GUIDE, TILE_GUIDE1);
 
     //// 境界線 8*32 dot
-    set_sprite_form(SPRITE_BOUNDARY_L, OBJ_SIZE(1), OBJ_TALL, OBJ_256_COLOR);
-    set_sprite_tile(SPRITE_BOUNDARY_L, TILE_BOUNDARY1);
+    //set_sprite_form(SPRITE_BOUNDARY_L, OBJ_SIZE(1), OBJ_TALL, OBJ_256_COLOR);
+    //set_sprite_tile(SPRITE_BOUNDARY_L, TILE_BOUNDARY1);
 
-    set_sprite_form(SPRITE_BOUNDARY_R, OBJ_SIZE(1), OBJ_TALL, OBJ_256_COLOR);
-    set_sprite_tile(SPRITE_BOUNDARY_R, TILE_BOUNDARY1);
+    //set_sprite_form(SPRITE_BOUNDARY_R, OBJ_SIZE(1), OBJ_TALL, OBJ_256_COLOR);
+    //set_sprite_tile(SPRITE_BOUNDARY_R, TILE_BOUNDARY1);
 
     //// リングアイコン 16*16 dot
     set_sprite_form(SPRITE_RINGICON, OBJ_SIZE(1), OBJ_SQUARE, OBJ_256_COLOR);
@@ -403,7 +408,7 @@ init_sprite_setting()
     }
 
     //// ブラボー 8*32 dot
-    set_sprite_form(SPRITE_BRAVOICON, OBJ_SIZE(2), OBJ_WIDE, OBJ_256_COLOR);
+    set_sprite_form(SPRITE_BRAVOICON, OBJ_SIZE(1), OBJ_WIDE, OBJ_256_COLOR);
     set_sprite_tile(SPRITE_BRAVOICON, TILE_BRAVO1);
 
     //// ブロック 64*64 dot
@@ -1283,6 +1288,10 @@ update_energy(int e)
     } else if (ship.energy > (MAX_ENERGY + MAX_ENERGY_BLANK) << E_FIX) {
         ship.energy = (MAX_ENERGY + MAX_ENERGY_BLANK) << E_FIX;
     }
+
+    if(ship.energy >> E_FIX > MAX_ENERGY / 4) {
+        ship.sprite.show = true;
+    }
 }
 
 /**********************************************/ /**
@@ -1412,6 +1421,7 @@ set_level_param(int lv)
 {
     // ブロック速度, ブロック生成間隔, リング生成確率,
     static int param[MAX_MODE][MAX_LV][3] = {
+        // ノーマル
         { { -4096 * 20, 40, 2 },
             { -4096 * 21, 38, 2 },
             { -4096 * 22, 36, 2 },
@@ -1420,6 +1430,7 @@ set_level_param(int lv)
             { -4096 * 25, 30, 3 },
             { -4096 * 26, 28, 4 },
             { -4096 * 27, 26, 4 } },
+        // エクストリーム
         { { -4096 * 24, 40, 4 },
             { -4096 * 25, 38, 4 },
             { -4096 * 26, 36, 4 },
@@ -1551,20 +1562,22 @@ static void
 trophy ()
 {
     /*
-     * 実績1：3連続リング獲得
+     * 実績1：2連続リング獲得
      */
-    if (trophy_req.continuas_ring > 3 && !trophy_unlocked[0]) {
+    if (trophy_req.continuas_ring >= 2 && !trophy_unlocked[0]) {
         trophy_mes.is_start = true;
         trophy_unlocked[0] = true;
+        reset_trophy_requirement(RESET_TROPHY_ALL);
         return;
     }
   
     /*
-     * 実績2：3連続ブラボー
+     * 実績2：2連続ブラボー
      */
-    if (trophy_req.continuas_bravo > 3 && !trophy_unlocked[1]) {
+    if (trophy_req.continuas_bravo >= 2 && !trophy_unlocked[1]) {
         trophy_mes.is_start = true;
         trophy_unlocked[1] = true;
+        reset_trophy_requirement(RESET_TROPHY_ALL);
         return;
     }
 
@@ -1578,27 +1591,29 @@ trophy ()
     }
 
     /*
-     * 実績4：5連続リング獲得
+     * 実績4：3連続リング獲得
      */
-    if (trophy_req.continuas_ring > 5 && !trophy_unlocked[3]) {
+    if (trophy_req.continuas_ring >= 3 && !trophy_unlocked[3]) {
         trophy_mes.is_start = true;
         trophy_unlocked[3] = true;
+        reset_trophy_requirement(RESET_TROPHY_ALL);
         return;
     }
 
     /*
-     * 実績5：5連続ブラボー
+     * 実績5：レベル5までいった
      */
-    if (trophy_req.continuas_bravo > 5 && !trophy_unlocked[4]) {
+    if (stage.lv == 5 && !trophy_unlocked[4]) {
         trophy_mes.is_start = true;
         trophy_unlocked[4] = true;
+        reset_trophy_requirement(RESET_TROPHY_ALL);
         return;
     }
 
     /*
-     * 実績6：スコア500000獲得
+     * 実績6：レベル8 までいった
      */
-    if (score >= 500000 && !trophy_unlocked[5]) {
+    if (stage.lv == MAX_LV && !trophy_unlocked[5]) {
         trophy_mes.is_start = true;
         trophy_unlocked[5] = true;
         return;
@@ -1631,13 +1646,20 @@ disp_trophy_mes ()
 }
 
 /**********************************************//**
- *  @brief トロフィー獲得条件 リセット
+ * @brief トロフィー獲得条件 リセット
+ * @param reset RESET_TROPHY_ALL|RESET_TROPHY_RING|RESET_TROPHY_BRAVO
  ***********************************************/
 static void
-reset_trophy_requirement()
+reset_trophy_requirement(int reset)
 {
-    trophy_req.continuas_ring = 0;
-    trophy_req.continuas_bravo = 0;
+    if (reset == RESET_TROPHY_ALL) {
+        trophy_req.continuas_ring = 0;
+        trophy_req.continuas_bravo = 0;
+    } else if (reset == RESET_TROPHY_RING) {
+        trophy_req.continuas_ring = 0;
+    } else {
+        trophy_req.continuas_bravo = 0;
+    }
 }
 
 /**********************************************/ /**

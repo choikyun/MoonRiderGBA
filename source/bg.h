@@ -210,7 +210,7 @@ load_frame_bitmap(const u16 *);
  カレントフレームをFILL
  ***************************************************/
 void
-fill_frame_bitmap(const u8*);
+fill_frame_bitmap(int, int, const u8*);
 
 
 

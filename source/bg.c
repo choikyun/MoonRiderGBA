@@ -214,9 +214,13 @@ void load_frame_bitmap(const u16* data)
 }
 
 /***************************************************
- カレントフレームをFILL
+ カレントフレームをFILL FILLは8で割り切れること
  ***************************************************/
-void fill_frame_bitmap(const u8* color)
+void fill_frame_bitmap(int x, int y, const u8* color)
 {
-    CpuFastSet(color, current_frame, (FILL | (240 * 160 / 4)));
+    int start = (y * SCREEN_WIDTH + x) / 4;
+    u32* screen = (u32*)current_frame + start;
+
+    int count = (240 * 160 / 4) - start;
+    CpuFastSet(color, screen, (FILL | count));
 }

@@ -223,6 +223,18 @@
  */
 #define FIX_STAGE_Y (16)
 
+/**
+ * @brief BG開始 Y座標
+ * 
+ */
+#define BG_Y (26)
+
+/**
+ * @brief BGカラー 単色
+ * 
+ */
+#define BG_COLOR (11)
+
 /***************************************************
  * 自機 スプライト
  ***************************************************/
@@ -1172,6 +1184,8 @@ typedef struct
     bool demo;
     // フラッシュ
     FlashType flash;
+    // BGカラー
+    u8 bg_color[32];
 } ALIGN(4) StageType;
 
 /**

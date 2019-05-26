@@ -208,6 +208,11 @@ void init_game()
         stage.flash.color[i] = FLASH_COLOR;
     }
 
+    // BGカラー初期化
+    for (int j = 0; j < 32; j++) {
+        stage.bg_color[j] = BG_COLOR;
+    }
+
     // モード
       stage.mode = SRAMRead32(SRAM_MODE);
     if ((u32)stage.mode > 1 ) {
@@ -440,6 +445,12 @@ restart()
 
     // ステージ初期化
     init_stage();
+
+    // BGをロード
+    load_frame_bitmap(DEF_BG_BITMAP);
+    flip_frame();
+    load_frame_bitmap(DEF_BG_BITMAP);
+    flip_frame();
 }
 
 /**********************************************/ /**
@@ -1326,10 +1337,11 @@ draw_bg()
 
     if (stage.flash.interval) {
         stage.flash.interval--;
-        fill_frame_bitmap(stage.flash.color);
+        fill_frame_bitmap(0, BG_Y, stage.flash.color);
     } else {
         // 通常のBG
-        load_frame_bitmap(DEF_BG_BITMAP);
+        //load_frame_bitmap(DEF_BG_BITMAP);
+        fill_frame_bitmap(0, BG_Y, stage.bg_color);
     }
 }
 

@@ -340,9 +340,14 @@ move_blocks()
             if (blocks.list[0].type == NORMAL
                 && abs((m.x + m.w / 2) - (e.x + e.w / 2)) <= BELOW_BLOCK_BONUS) {
                 add_bonus(BLOCK_BONUS);
-                ship.energy = MAX_ENERGY << E_FIX;
                 set_bravo_icon();
                 trophy_req.continuas_bravo++;
+                // エネルギー回復
+                ship.energy += BRAVO_RECOVERY << E_FIX;
+                if (ship.energy >= MAX_ENERGY << E_FIX) {
+                    ship.energy = MAX_ENERGY << E_FIX;
+                }
+
             } else {
                 // トロフィー獲得条件リセット ブラボー
                 reset_trophy_requirement(RESET_TROPHY_BRAVO);
@@ -1453,9 +1458,6 @@ set_level_param(int lv)
             { -4096 * 31, 26, 6 } }
     };
 
-    // エネルギー回復
-    //ship.energy = (MAX_ENERGY + MAX_ENERGY_BLANK) << E_FIX;
-
     // ブロックスピード
     blocks.speed = param[stage.mode][lv][0];
 
@@ -1485,6 +1487,11 @@ level_up()
         if (!--lv_mes.count) {
             reset_message(&lv_mes, MES_BLINK_NORMAL);
 
+            draw_bitmap_frame(LV_MES_X, LV_MES_X, LV_MES_W, LV_MES_H, bmp_zone2Bitmap);
+            flip_frame();
+            draw_bitmap_frame(LV_MES_X, LV_MES_X, LV_MES_W, LV_MES_H, bmp_zone2Bitmap);
+            flip_frame();
+
             // BGM切り替え
             StopMusic();
             stage_bgm = (stage_bgm + 1) & MAX_STAGE_BGM;
@@ -1493,7 +1500,9 @@ level_up()
     }
 
     if (lv_mes.chr) {
-        draw_bitmap_frame(LV_MES_X, LV_MES_X, LV_MES_W, LV_MES_H, bmp_lv_black1Bitmap);
+        draw_bitmap_frame(LV_MES_X, LV_MES_X, LV_MES_W, LV_MES_H, bmp_zone1Bitmap);
+    } else {
+        draw_bitmap_frame(LV_MES_X, LV_MES_X, LV_MES_W, LV_MES_H, bmp_zone2Bitmap);
     }
 }
 

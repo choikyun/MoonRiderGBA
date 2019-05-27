@@ -330,7 +330,7 @@
  *  @brief エネルギー 余剰分
  * 
  */
-#define MAX_ENERGY_BLANK (2)
+#define MAX_ENERGY_BLANK (1)
 
 /**
  * @brief エネルギー表示X座標
@@ -360,13 +360,13 @@
  * @brief ダメージ
  * 
  */
-#define DAMAGE_ENERGY (-10 << E_FIX)
+#define DAMAGE_ENERGY (-12 << E_FIX)
 
 /**
  * @brief 回復
  * 
  */
-#define RECOVERY_ENERGY (5 << E_FIX)
+#define RECOVERY_ENERGY (6 << E_FIX)
 
 /***************************************************
  * 逆噴射
@@ -375,7 +375,7 @@
 /**
  * @brief 使用エネルギー
  */
-#define BOOTER_ENERGY (-RECOVERY_ENERGY)
+#define BOOTER_ENERGY (-10 << E_FIX)
 
 /**
  * @brief 逆噴射の加速
@@ -998,6 +998,11 @@
  * @brief ブラボー Z座標
  */
 #define BRAVO_Z (MIN_Z)
+
+/**
+ * @brief ブラボー 回復
+ */
+#define BRAVO_RECOVERY (15)
 
 
 /***************************************************

@@ -31,8 +31,9 @@
 // 数字
 #include "bmp_num.h"
 
-// レベル
-#include "bmp_lv_black1.h"
+// ゾーン
+#include "bmp_zone1.h"
+#include "bmp_zone2.h"
 
 // warning
 #include "bmp_warning.h"

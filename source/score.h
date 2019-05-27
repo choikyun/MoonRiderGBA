@@ -33,6 +33,10 @@ int
 load_hiscore ();
 void
 clear_hiscore ();
+void
+save_trophy (bool *);
+void
+load_trophy (bool *);
 
 
 u8

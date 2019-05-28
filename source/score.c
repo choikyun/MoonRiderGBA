@@ -1,15 +1,15 @@
 /**
  * @file score.c
  * @brief スコア
- * @date  2017/02/01 更新
- * @author Choe Gyun(choikyun)
+ * @date  2019/05/28
+ * @author Choi Gyun
  */
 
 /***************************************************
- * Moon Defender GBA
+ * Moon Rider
  * ver 1.0.0
- * 2017.02.01
- * Choe Gyun (choikyun)
+ * 2019.04.19
+ * Choi Gyun
  *****************************************************/
 
 #include <gba.h>

@@ -1,7 +1,7 @@
 /**
  * @file game.c
  * @brief ゲーム本体
- * @date  2019.04.20 作成
+ * @date  2019/05/28
  * @author Choi Gyun
  */
 
@@ -52,7 +52,7 @@ static void move_lines();
 static void draw_lines();
 static void draw_line(int);
 static void draw_energy();
-static VectorType trans_device_coord(SpriteCharType*);
+static VectorType trans_device_coord(const SpriteCharType*);
 static void disp_boundary();
 static void flash();
 static void shock();
@@ -285,6 +285,8 @@ create_new_blocks()
 
 /**********************************************/ /**
  * @brief ブロック移動
+ * 
+ * 移動、自機との当たり判定、削除をしています.
  ***********************************************/
 static void
 move_blocks()
@@ -689,6 +691,7 @@ init_guide()
 static void
 init_boundary()
 {
+    /*
     boundary_l.sprite.chr = SPRITE_BOUNDARY_L;
     boundary_l.sprite.vec.x = 0;
     boundary_l.sprite.vec.y = 0;
@@ -714,6 +717,7 @@ init_boundary()
     boundary_r.sprite.fix.y = 0;
     boundary_r.sprite.rect.w = BOUNDARY_W;
     boundary_r.sprite.rect.h = BOUNDARY_H;
+    */
 }
 
 /**********************************************/ /**
@@ -891,11 +895,12 @@ draw_line(int y)
 /**********************************************/ /**
  * @brief 3D座標からデバイス座標に変換
  * 
+ * このゲームの要？ 3Dから2Dに透視変換しています.
  * @param *sp スプライト
  * @return 3D座標
  ***********************************************/
 static VectorType
-trans_device_coord(SpriteCharType* sp)
+trans_device_coord(const SpriteCharType* sp)
 {
     VectorType v;
     int z = sp->vec.z >> FIX; // Z軸整数値のみ
@@ -1113,7 +1118,7 @@ disp_blocks()
 
         move_sprite(
             blocks.list[i].chr + i,
-            // v.x,
+            // v.x, // 視点をを移動しない場合はこちら
             v.x + (stage.center.x >> FIX), // 視点を移動する場合はこちら
             v.y);
     }
@@ -1164,6 +1169,7 @@ disp_booster_icon()
 static void
 disp_boundary()
 {
+    /*
     if (stage.center.x >> FIX < 0) {
         // 左の境界
         boundary_l.sprite.target.x = SHIP_MOVE_MIN_X;
@@ -1191,6 +1197,7 @@ disp_boundary()
 
         erase_sprite(boundary_l.sprite.chr);
     }
+    */
 }
 
 /**********************************************/ /**
@@ -1622,9 +1629,9 @@ trophy ()
     }
 
     /*
-     * 実績5：レベル5までいった
+     * 実績5：スコア300000獲得
      */
-    if (stage.lv == 5 && !trophy_unlocked[4]) {
+    if (score >= 300000 && !trophy_unlocked[4]) {
         trophy_mes.is_start = true;
         trophy_unlocked[4] = true;
         reset_trophy_requirement(RESET_TROPHY_ALL);

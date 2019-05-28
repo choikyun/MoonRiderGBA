@@ -1,15 +1,15 @@
 /**
  * @file game.h
  * @brief ゲーム本体のヘッダ
- * @date  2017/02/01 更新
- * @author Choe Gyun(choikyun)
+ * @date  2019/05/28
+ * @author Choi Gyun
  */
 
 /***************************************************
- * Moon Defender GBA
+ * Moon Rider
  * ver 1.0.0
- * 2017.02.01
- * Choe Gyun (choikyun)
+ * 2019.04.19
+ * Choi Gyun
  *****************************************************/
 
 #ifndef _game_h_
@@ -33,75 +33,76 @@
  ***************************************************/
 
 /**
- * 固定小数点部分 16bit
+ * @brief 固定小数点部分 16bit
  */
 #define FIX (16)
 
 /**
- * 数字　幅
+ * @brief 数字　幅
  */
 #define NUM_W (8)
+
 /**
- * 数字　高さ
+ * @brief 数字　高さ
  */
 #define NUM_H (8)
 
 /**
- * 数字の実際の幅
+ * @brief 数字の実際の幅
  *
  * MODE4では16bit単位で書き込むため
  */
 #define REAL_NUM_W (NUM_W / 2)
 
 /**
- * キー入力　長さ
+ * @brief キー入力　長さ
  */
 #define DEF_KEY_DELAY (1)
+
 /**
- * キー入力 リピート
+ * @brief キー入力 リピート
  */
 #define DEF_KEY_REPEAT (1)
 
 /**
- * メッセージ表示ウェイト
+ * @brief メッセージ表示ウェイト
  */
 #define MES_WAIT (20)
 
 /**
- * メッセージ点滅カウント
+ * @brief メッセージ点滅カウント
  */
 #define MES_COUNT (10)
 
 /**
- * 一般オブジェクト　幅
+ * @brief 一般オブジェクト　幅
  */
 #define OBJ_W (32)
+
 /**
- * 一般オブジェクト　高さ
+ * @brief 一般オブジェクト　高さ
  */
 #define OBJ_H (32)
 
 /**
  * @brief 画面の中心
- * 
  */
 #define SCREEN_CENTER (SCREEN_WIDTH / 2)
 
 /***************************************************
  * ゲーム個別
  ***************************************************/
-
-/***************************************************
+/*
  * ゲームバランスに関連するパラメータ
- ***************************************************/
+ */
 
 /**
- * ブロックの出現間隔
+ * @brief ブロックの出現間隔
  */
 #define BLOCK_INTERVAL (19)
 
 /**
- * ブロックの同時出現数
+ * @brief ブロックの同時出現数
  */
 #define APPER_MAX_BLOCKS (1)
 
@@ -112,7 +113,6 @@
 
 /**
  * @brief 次のレベルまで（フレーム）
- * 
  */
 #define NEXT_LEVEL (30 * 60)
 
@@ -121,14 +121,23 @@
  ***************************************************/
 
 /**
- * ゲームモード数
+ * @brief ゲームモード数
  */
 #define MAX_MODE (2)
 
+/**
+ * @brief モード選択矢印 X座標
+ */
 #define MODE_ARROW_X (84)
 
+/**
+ * @brief モード選択矢印 X座標 2
+ */
 #define MODE_ARROW_X2 (38)
 
+/**
+ * @brief モード選択矢印 Y座標
+ */
 #define MODE_ARROW_Y (122)
 
 /***************************************************
@@ -136,52 +145,52 @@
  ***************************************************/
 
 /**
- * トロフィーの数
+ * @brief トロフィーの数
  */
 #define MAX_TROPHY (6)
 
 /**
- * アンロックメッセージ　X座標
+ * @brief アンロックメッセージ　X座標
  */
 #define UNLOCK_MES_X (90)
 
 /**
- * アンロックメッセージ　Y座標
+ * @brief アンロックメッセージ　Y座標
  */
 #define UNLOCK_MES_Y (76)
 
 /**
- * アンロックメッセージ　インターバル
+ * @brief アンロックメッセージ　インターバル
  */
 #define UNLOCK_MES_INTERVAL (6)
 
 /**
- * アンロックメッセージ　幅
+ * @brief アンロックメッセージ　幅
  */
 #define UNLOCK_MES_W (48)
 
 /**
- * アンロックメッセージ　高さ
+ * @brief アンロックメッセージ　高さ
  */
 #define UNLOCK_MES_H (7)
 
 /**
- * トロフィーマーク　X座標
+ * @brief トロフィーマーク　X座標
  */
 #define TROPHY_X (192)
 
 /**
- * トロフィーマーク　Y座標
+ * @brief トロフィーマーク　Y座標
  */
 #define TROPHY_Y (1)
 
 /**
- * トロフィーマーク　幅
+ * @brief トロフィーマーク　幅
  */
 #define TROPHY_W (8)
 
 /**
- * トロフィーマーク　高さ
+ * @brief トロフィーマーク　高さ
  */
 #define TROPHY_H (8)
 
@@ -190,123 +199,115 @@
  ***************************************************/
 
 /**
- * Z座標 最大値
+ * @brief Z座標 最大値
  */
 #define MAX_Z (300)
 
 /**
- * Z座標 最小値
+ * @brief Z座標 最小値
  */
 #define MIN_Z (20)
 
 /**
  * @brief ステータス表示域の高さ
- * 
  */
 #define STATUS_HEIGHT (32)
 
 /**
  * @brief ステージY方向の余白
- * 
  */
 #define STAGE_Y_BLANK (80 + 40)
 
 /**
- * 座標補正X
+ * @brief 座標補正X
+ * 
  * ステージの論理座標からデバイス座標へ変換
  */
 #define FIX_STAGE_X (SCREEN_WIDTH / 2)
 
 /**
- * 座標補正Y
+ * @brief 座標補正Y
+ * 
  * ステージの論理座標からデバイス座標へ変換
  */
 #define FIX_STAGE_Y (16)
 
 /**
  * @brief BG開始 Y座標
- * 
  */
 #define BG_Y (26)
 
 /**
  * @brief BGカラー 単色
- * 
  */
-#define BG_COLOR (11)
+#define BG_COLOR (11) // 黒
 
 /***************************************************
  * 自機 スプライト
  ***************************************************/
 
 /**
- * 自機 幅
+ * @brief 自機 幅
  */
 #define SHIP_W (31)
+
 /**
- * 自機 高さ
+ * @brief 自機 高さ
  */
 #define SHIP_H (31)
 
 /**
- * 自機 X座標 中心
+ * @brief 自機 X座標 中心
  */
 #define SHIP_X (0)
 
 /**
- * 自機 Y座標 中心
+ * @brief 自機 Y座標 中心
  */
 #define SHIP_Y (128)
 
 /**
- * 自機 Z座標
+ * @brief 自機 Z座標
  */
 #define SHIP_Z MIN_Z
 
 /**
  * @brief 自機 移動X座標最小値
- * 
  */
 #define SHIP_MOVE_MIN_X (-200)
 
 /**
  * @brief 自機 移動X座標最大値
- * 
  */
 #define SHIP_MOVE_MAX_X (200)
 
 /**
  * @brief 自機 移動Y座標最小値
- * 
  */
 #define SHIP_MOVE_MIN_Y (STAGE_Y_BLANK)
 
 /**
  * @brief 自機 移動Y座標最大値
- * 
  */
 #define SHIP_MOVE_MAX_Y (SCREEN_HEIGHT - SHIP_H / 2)
 
 /**
- * 自機 速度
+ * @brief 自機 加速度
  */
 #define SHIP_SPEED (4096 * 2)
 
 /**
  * @brief 自機自然減速
- * 
  */
 #define SHIP_FRIC (0.01)
 
 /**
  * @brief 自機最大加速度
- * 
  */
 #define MAX_SHIP_ACC (3 << FIX)
 
 /**
  * @brief 自機警告点滅インターバル
- * 
  */
 #define SHIP_CAUTION_INTERVAL (3)
 
@@ -316,55 +317,46 @@
 
 /**
  * @brief エネルギー用の小数点
- * 
  */
 #define E_FIX (8)
 
 /**
- * @brief エネルギー
- * 
+ * @brief エネルギー最大値
  */
 #define MAX_ENERGY (30)
 
 /**
  *  @brief エネルギー 余剰分
- * 
  */
 #define MAX_ENERGY_BLANK (1)
 
 /**
- * @brief エネルギー表示X座標
- * 
+ * @brief エネルギーバー表示 X座標
  */
 #define ENERGY_X (168)
 
 /**
- * @brief エネルギー表示Y座標
- * 
+ * @brief エネルギーバー表示 Y座標
  */
 #define ENERGY_Y (0)
 
 /**
- * @brief エネルギー表示 バーの幅
- * 
+ * @brief エネルギーバーの幅
  */
 #define ENERGY_W (2)
 
 /**
- * @brief エネルギー表示 バーの高さ
- * 
+ * @brief エネルギーバーの高さ
  */
 #define ENERGY_H (8)
 
 /**
  * @brief ダメージ
- * 
  */
 #define DAMAGE_ENERGY (-12 << E_FIX)
 
 /**
  * @brief 回復
- * 
  */
 #define RECOVERY_ENERGY (6 << E_FIX)
 
@@ -413,19 +405,17 @@
  ***************************************************/
 
 /**
- * 振幅
+ * @brief 振動の振幅
  */
 #define SHOCK_RANGE (4)
 
-
 /**
- * 間隔
+ * @brief 振動の間隔
  */
 #define SHOCK_INTERVAL (2)
 
-
 /**
- * 長さ
+ * @brief 振動の長さ
  */
 #define SHOCK_DURATION (SHOCK_INTERVAL * 6)
 
@@ -434,52 +424,52 @@
  ***************************************************/
 
 /**
- * 炎 幅
+ * @brief 炎 幅
  */
 #define FIRE_W (15)
 
 /**
- * 炎 高さ
+ * @brief 炎 高さ
  */
 #define FIRE_H (15)
 
 /**
- * 炎 X座標 中心
+ * @brief 炎 X座標 中心
  */
 #define FIRE_X (0)
 
 /**
- * 炎 Y座標 中心
+ * @brief 炎 Y座標 中心
  */
 #define FIRE_Y (6)
 
 /**
- * 炎 Y座標 中心 自機が上移動のとき
+ * @brief 炎 Y座標 中心 自機が上移動のとき
  */
 #define FIRE_Y_UP (10)
 
 /**
- * 炎 Y座標 中心 自機が下移動のとき
+ * @brief 炎 Y座標 中心 自機が下移動のとき
  */
 #define FIRE_Y_DOWN (4)
 
 /**
- * 炎 Y座標 中心 自機が上移動のとき
+ * @brief 炎 Y座標 中心 自機が上移動のとき
  */
 #define FIRE_X_LEFT (4)
 
 /**
- * 炎 Y座標 中心 自機が下移動のとき
+ * @brief 炎 Y座標 中心 自機が下移動のとき
  */
 #define FIRE_X_RIGHT (-4)
 
 /**
- * 炎 Y座標
+ * @brief 炎 Y座標
  */
 #define FIRE_Z MIN_Z
 
 /**
- * 炎 点滅間隔
+ * @brief 炎 点滅間隔
  */
 #define FIRE_INTERVAL (3)
 
@@ -488,85 +478,76 @@
  ***************************************************/
 
 /**
- * ブロック 幅
+ * @brief ブロック 幅
  */
 #define BLOCK_W (40)
 //#define BLOCK_W (80)
 
 /**
- * ブロック 高さ
+ * @brief ブロック 高さ
  */
 #define BLOCK_H (40)
 //#define BLOCK_H (80)
 
 /**
  * @brief スプライト幅
- * 
  */
 #define BLOCK_SP_W (64)
 //#define BLOCK_SP_W (128)
 
 /**
  * @brief スプライト高さ
- * 
  */
 #define BLOCK_SP_H (64)
 //#define BLOCK_SP_H (128)
 
 /**
- * ブロック最大数
+ * @brief ブロック最大数
  */
 #define MAX_BLOCKS (16)
 
 /**
  * @brief dデフォルトの加速度
- * 
  */
 #define DEF_BLOCK_ACC (-4096 * 1)
 
 /**
- * Z加速度最大値
+ * @brief Z加速度最大値
  */
 #define BLOCK_MAX_ACC (4) << FIX)
 
 /**
- * ブロック出現間隔 X方向
+ * @brief ブロック出現間隔 X方向
  */
 #define BLOCK_X_STEP (40)
 
 /**
  * @brief ブロック出現 Y方向
- * 
  */
 #define BLOCK_Y_STEP (40)
 
 /**
  * @brief X方向の出現数
- * 
  */
 #define BLOCK_X_STEP_NUM (10 - 1)
 
 /**
  * @brief X方向の余白 2キャラ分
- * 
  */
 #define BLOCK_X_STEP_BLANK (BLOCK_X_STEP *2)
 
 /**
  * @brief Y方向の出現数
- * 
  */
 #define BLOCK_Y_STEP_NUM (0)
 
 /**
  * @brief ブロック着地点の余白
- * 
  */
 #define BLOCK_Y_TARGET_BLANK (SCREEN_HEIGHT - BLOCK_H * 2 - FIX_STAGE_Y)
 
 /**
  * @brief ブロック着地点 Y座標
- * 
  */
 #define BLOCK_Y_TARGET (SHIP_Y - 40)
 
@@ -576,87 +557,79 @@
 
 /**
  * @brief ガイド幅
- * 
  */
 #define GUIDE_W (8)
 
 /**
  * @brief ガイド高さ
- * 
  */
 #define GUIDE_H (8)
 
 /**
  * @brief ガイドY座標
- * 
  */
 #define GUIDE_Y (SHIP_Y + 12)
 
 /***************************************************
- * 地平線
+ * 水平線
  ***************************************************/
 
 /**
- * @brief 地平線の最大数
- * 
+ * @brief 水平線の最大数
  */
 #define MAX_LINES (10)
 
 /**
- * @brief 地平線 速度
- * 
+ * @brief 水平線 速度
  */
 #define LINE_SPEED (-4096 * 25)
 
 /**
- * @brief 地平線出現間隔 Z座標
+ * @brief 水平線出現間隔 Z座標
  */
 #define LINE_INTERVAL (MAX_Z / MAX_LINES)
 
 /**
- * @brief 地平線 Z座標 デフォルト
+ * @brief 水平線 Z座標 デフォルト
  */
 #define LINE_Z MAX_Z
 
 /**
- * @brief 地平線幅
+ * @brief 水平線 幅
  */
 #define LINE_W (SCREEN_WIDTH)
 
 /**
- * @brief X座標
+ * @brief 水平線 X座標
  */
 #define LINE_X (-120)
 
 /**
- * @brief 地平線の目標Y座標
+ * @brief 水平線の目標Y座標
  */
 #define LINE_Y_TARGET (SCREEN_HEIGHT - FIX_STAGE_Y)
 
 /**
- * @brief 地平線の色
+ * @brief 水平線の色
  */
-#define LINE_COLOR (38 | 38 << 8 | 38 << 16 | 38 << 24)
+#define LINE_COLOR (38 | 38 << 8 | 38 << 16 | 38 << 24) // 赤
 
 /***************************************************
  * 境界線
  ***************************************************/
 
 /**
- * @brief 境界線幅
- * 
+ * @brief 境界線 幅
  */
 #define BOUNDARY_W (7)
 
 /**
- * @brief 境界線高さ
- * 
+ * @brief 境界線 高さ
  */
 #define BOUNDARY_H (32)
 
 /**
- * @brief 境界線Y座標
- * 
+ * @brief 境界線 Y座標
  */
 #define BOUNDARY_Y (SHIP_Y - BOUNDARY_H / 2)
 
@@ -666,37 +639,31 @@
 
 /**
  * @brief リングアイコン Y座標
- * 
  */
 #define ICON_RING_Y (-5)
 
 /**
  * @brief リングアイコン ターゲット Y座標
- * 
  */
 #define ICON_TARGET_Y (-20)
 
 /**
  * @brief アイコン 表示時間
- * 
  */
 #define ICON_LIFE (30)
 
 /**
  * @brief アイコン 幅
- * 
  */
 #define ICON_W (11)
 
 /**
  * @brief アイコン 高さ
- * 
  */
 #define ICON_H (11)
 
 /**
- * @brief アイコン Y 加速度
- * 
+ * @brief アイコン Y方向 加速度
  */
 #define ICON_Y_ACC (-1 << FIX)
 
@@ -705,12 +672,12 @@
  ***************************************************/
 
 /**
- * フラッシュ　間隔
+ * @brief フラッシュ　間隔
  */
 #define FLASH_INTERVAL (4)
 
 /**
- * フラッシュ　色
+ * @brief フラッシュ　色
  */
 #define FLASH_COLOR (15)
 
@@ -719,113 +686,112 @@
  ***************************************************/
 
 /**
- * 通常のスコア フレーム毎
+ * @brief 通常のスコア フレーム毎に加算
  */
 #define NORMAL_SCORE (10)
 
 /**
- * スコア表示桁
+ * @brief スコア表示桁
  */
 #define SCORE_DIGIT (8)
 
 /**
- * スコア　X座標
+ * @brief スコア X座標
  */
 #define SCORE_X (76)
+
 /**
- * スコア　Y座標
+ * @brief スコア Y座標
  */
 #define SCORE_Y LV_Y
+
 /**
- * ハイスコア　X座標
+ * @brief ハイスコア X座標
  */
 #define HISCORE_X (124)
+
 /**
- * ハイスコア　Y座標
+ * @brief ハイスコア Y座標
  */
 #define HISCORE_Y (107)
 
 /**
- * ボーナス表示桁
+ * @brief ボーナス表示桁
  */
 #define BONUS_DIGET (8)
 
 /**
- * ボーナス メッセージ X座標
+ * @brief ボーナス メッセージ X座標
  */
 #define BONUS_MES_X (70)
 
 /**
- * ボーナス メッセージ Y座標
+ * @brief ボーナス メッセージ Y座標
  */
 #define BONUS_MES_Y (90)
 
 /**
- * ボーナス メッセージ 幅
+ * @brief ボーナス メッセージ 幅
  */
 #define BONUS_MES_W (36)
 
 /**
- * ボーナス メッセージ 高さ
+ * @brief ボーナス メッセージ 高さ
  */
 #define BONUS_MES_H (8)
 
 /**
  * @brief ボーナス X座標
- * 
  */
 #define BONUS_X (110)
 
 /**
  * @brief ボーナス Y座標
- * 
  */
 #define BONUS_Y (BONUS_MES_Y)
 
 /**
- * リングボーナス単位
+ * @brief リングボーナス単位
  */
 #define RING_BONUS_UNIT (100)
 
 /**
- * @brief ブロックボーナスしきい値
- * 
+ * @brief ブロックボーナス 判定のしきい値
  */
 #define BELOW_BLOCK_BONUS (50)
 
 /**
  * @brief ブロックボーナス 
- * 
  */
 #define BLOCK_BONUS (1000)
 
 /**
- * トータル メッセージ X座標
+ * @brief トータル メッセージ X座標
  */
 #define TOTAL_MES_X (70)
 
 /**
- * トータル メッセージ Y座標
+ * @brief トータル メッセージ Y座標
  */
 #define TOTAL_MES_Y (100)
 
 /**
- * トータル メッセージ 幅
+ * @brief トータル メッセージ 幅
  */
 #define TOTAL_MES_W (36)
 
 /**
- * トータル メッセージ 高さ
+ * @brief トータル メッセージ 高さ
  */
 #define TOTAL_MES_H (8)
 
 /**
- * トータル X座標
+ * @brief トータル X座標
  */
 #define TOTAL_X (110)
 
 /**
- * トータル Y座標
+ * @brief トータル Y座標
  */
 #define TOTAL_Y (TOTAL_MES_Y)
 
@@ -834,7 +800,7 @@
  ***************************************************/
 
 /**
- * @brief リング数　桁
+ * @brief リング数 桁
  */
 #define RING_DIGIT (2)
 
@@ -853,28 +819,27 @@
  ***************************************************/
 
 /**
- * @brief メッセージ表示　X座標
+ * @brief メッセージ表示 X座標
  */
 #define MES_X (50)
 
 /**
- * @brief メッセージ表示　Y座標
+ * @brief メッセージ表示 Y座標
  */
 #define MES_Y (50)
 
 /**
- * @brief メッセージ表示　幅
+ * @brief メッセージ表示 幅
  */
 #define MES_W (140)
 
 /**
- * @brief メッセージ表示　高さ
+ * @brief メッセージ表示 高さ
  */
 #define MES_H (24)
 
 /**
  * @brief ワーニングメッセージ開始まで
- * 
  */
 #define WAIT_WARNING (3 * 60)
 
@@ -885,12 +850,11 @@
 
 /**
  * @brief 最高レベル
- * 
  */
 #define MAX_LV (8)
 
 /**
- * @brief レベル表示　桁
+ * @brief レベル表示 桁
  */
 #define LV_DIGIT (1)
 
@@ -900,58 +864,51 @@
 #define LV_X (30)
 
 /**
- * @brief レベル表示　Y座標
+ * @brief レベル表示 Y座標
  */
 #define LV_Y (0)
 
 /**
  * @brief レベルメッセージ X座標
- * 
  */
 #define LV_MES_X (0)
 
 /**
  * @brief レベルメッセージ Y座標
- * 
  */
 #define LV_MES_X (0)
 
 /**
  * @brief レベルメッセージ 幅
- * 
  */
 #define LV_MES_W (28)
 
 /**
  * @brief レベルメッセージ 高さ
- * 
  */
 #define LV_MES_H (8)
 
 /***************************************************
  *　爆風
  ***************************************************/
+
 /**
  * @brief 爆風 最大値 ブロック
- * 
  */
 #define FIRE_BOMBS (2)
 
 /**
  * @brief 爆風 繰り返し回数 ブロック
- * 
  */
 #define REP_BLOCK_BOMBS (2)
 
 /**
- * @brief 爆風 繰り返し回数 ゲームオーバー
- * 
+ * @brief 爆風 繰り返し回数
  */
 #define REP_OVER_BOMBS (3)
 
 /**
  * @brief 爆風 発生範囲
- * 
  */
 #define BOMB_RANGE (32)
 
@@ -1004,7 +961,6 @@
  */
 #define BRAVO_RECOVERY (15)
 
-
 /***************************************************
  *　BGM
  ***************************************************/
@@ -1035,29 +991,29 @@ enum {
  * @brief スプライトキャラクタ
  */
 enum {
-    // 矢印
+    //! 矢印
     SPRITE_ARROW,
-    // ブラボー
+    //! ブラボー
     SPRITE_BRAVOICON,
-    // 爆風
+    //! 爆風
     SPRITE_BOMB,
-    // 炎
+    //! 炎
     SPRITE_FIRE = 4,
-    // 自機
+    //! 自機
     SPRITE_SHIP,
-    // 逆噴射
+    //! 逆噴射
     SPRITE_BOOSTER,
-    // 逆噴射アイコン
+    //! 逆噴射アイコン
     SPRITE_BOOSTERICON,
-    // ガイド
+    //! ガイド
     SPRITE_GUIDE,
-    // 境界線
+    //! 境界線
     SPRITE_BOUNDARY_L,
-    // 境界線
+    //! 境界線
     SPRITE_BOUNDARY_R,
-    // リングアイコン
+    //! リングアイコン
     SPRITE_RINGICON,
-    // ブロック
+    //! ブロック MAX_BLOCKS 分
     SPRITE_BLOCK,
 };
 
@@ -1065,37 +1021,41 @@ enum {
  * @brief ブロックの種類
  */
 typedef enum {
-    // 通常のブロック
+    //! 通常のブロック
     NORMAL = 0,
-    // リング
+    //! ボーナスリング
     RING,
 } BlockTypeEnum;
 
 /**
  * @brief 爆風の種類
- * 
  */
 enum {
+    //! ブロック衝突時
     BOMB_BLOCK,
+    //! ゲームオーバー時
     BOMB_OVER
 };
 
 /**
  * @brief メッセージ点滅モード
- * 
  */
 enum {
+    //! 通常点滅
     MES_BLINK_NORMAL,
+    //! 高速点滅
     MES_BLINK_FAST
 };
 
 /**
  * @brief トロフィー獲得条件リセット
- * 
  */
 enum {
+    //! すべての条件をリセット
     RESET_TROPHY_ALL,
+    //! リングの条件をリセット
     RESET_TROPHY_RING,
+    //! ブラボーの条件をリセット
     RESET_TROPHY_BRAVO
 };
 
@@ -1129,7 +1089,7 @@ typedef struct
     int x;
     int y;
     int z;
-    // スケール 1-100%
+    //! スケール 1-100%
     int scale;
 } ALIGN(4) VectorType;
 
@@ -1160,7 +1120,8 @@ typedef struct
 {
     int scene;
     int next_scene;
-    int intermission; // 次のシーンまでの幕間
+    //! 次のシーンまでのウェイト
+    int intermission;
     u16 key;
     u16 keyr;
     int demo_start;
@@ -1171,23 +1132,23 @@ typedef struct
  */
 typedef struct
 {
-    // レベル
+    //! レベル
     int lv;
-    // 次のレベルまで（フレーム数）
+    //! 次のレベルまで（フレーム数）
     int next_lv;
-    // 獲得リング
+    //! 獲得リング
     int ring;
-    // 経過フレーム
+    //! 経過フレーム
     int frame;
-    // ステージの中心座標
+    //! ステージの中心座標
     VectorType center;
-    // 次のブロックが出現するまでの間隔
+    //! 次のブロックが出現するまでの間隔
     int star_interval;
-    // モード
+    //! モード
     int mode;
-    // デモモード
+    //! デモモード
     bool demo;
-    // フラッシュ
+    //! フラッシュ
     FlashType flash;
     // BGカラー
     u8 bg_color[32];
@@ -1198,11 +1159,11 @@ typedef struct
  */
 typedef struct
 {
-    bool is_start; // 開始
-    int frame; // 現在のフレーム
-    int max_frame; // フレーム最大値
-    int interval; // インターバル
-    int interval_rel; // インターバル既定値
+    bool is_start;
+    int frame; 
+    int max_frame;
+    int interval;
+    int interval_rel;
 } ALIGN(4) AnimeType;
 
 /**
@@ -1210,27 +1171,27 @@ typedef struct
  */
 typedef struct
 {
-    // キャラクタ番号 0-127
+    //! キャラクタ番号 0-127
     int chr;
-    // タイル番号 512-1024
+    //! タイル番号 512-1024
     int tile;
-    // キャラクタータイプ
+    //! キャラクタータイプ
     BlockTypeEnum type;
-    // 現在の座標
+    //! 現在の座標
     VectorType vec;
-    // 加速度
+    //! 加速度
     VectorType acc;
-    // 目標の座標
+    //! 目標の座標
     PointType target;
-    // 座標補正用
+    //! 座標補正用
     PointType fix;
-    // 中心のオフセット
+    //! 中心のオフセット
     PointType center;
-    // 矩形
+    //! 矩形
     RectangleType rect;
-    // 当たり判定用矩形
+    //! 当たり判定用矩形
     RectangleType hit;
-    // 表示フラグ
+    //! 表示フラグ
     bool show;
 } ALIGN(4) SpriteCharType;
 
@@ -1238,17 +1199,17 @@ typedef struct
  * @brief 自機
  */
 typedef struct {
-    // エネルギー
+    //! エネルギー
     int energy;
-    // 逆噴射
+    //! 逆噴射
     int booster;
-    // 逆噴射可能か
+    //! 逆噴射可能か
     bool allows_booster;
-    // 振動
+    //! 振動
     ShockType shock;
-    // 点滅
+    //! 点滅
     FlashType flash;
-    // スプライト
+    //! スプライト
     SpriteCharType sprite;
 } ALIGN(4) ShipType;
 
@@ -1256,9 +1217,9 @@ typedef struct {
  * @brief 炎
  */
 typedef struct {
-    // アニメーション用
+    //! アニメーション用
     AnimeType anime;
-    // スプライト
+    //! スプライト
     SpriteCharType sprite;
 } ALIGN(4) FireType;
 
@@ -1266,11 +1227,11 @@ typedef struct {
  * @brief アイコン
  */
 typedef struct {
-    // 表示期間
+    //! 表示期間
     int life;
-    // 目標座標
+    //! 目標座標
     PointType target;
-    // スプライト
+    //! スプライト
     SpriteCharType sprite;
 } ALIGN(4) IconType;
 
@@ -1279,21 +1240,21 @@ typedef struct {
  */
 typedef struct
 {
-    // 出現間隔 Z軸
+    //! 出現間隔 Z軸
     int interval;
-    // 出現間隔 Z軸 リロード
+    //! 出現間隔 Z軸 リロード
     int interval_rel;
-    // 現在の数
+    //! 現在の数
     int num;
-    // 最大出現数
+    //! 最大出現数
     int max_blocks;
-    // 加速度（全てのブロック共通）
+    //! 加速度（全てのブロック共通）
     int acc;
-    // デフォルトの速度（全てのブロック共通）
+    //! デフォルトの速度（全てのブロック共通）
     int speed;
-    // リング出現確率
+    //! リング出現確率
     int ring_chance;
-    // ブロックのリスト
+    //! ブロックのリスト
     SpriteCharType list[MAX_BLOCKS];
 } ALIGN(4) BlockType;
 
@@ -1302,27 +1263,25 @@ typedef struct
  */
 typedef struct
 {
-    // 現在の数
+    //! 現在の数
     int num;
-    // 最大数
+    //! 最大数
     int max;
-    // ベース座標
+    //! ベース座標
     PointType base;
     FireType list[FIRE_BOMBS];
 } ALIGN(4) BombType;
 
 /**
- * @brief 地平線管理
+ * @brief 水平線管理
  */
 typedef struct
 {
-    // 現在の数
+    //! 現在の数
     int num;
-    // 進んだ距離 Z軸
+    //! 進んだ距離 Z軸
     int z;
-    // カラー
-    //u8 color[32];
-    // 地平線のリスト
+    //! 水平線のリスト
     SpriteCharType list[MAX_LINES];
 } ALIGN(4) LineType;
 
@@ -1330,9 +1289,9 @@ typedef struct
  * @brief 境界線
  */
 typedef struct {
-    // アニメーション用
+    //! アニメーション用
     AnimeType anime;
-    // スプライト
+    //! スプライト
     SpriteCharType sprite;
 } ALIGN(4) BoundaryType;
 
@@ -1364,9 +1323,9 @@ typedef struct
  */
 typedef struct
 {
-    // 連続獲得リング
+    //! 連続獲得リング
     int continuas_ring;
-    // 連続獲得ブラボー
+    //! 連続獲得ブラボー
     int continuas_bravo;
 }ALIGN(4) TrophyRequiremnet;
 
@@ -1382,8 +1341,6 @@ typedef struct
 #define TILE_SHIP1 (512) // 32tiles
 #define TILE_SHIP2 (544) // 32
 #define TILE_SHIP3 (576) // 32
-//#define TILE_SHIP4 (608) // 32
-//#define TILE_SHIP5 (640) // 32
 
 // 炎
 #define TILE_FIRE1 (672) // 8tiles
@@ -1424,56 +1381,55 @@ typedef struct
 // 矢印
 #define TILE_ARROW (1022) // 2tiles
 
-
 ///////////////////////////////////////////////////////////////////// SRAM
 
 /**
- * ハイスコアSRAM保存用
+ * @brief ハイスコアSRAM保存用
  */
 #define SRAM_CHECK (0)
 
 /**
- * ハイスコアSRAM保存用
+ * @brief ハイスコアSRAM保存用
  */
 #define SRAM_HISCORE_NORMAL (4)
 
 /**
- * ハイスコアSRAM保存用
+ * @brief ハイスコアSRAM保存用
  */
 #define SRAM_HISCORE_HARD (8)
 
 /**
- * トロフィーフラグ
+ * @brief トロフィーフラグ
  */
 #define SRAM_TROPHY_NORMAL (12) // 4*6
 #define SRAM_TROPHY_HARD (36) // 4*6
 
 /**
- * 乱数の種
+ * @brief 乱数の種
  */
 #define SRAM_SEED (100)
 
 /**
- * ゲームモード保存
+ * @brief ゲームモード保存
  */
 #define SRAM_MODE (104)
 
 /**
- * SRAM書き込みフラグ
+ * @brief SRAM書き込みフラグ
  */
 #define SRAM_ON ((u32)0xf0f0f0f0)
 
 ///////////////////////////////////////////////////////////////////// COLOR
 
 /**
- * 15bit 透過色
+ * @brief 15bit 透過色
  */
 #define COLOR_TRANS RGB5(0, 0, 0)
 
 ///////////////////////////////////////////////////////////////////// PALETTE COLOR
 
 /**
- * 透過色
+ * @brief 透過色
  */
 #define PAL_TRANS (0)
 
@@ -1484,55 +1440,54 @@ typedef struct
 ///////////////////////////////////////////////////////////////////// マクロ
 
 /**
- * ランダム
+ * @brief ランダム
  */
 #define RND(MIN, MAX) ((MIN) + (int)(rand() / (float)RAND_MAX * ((MAX) - (MIN) + 1)))
 
 ///////////////////////////////////////////////////////////////////// グローバル変数
 
 /**
- * ゲーム管理
+ * @brief ゲーム管理
  */
 GLOBAL GameStateType game_state;
 
 /**
- * ステージ管理
+ * @brief ステージ管理
  */
 GLOBAL StageType stage;
 
 /**
- * 自機
+ * @brief 自機
  */
 GLOBAL ShipType ship;
 
 /**
- * 炎
+ * @brief 炎
  */
 GLOBAL FireType fire;
 
 /**
- * 逆噴射
+ * @brief 逆噴射
  */
 GLOBAL FireType booster;
 
 /**
- * ブロック
+ * @brief ブロック
  */
 GLOBAL BlockType blocks;
 
 /**
- * 地平線
+ * @brief 地平線
  */
 GLOBAL LineType lines;
 
  /**
- * 地平線
+ * @brief 地平線
  */
 GLOBAL BombType bomb;
 
 /**
  * @brief ガイド
- * 
  */
 GLOBAL SpriteCharType guide;
 
@@ -1540,23 +1495,20 @@ GLOBAL SpriteCharType guide;
  * @brief 境界線
  * 
  */
-GLOBAL BoundaryType boundary_r;
+// GLOBAL BoundaryType boundary_r;
 
 /**
  * @brief 境界線
- * 
  */
-GLOBAL BoundaryType boundary_l;
+// GLOBAL BoundaryType boundary_l;
 
 /**
  * @brief リングアイコン
- * 
  */
 GLOBAL IconType ring_icon;
 
 /**
  * @brief 逆噴射アイコンアニメ用
- * 
  */
 GLOBAL AnimeType booster_icon_anime;
 
@@ -1567,7 +1519,6 @@ GLOBAL BlinkMessageType mes;
 
 /**
  * @brief レベルアップ表示
- * 
  */
 GLOBAL BlinkMessageType lv_mes;
 
@@ -1583,42 +1534,41 @@ GLOBAL TrophyRequiremnet trophy_req;
 
 /**
  * @brief ブラボーアイコン
- * 
  */
 GLOBAL IconType bravo_icon;
 
 /**
- * スコア
+ * @brief スコア
  */
 GLOBAL int score;
 
 /**
- * ボーナス
+ * @brief ボーナス
  */
 GLOBAL int bonus;
 
 /**
- * トータル
+ * @brief トータル
  */
 GLOBAL int total;
 
 /**
- * ハイスコア
+ * @brief ハイスコア
  */
 GLOBAL int hiscore;
 
 /**
- * 乱数の種
+ * @brief 乱数の種
  */
 GLOBAL u32 seed;
 
 /**
- * 現在のステージBGM
+ * @brief 現在のステージBGM
  */
 GLOBAL int stage_bgm;
 
 /**
- * トロフィー解除フラグ
+ * @brief トロフィー解除フラグ
  */
 GLOBAL bool trophy_unlocked[MAX_TROPHY];
 

@@ -753,7 +753,7 @@
 /**
  * @brief リングボーナス単位
  */
-#define RING_BONUS_UNIT (100)
+#define RING_BONUS_UNIT (500)
 
 /**
  * @brief ブロックボーナス 判定のしきい値

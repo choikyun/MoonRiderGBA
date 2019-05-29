@@ -4,7 +4,7 @@
 ひたすら柱を避けて進みます。  
 エミュレータか実機で遊べます。  
 
-[プレイ動画 youtube]()
+[プレイ動画 youtube](https://youtu.be/PTRonYy1RuA)
 
 ## 遊び方
 

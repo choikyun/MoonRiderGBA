@@ -167,6 +167,7 @@ s16 read_sprite_y(u16 num)
 
 /**********************************************/ /**
  * @brief アフィン設定 スプライトとアフィンパラメータの対応
+ * 
  * @param num スプライト番号 0-127
  * @param a_num 対応するアフィンパラメータ 0-31
  * @param d_flg ダブルサイズを使用するか 0|SP_SIZE_DOUBLE
@@ -185,6 +186,7 @@ void set_affine_setting(u16 num, u16 a_num, u16 d_flg)
 
 /**********************************************/ /**
  * @brief 拡大縮小
+ * 
  * @param num アフィンパラメータ 0-31
  * @param x_sc Xスケール 1-100%
  * @param y_sc Yスケール 1-100%

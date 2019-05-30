@@ -392,7 +392,7 @@
 /**
  * @brief 逆噴射アイコン Y座標
  */
-#define BOOSTER_ICON_X (0)
+#define BOOSTER_ICON_Y (0)
 
 /**
  * @brief 逆噴射アニメ インターバル
@@ -976,7 +976,7 @@
  ***************************************************/
 
 /**
- * @brief ステージBGM数
+ * @brief ステージBGM数 0-3パターン
  */
 #define MAX_STAGE_BGM (3)
 

@@ -44,7 +44,6 @@ extern u8 m2_bin[]; // 曲2 ステージ
 extern u8 m3_bin[]; // 曲3 ステージ
 extern u8 m4_bin[]; // 曲4 ステージ
 
-
 #define SAMPLING_M0 (264914)
 #define SAMPLING_M1 (151199)
 #define SAMPLING_M2 (132299)

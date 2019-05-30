@@ -385,6 +385,16 @@
 #define BOOSTER_FIXED_Y (-8)
 
 /**
+ * @brief 逆噴射アイコン X座標
+ */
+#define BOOSTER_ICON_X (232)
+
+/**
+ * @brief 逆噴射アイコン Y座標
+ */
+#define BOOSTER_ICON_X (0)
+
+/**
  * @brief 逆噴射アニメ インターバル
  */
 #define BOOSTER_ICON_INTERVAL (3)

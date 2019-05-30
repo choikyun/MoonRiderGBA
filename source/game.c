@@ -1160,7 +1160,7 @@ disp_booster_icon()
     } else {
         set_sprite_tile(SPRITE_BOOSTERICON, TILE_BOOSTERICON1);
     }
-    move_sprite(SPRITE_BOOSTERICON, 232, 0);
+    move_sprite(SPRITE_BOOSTERICON, BOOSTER_ICON_X, BOOSTER_ICON_X);
 }
 
 /**********************************************/ /**

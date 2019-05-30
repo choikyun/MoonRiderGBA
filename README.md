@@ -67,5 +67,5 @@
 <http://www.orangefreesounds.com/>  
 
 ## 参考
-佐伯俊道 DASH!!  
+佐伯俊道 **DASH!!**  
 ポケコンジャーナル 94年11月号より  

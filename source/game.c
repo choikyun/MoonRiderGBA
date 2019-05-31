@@ -56,7 +56,7 @@ static VectorType trans_device_coord(const SpriteCharType*);
 static void disp_boundary();
 static void flash();
 static void shock();
-static bool hits_block();
+static bool hits_block(const RectangleType* , const RectangleType*);
 static void update_energy(int);
 static void init_ring_icon();
 static void set_ring_icon();
@@ -74,7 +74,7 @@ static void set_level_param(int);
 static void disp_booster_icon();
 static void init_booster_icon_anime();
 static void disp_warning();
-static void init_bomb(VectorType*, int);
+static void init_bomb(const VectorType*, int);
 static void set_new_bomb();
 static void disp_bomb();
 static void disp_gameover();
@@ -214,14 +214,14 @@ void init_game()
     }
 
     // モード
-      stage.mode = SRAMRead32(SRAM_MODE);
-    if ((u32)stage.mode > 1 ) {
-        stage.mode = 0;// 数値がおかしかったらリセット
+    stage.mode = SRAMRead32(SRAM_MODE);
+    if ((u32)stage.mode > 1) {
+        stage.mode = 0; // 数値がおかしかったらリセット
     }
 
     // トロフィー初期化
     init_trophy();
-    
+
     // ハイスコア,トロフィーのロード
     hiscore = load_hiscore();
 
@@ -240,7 +240,7 @@ void init_game()
     // ブロック初期化
     init_blocks();
 
-    // 地平線
+    // 水平線
     init_lines();
 
     // ガイド
@@ -291,7 +291,7 @@ create_new_blocks()
 static void
 move_blocks()
 {
-    RectangleType m, e;
+    static RectangleType m, e;
 
     if (!blocks.num) {
         return;
@@ -446,7 +446,7 @@ restart()
     // メッセージ初期化
     reset_message(&mes, MES_BLINK_NORMAL);
     reset_message(&lv_mes, MES_BLINK_NORMAL);
-    
+
     // トロフィー用メッセージ初期化
     reset_message(&trophy_mes, MES_BLINK_FAST);
 
@@ -606,7 +606,7 @@ init_block(int num, int x, int y)
 }
 
 /**********************************************/ /**
- * @brief 地平線初期化
+ * @brief 水平線初期化
  ***********************************************/
 static void
 init_lines()
@@ -727,7 +727,8 @@ init_boundary()
  * @param e 座標
  * @return 当たっているか
  ***********************************************/
-static bool hits_block(RectangleType* m, RectangleType* e)
+static bool
+hits_block(const RectangleType* m, const RectangleType* e)
 {
     // MX - EX + A = A + B + 1
     if ((u16)(m->x - e->x + m->w) < m->w + e->w + 1) {
@@ -744,7 +745,7 @@ static bool hits_block(RectangleType* m, RectangleType* e)
  * @param max 発生回数
  ***********************************************/
 static void
-init_bomb(VectorType* v, int max)
+init_bomb(const VectorType* v, int max)
 {
     bomb.base.x = (v->x >> FIX) + FIX_STAGE_X - BOMB_W / 2;
     bomb.base.y = (v->y >> FIX) + FIX_STAGE_Y - BOMB_H / 2;
@@ -871,7 +872,7 @@ move_lines()
 static void
 draw_lines()
 {
-    VectorType v;
+    static VectorType v;
 
     for (int i = 0; i < lines.num; i++) {
         v = trans_device_coord(&lines.list[i]);
@@ -902,7 +903,7 @@ draw_line(int y)
 static VectorType
 trans_device_coord(const SpriteCharType* sp)
 {
-    VectorType v;
+    static VectorType v;
     int z = sp->vec.z >> FIX; // Z軸整数値のみ
     int tx = sp->target.x + sp->fix.x; // 目標値の補正
     int ty = sp->target.y + sp->fix.y;
@@ -995,11 +996,12 @@ check_stage_boundary()
 static void
 disp_ship()
 {
+    static VectorType v;
     ship.sprite.target.x = ship.sprite.vec.x >> FIX;
     ship.sprite.target.y = ship.sprite.vec.y >> FIX;
 
     // 座標変換
-    VectorType v = trans_device_coord(&ship.sprite);
+    v = trans_device_coord(&ship.sprite);
 
     // エネルギー警告
     if (ship.energy >> E_FIX <= MAX_ENERGY / 4) {
@@ -1036,6 +1038,8 @@ disp_ship()
 static void
 disp_fire()
 {
+    static VectorType v;
+
     if (ship.booster > 0) {
         erase_sprite(fire.sprite.chr);
     }
@@ -1052,7 +1056,7 @@ disp_fire()
     fire.sprite.target.y = FIRE_Y + (ship.sprite.vec.y >> FIX);
 
     // 座標変換
-    VectorType v = trans_device_coord(&fire.sprite);
+    v = trans_device_coord(&fire.sprite);
 
     move_sprite(fire.sprite.chr, v.x, v.y);
 }
@@ -1063,6 +1067,8 @@ disp_fire()
 static void
 disp_booster()
 {
+    static VectorType v;
+
     if (!ship.booster) {
         erase_sprite(booster.sprite.chr);
         return;
@@ -1083,7 +1089,7 @@ disp_booster()
     booster.sprite.target.y = (ship.sprite.vec.y >> FIX) + BOOSTER_FIXED_Y;
 
     // 座標変換
-    VectorType v = trans_device_coord(&booster.sprite);
+    v = trans_device_coord(&booster.sprite);
 
     move_sprite(booster.sprite.chr, v.x, v.y);
 }
@@ -1094,7 +1100,7 @@ disp_booster()
 static void
 disp_blocks()
 {
-    VectorType v;
+    static VectorType v;
 
     for (int i = 0; i < blocks.num; i++) {
         // ステージ側が移動するのでターゲット座標の補正
@@ -1130,10 +1136,12 @@ disp_blocks()
 static void
 disp_guide()
 {
+    static VectorType v;
+
     guide.target.x = 0;
     guide.target.y = GUIDE_Y;
 
-    VectorType v = trans_device_coord(&guide);
+    v = trans_device_coord(&guide);
 
     move_sprite(
         guide.chr,
@@ -1206,6 +1214,8 @@ disp_boundary()
 static void
 disp_ring_icon()
 {
+    static VectorType v;
+
     if (!ring_icon.life) {
         return;
     }
@@ -1217,7 +1227,7 @@ disp_ring_icon()
     ring_icon.sprite.target.x = ring_icon.sprite.vec.x >> FIX;
     ring_icon.sprite.target.y = ring_icon.sprite.vec.y >> FIX;
 
-    VectorType v = trans_device_coord(&ring_icon.sprite);
+    v = trans_device_coord(&ring_icon.sprite);
 
     move_sprite(
         ring_icon.sprite.chr,
@@ -1235,6 +1245,8 @@ disp_ring_icon()
 static void
 disp_bravo_icon()
 {
+    static VectorType v;
+
     if (!bravo_icon.life) {
         return;
     }
@@ -1242,7 +1254,7 @@ disp_bravo_icon()
     bravo_icon.sprite.target.x = bravo_icon.sprite.vec.x >> FIX;
     bravo_icon.sprite.target.y = bravo_icon.sprite.vec.y >> FIX;
 
-    VectorType v = trans_device_coord(&bravo_icon.sprite);
+    v = trans_device_coord(&bravo_icon.sprite);
 
     move_sprite(bravo_icon.sprite.chr, v.x, v.y);
 
@@ -1312,7 +1324,7 @@ update_energy(int e)
         ship.energy = (MAX_ENERGY + MAX_ENERGY_BLANK) << E_FIX;
     }
 
-    if(ship.energy >> E_FIX > MAX_ENERGY / 4) {
+    if (ship.energy >> E_FIX > MAX_ENERGY / 4) {
         ship.sprite.show = true;
     }
 }
@@ -1565,29 +1577,28 @@ void update_hiscore()
     disp_trophy();
 }
 
-/**********************************************//**
+/**********************************************/ /**
  * @brief トロフィーマーク表示
  ***********************************************/
-void disp_trophy ()
+void disp_trophy()
 {
-  int x = TROPHY_X;
-  // トロフィー表示
-  for (int i = 0; i < MAX_TROPHY; i++)
-  {
-    if (trophy_unlocked[i])
-      draw_bitmap8 (x, TROPHY_Y, TROPHY_W, TROPHY_H, bmp_trophyBitmap);
-    else
-      draw_bitmap8 (x, TROPHY_Y, TROPHY_W, TROPHY_H, bmp_notrophyBitmap);
+    int x = TROPHY_X;
+    // トロフィー表示
+    for (int i = 0; i < MAX_TROPHY; i++) {
+        if (trophy_unlocked[i])
+            draw_bitmap8(x, TROPHY_Y, TROPHY_W, TROPHY_H, bmp_trophyBitmap);
+        else
+            draw_bitmap8(x, TROPHY_Y, TROPHY_W, TROPHY_H, bmp_notrophyBitmap);
 
-    x += TROPHY_W;
-  }
+        x += TROPHY_W;
+    }
 }
 
-/**********************************************//**
+/**********************************************/ /**
  * トロフィー（実績）解除
  ***********************************************/
 static void
-trophy ()
+trophy()
 {
     /*
      * 実績1：2連続リング獲得
@@ -1598,7 +1609,7 @@ trophy ()
         reset_trophy_requirement(RESET_TROPHY_ALL);
         return;
     }
-  
+
     /*
      * 実績2：2連続ブラボー
      */
@@ -1648,32 +1659,30 @@ trophy ()
     }
 }
 
-/**********************************************//**
+/**********************************************/ /**
  *  トロフィー獲得メッセージ
  ***********************************************/
 static void
-disp_trophy_mes ()
+disp_trophy_mes()
 {
-  if (!trophy_mes.is_start)
-    return;
+    if (!trophy_mes.is_start)
+        return;
 
-  // 点滅
-  if (!--trophy_mes.wait)
-  {
-    trophy_mes.wait = trophy_mes.wait_rel;
-    trophy_mes.chr ^= 1;
+    // 点滅
+    if (!--trophy_mes.wait) {
+        trophy_mes.wait = trophy_mes.wait_rel;
+        trophy_mes.chr ^= 1;
 
-    if (!--trophy_mes.count)
-    {
-      reset_message(&trophy_mes, MES_BLINK_FAST);
+        if (!--trophy_mes.count) {
+            reset_message(&trophy_mes, MES_BLINK_FAST);
+        }
     }
-  }
 
-  if (trophy_mes.chr)
-    draw_bitmap_frame (UNLOCK_MES_X, UNLOCK_MES_Y, UNLOCK_MES_W, UNLOCK_MES_H, bmp_unlockedBitmap);
+    if (trophy_mes.chr)
+        draw_bitmap_frame(UNLOCK_MES_X, UNLOCK_MES_Y, UNLOCK_MES_W, UNLOCK_MES_H, bmp_unlockedBitmap);
 }
 
-/**********************************************//**
+/**********************************************/ /**
  * @brief トロフィー獲得条件 リセット
  * @param reset RESET_TROPHY_ALL|RESET_TROPHY_RING|RESET_TROPHY_BRAVO
  ***********************************************/

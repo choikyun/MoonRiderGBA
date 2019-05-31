@@ -944,7 +944,7 @@
 /**
  * @brief ブラボー 表示時間
  */
-#define BRAVO_LIFE (30)
+#define BRAVO_LIFE (40)
 
 /**
  * @brief ブラボー Y座標

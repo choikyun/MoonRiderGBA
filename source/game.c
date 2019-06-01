@@ -1229,10 +1229,7 @@ disp_ring_icon()
 
     v = trans_device_coord(&ring_icon.sprite);
 
-    move_sprite(
-        ring_icon.sprite.chr,
-        v.x,
-        v.y);
+    move_sprite(ring_icon.sprite.chr, v.x, v.y);
 
     if (--ring_icon.life == 0) {
         erase_sprite(ring_icon.sprite.chr);
